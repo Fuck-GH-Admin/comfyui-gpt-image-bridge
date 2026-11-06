@@ -42,7 +42,7 @@ At `main@abfacd3`, the same `transparent_png` case was queued once against the r
 - [Sanitized request report and pixel evidence](evidence/live-alpha-retest-2026-11-06.json); raw credentials were absent from history and PNG metadata.
 - Local regression rerun: Python **294 passed**, JavaScript **14 passed**; real ComfyUI + simulated upstream **PASS**, including `(0, 255)` RGBA round-trip.
 
-This single real success does not establish reliable transparency for every prompt, model or account. The earlier RGB observation remains valid historical evidence. The plugin preserves alpha when returned by upstream; it does not force upstream transparency. Size/format and Responses/Chat failures from the earlier matrix were not reclassified or re-tested here.
+This single real success does not establish reliable transparency for every prompt, model or account. The earlier RGB observation remains valid evidence of the saved file only: the old decoder always converted to RGB, so that file alone cannot establish whether the original upstream bytes contained alpha or whether upstream behavior has changed. The plugin preserves alpha when returned by upstream; it does not force upstream transparency. Size/format and Responses/Chat failures from the earlier matrix were not reclassified or re-tested here.
 
 Reproduce with the existing runner (one potentially billable request):
 
