@@ -1,0 +1,2756 @@
+{
+  "baseline_commit": "2340796",
+  "date": "2026-11-06",
+  "python_tests": {
+    "passed": 291,
+    "xfail": 1,
+    "reason": "transparent output alpha loss"
+  },
+  "javascript_tests": {
+    "passed": 14
+  },
+  "coverage": {
+    "covered_lines": 2044,
+    "num_statements": 2361,
+    "percent_covered": 83.7749330157785,
+    "percent_covered_display": "84",
+    "missing_lines": 317,
+    "excluded_lines": 0,
+    "percent_statements_covered": 86.57348581109699,
+    "percent_statements_covered_display": "87",
+    "num_branches": 998,
+    "num_partial_branches": 172,
+    "covered_branches": 770,
+    "missing_branches": 228,
+    "percent_branches_covered": 77.15430861723446,
+    "percent_branches_covered_display": "77"
+  },
+  "coverage_by_file": {
+    "gpt_image_bridge/__init__.py": {
+      "covered_lines": 3,
+      "num_statements": 3,
+      "percent_covered": 100.0,
+      "percent_covered_display": "100",
+      "missing_lines": 0,
+      "excluded_lines": 0,
+      "percent_statements_covered": 100.0,
+      "percent_statements_covered_display": "100",
+      "num_branches": 0,
+      "num_partial_branches": 0,
+      "covered_branches": 0,
+      "missing_branches": 0,
+      "percent_branches_covered": 100.0,
+      "percent_branches_covered_display": "100"
+    },
+    "gpt_image_bridge/config.py": {
+      "covered_lines": 290,
+      "num_statements": 320,
+      "percent_covered": 88.69565217391305,
+      "percent_covered_display": "89",
+      "missing_lines": 30,
+      "excluded_lines": 0,
+      "percent_statements_covered": 90.625,
+      "percent_statements_covered_display": "91",
+      "num_branches": 140,
+      "num_partial_branches": 20,
+      "covered_branches": 118,
+      "missing_branches": 22,
+      "percent_branches_covered": 84.28571428571429,
+      "percent_branches_covered_display": "84"
+    },
+    "gpt_image_bridge/errors.py": {
+      "covered_lines": 83,
+      "num_statements": 91,
+      "percent_covered": 89.74358974358974,
+      "percent_covered_display": "90",
+      "missing_lines": 8,
+      "excluded_lines": 0,
+      "percent_statements_covered": 91.20879120879121,
+      "percent_statements_covered_display": "91",
+      "num_branches": 26,
+      "num_partial_branches": 4,
+      "covered_branches": 22,
+      "missing_branches": 4,
+      "percent_branches_covered": 84.61538461538461,
+      "percent_branches_covered_display": "85"
+    },
+    "gpt_image_bridge/images.py": {
+      "covered_lines": 118,
+      "num_statements": 120,
+      "percent_covered": 97.02380952380952,
+      "percent_covered_display": "97",
+      "missing_lines": 2,
+      "excluded_lines": 0,
+      "percent_statements_covered": 98.33333333333333,
+      "percent_statements_covered_display": "98",
+      "num_branches": 48,
+      "num_partial_branches": 3,
+      "covered_branches": 45,
+      "missing_branches": 3,
+      "percent_branches_covered": 93.75,
+      "percent_branches_covered_display": "94"
+    },
+    "gpt_image_bridge/oauth.py": {
+      "covered_lines": 257,
+      "num_statements": 315,
+      "percent_covered": 77.54137115839244,
+      "percent_covered_display": "78",
+      "missing_lines": 58,
+      "excluded_lines": 0,
+      "percent_statements_covered": 81.58730158730158,
+      "percent_statements_covered_display": "82",
+      "num_branches": 108,
+      "num_partial_branches": 33,
+      "covered_branches": 71,
+      "missing_branches": 37,
+      "percent_branches_covered": 65.74074074074075,
+      "percent_branches_covered_display": "66"
+    },
+    "gpt_image_bridge/protocols.py": {
+      "covered_lines": 895,
+      "num_statements": 1038,
+      "percent_covered": 83.18181818181819,
+      "percent_covered_display": "83",
+      "missing_lines": 143,
+      "excluded_lines": 0,
+      "percent_statements_covered": 86.22350674373796,
+      "percent_statements_covered_display": "86",
+      "num_branches": 502,
+      "num_partial_branches": 84,
+      "covered_branches": 386,
+      "missing_branches": 116,
+      "percent_branches_covered": 76.89243027888446,
+      "percent_branches_covered_display": "77"
+    },
+    "gpt_image_bridge/routes.py": {
+      "covered_lines": 63,
+      "num_statements": 86,
+      "percent_covered": 73.57142857142857,
+      "percent_covered_display": "74",
+      "missing_lines": 23,
+      "excluded_lines": 0,
+      "percent_statements_covered": 73.25581395348837,
+      "percent_statements_covered_display": "73",
+      "num_branches": 54,
+      "num_partial_branches": 6,
+      "covered_branches": 40,
+      "missing_branches": 14,
+      "percent_branches_covered": 74.07407407407408,
+      "percent_branches_covered_display": "74"
+    },
+    "gpt_image_bridge/session_credentials.py": {
+      "covered_lines": 49,
+      "num_statements": 49,
+      "percent_covered": 100.0,
+      "percent_covered_display": "100",
+      "missing_lines": 0,
+      "excluded_lines": 0,
+      "percent_statements_covered": 100.0,
+      "percent_statements_covered_display": "100",
+      "num_branches": 14,
+      "num_partial_branches": 0,
+      "covered_branches": 14,
+      "missing_branches": 0,
+      "percent_branches_covered": 100.0,
+      "percent_branches_covered_display": "100"
+    },
+    "gpt_image_bridge/transport.py": {
+      "covered_lines": 149,
+      "num_statements": 183,
+      "percent_covered": 77.36625514403292,
+      "percent_covered_display": "77",
+      "missing_lines": 34,
+      "excluded_lines": 0,
+      "percent_statements_covered": 81.4207650273224,
+      "percent_statements_covered_display": "81",
+      "num_branches": 60,
+      "num_partial_branches": 13,
+      "covered_branches": 39,
+      "missing_branches": 21,
+      "percent_branches_covered": 65.0,
+      "percent_branches_covered_display": "65"
+    },
+    "nodes.py": {
+      "covered_lines": 137,
+      "num_statements": 156,
+      "percent_covered": 85.14851485148515,
+      "percent_covered_display": "85",
+      "missing_lines": 19,
+      "excluded_lines": 0,
+      "percent_statements_covered": 87.82051282051282,
+      "percent_statements_covered_display": "88",
+      "num_branches": 46,
+      "num_partial_branches": 9,
+      "covered_branches": 35,
+      "missing_branches": 11,
+      "percent_branches_covered": 76.08695652173913,
+      "percent_branches_covered_display": "76"
+    }
+  },
+  "browser": {
+    "checks": [
+      {
+        "name": "new-provider-defaults",
+        "pass": true
+      },
+      {
+        "name": "password-editor-input",
+        "pass": true
+      },
+      {
+        "name": "password-save",
+        "pass": true
+      },
+      {
+        "name": "password-cancel",
+        "pass": true
+      },
+      {
+        "name": "queue-handle",
+        "pass": true
+      },
+      {
+        "name": "local-workflow-contains-key-as-documented",
+        "pass": true
+      },
+      {
+        "name": "restored-password-widget",
+        "pass": true
+      },
+      {
+        "name": "old-four-widget-provider-loads",
+        "pass": true
+      },
+      {
+        "name": "generic-provider-switches",
+        "pass": true
+      },
+      {
+        "name": "three-initial-reference-slots",
+        "pass": true
+      },
+      {
+        "name": "sixteen-reference-cap",
+        "pass": true,
+        "count": 16
+      },
+      {
+        "name": "custom-dimensions-survive-normalization",
+        "pass": true
+      },
+      {
+        "name": "reference-disconnect-preserves-order",
+        "pass": true
+      },
+      {
+        "name": "edit-reference-list-fifteen",
+        "pass": true
+      },
+      {
+        "name": "GPTImageBridgeGenerate-advanced-options",
+        "pass": true
+      },
+      {
+        "name": "GPTImageBridgeEdit-advanced-options",
+        "pass": true
+      },
+      {
+        "name": "oauth-provider-no-key-widget",
+        "pass": true
+      }
+    ],
+    "passed": 17,
+    "total": 17
+  },
+  "local_http_matrix": [
+    {
+      "case": "images",
+      "prompt_id": "555d938d-11c6-4d56-bdd1-3fd985ef33a3",
+      "status": "success",
+      "elapsed_seconds": 0.29,
+      "calls": [
+        {
+          "case": "images",
+          "method": "POST",
+          "path": "/images/v1/images/generations",
+          "fields": {
+            "model": "mock-image-model",
+            "size": "1024x1024",
+            "quality": "low",
+            "background": "opaque",
+            "output_format": "png",
+            "moderation": "low"
+          },
+          "image_count": 0
+        }
+      ],
+      "pass": true,
+      "image_count": 2,
+      "revised_prompt": [
+        "mock revised prompt"
+      ],
+      "report": [
+        "{\"async\":{\"attempted\":false,\"effective_mode\":\"sync\",\"requested\":false,\"skipped_reason\":\"Disabled by the API Provider switch.\"},\"elapsed_ms\":4,\"input\":{\"mask\":{\"encoded_bytes\":0,\"present\":false},\"prompt\":{\"characters\":19,\"sha256\":\"43a25fa04ce56c210876cd2ee3c32f0feaa51023f809d5c682df0f430be78de5\",\"type\":\"input_text\"},\"roles\":[]},\"ok\":true,\"operation\":\"generate\",\"output\":{\"count\":2,\"images\":[{\"bytes\":95,\"format\":\"PNG\",\"height\":24,\"mime_type\":null,\"width\":32},{\"bytes\":95,\"format\":\"PNG\",\"height\":24,\"mime_type\":null,\"width\":32}],\"revised_prompt_present\":true},\"protocol_selection_basis\":\"explicit provider protocol 'images'\",\"provider\":{\"api_key_configured\":true,\"api_protocol\":\"images\",\"async_edit_endpoint\":\"\",\"async_generate_endpoint\":\"\",\"async_mapping\":{\"configured\":false,\"keys\":[]},\"async_poll_endpoint_template\":\"\",\"auth_mode\":\"api_key\",\"base_url\":\"http://127.0.0.1:42815/images/v1\",\"edit_endpoint\":\"\",\"generate_endpoint\":\"\",\"model\":\"mock-image-model\",\"use_async\":false,\"use_custom_endpoints\":false},\"requested_protocol\":\"images\",\"requests\":[{\"attempts\":1,\"elapsed_ms\":1,\"endpoint\":\"http://127.0.0.1:42815/images/v1/images/generations\",\"http_status\":200,\"phase\":\"sync\",\"request_id\":null}],\"selected_protocol\":\"images\"}"
+      ]
+    },
+    {
+      "case": "responses-json",
+      "prompt_id": "f19a0918-f1c3-4a5d-821e-3e8de74ae9f4",
+      "status": "success",
+      "elapsed_seconds": 0.21,
+      "calls": [
+        {
+          "case": "responses-json",
+          "method": "POST",
+          "path": "/responses-json/v1/responses",
+          "fields": {
+            "model": "mock-image-model"
+          },
+          "image_count": 0
+        }
+      ],
+      "pass": true,
+      "image_count": 1,
+      "revised_prompt": [
+        ""
+      ],
+      "report": [
+        "{\"async\":{\"attempted\":false,\"effective_mode\":\"sync\",\"requested\":false,\"skipped_reason\":\"The selected responses protocol has no Images async task contract.\"},\"elapsed_ms\":2,\"input\":{\"mask\":{\"encoded_bytes\":0,\"present\":false},\"prompt\":{\"characters\":19,\"sha256\":\"43a25fa04ce56c210876cd2ee3c32f0feaa51023f809d5c682df0f430be78de5\",\"type\":\"input_text\"},\"roles\":[]},\"ok\":true,\"operation\":\"generate\",\"output\":{\"count\":1,\"images\":[{\"bytes\":95,\"format\":\"PNG\",\"height\":24,\"mime_type\":null,\"width\":32}],\"revised_prompt_present\":false},\"protocol_selection_basis\":\"explicit provider protocol 'responses'\",\"provider\":{\"api_key_configured\":true,\"api_protocol\":\"responses\",\"async_edit_endpoint\":\"\",\"async_generate_endpoint\":\"\",\"async_mapping\":{\"configured\":false,\"keys\":[]},\"async_poll_endpoint_template\":\"\",\"auth_mode\":\"api_key\",\"base_url\":\"http://127.0.0.1:42815/responses-json/v1\",\"edit_endpoint\":\"\",\"generate_endpoint\":\"\",\"model\":\"mock-image-model\",\"use_async\":false,\"use_custom_endpoints\":false},\"requested_protocol\":\"responses\",\"requests\":[{\"attempts\":1,\"elapsed_ms\":1,\"endpoint\":\"http://127.0.0.1:42815/responses-json/v1/responses\",\"http_status\":200,\"index\":1,\"request_id\":null}],\"selected_protocol\":\"responses\"}"
+      ]
+    },
+    {
+      "case": "responses-sse",
+      "prompt_id": "81e91d05-61d8-4911-a5f4-253d7ea4551e",
+      "status": "success",
+      "elapsed_seconds": 0.21,
+      "calls": [
+        {
+          "case": "responses-sse",
+          "method": "POST",
+          "path": "/responses-sse/v1/responses",
+          "fields": {
+            "model": "mock-image-model"
+          },
+          "image_count": 0
+        }
+      ],
+      "pass": true,
+      "image_count": 1,
+      "revised_prompt": [
+        ""
+      ],
+      "report": [
+        "{\"async\":{\"attempted\":false,\"effective_mode\":\"sync\",\"requested\":false,\"skipped_reason\":\"The selected responses protocol has no Images async task contract.\"},\"elapsed_ms\":1,\"input\":{\"mask\":{\"encoded_bytes\":0,\"present\":false},\"prompt\":{\"characters\":19,\"sha256\":\"43a25fa04ce56c210876cd2ee3c32f0feaa51023f809d5c682df0f430be78de5\",\"type\":\"input_text\"},\"roles\":[]},\"ok\":true,\"operation\":\"generate\",\"output\":{\"count\":1,\"images\":[{\"bytes\":95,\"format\":\"PNG\",\"height\":24,\"mime_type\":null,\"width\":32}],\"revised_prompt_present\":false},\"protocol_selection_basis\":\"explicit provider protocol 'responses'\",\"provider\":{\"api_key_configured\":true,\"api_protocol\":\"responses\",\"async_edit_endpoint\":\"\",\"async_generate_endpoint\":\"\",\"async_mapping\":{\"configured\":false,\"keys\":[]},\"async_poll_endpoint_template\":\"\",\"auth_mode\":\"api_key\",\"base_url\":\"http://127.0.0.1:42815/responses-sse/v1\",\"edit_endpoint\":\"\",\"generate_endpoint\":\"\",\"model\":\"mock-image-model\",\"use_async\":false,\"use_custom_endpoints\":false},\"requested_protocol\":\"responses\",\"requests\":[{\"attempts\":1,\"elapsed_ms\":1,\"endpoint\":\"http://127.0.0.1:42815/responses-sse/v1/responses\",\"http_status\":200,\"index\":1,\"request_id\":null}],\"selected_protocol\":\"responses\"}"
+      ]
+    },
+    {
+      "case": "chat",
+      "prompt_id": "b3b48bac-bd3f-4965-b1c9-73ce1b597fcc",
+      "status": "success",
+      "elapsed_seconds": 0.2,
+      "calls": [
+        {
+          "case": "chat",
+          "method": "POST",
+          "path": "/chat/v1/chat/completions",
+          "fields": {
+            "model": "mock-image-model"
+          },
+          "image_count": 0
+        }
+      ],
+      "pass": true,
+      "image_count": 1,
+      "revised_prompt": [
+        ""
+      ],
+      "report": [
+        "{\"async\":{\"attempted\":false,\"effective_mode\":\"sync\",\"requested\":false,\"skipped_reason\":\"The selected chat_completions protocol has no Images async task contract.\"},\"elapsed_ms\":1,\"input\":{\"mask\":{\"encoded_bytes\":0,\"present\":false},\"prompt\":{\"characters\":19,\"sha256\":\"43a25fa04ce56c210876cd2ee3c32f0feaa51023f809d5c682df0f430be78de5\",\"type\":\"input_text\"},\"roles\":[]},\"ok\":true,\"operation\":\"generate\",\"output\":{\"count\":1,\"images\":[{\"bytes\":95,\"format\":\"PNG\",\"height\":24,\"mime_type\":null,\"width\":32}],\"revised_prompt_present\":false},\"protocol_notes\":{\"ignored_options\":[\"quality\",\"background\",\"output_format\",\"moderation\"],\"n_transport\":\"one request per requested image\",\"request_format\":\"messages[].content: text, then Reference 1, Reference 2, ...\",\"size_transport\":\"prompt_instruction\"},\"protocol_selection_basis\":\"explicit provider protocol 'chat_completions'\",\"provider\":{\"api_key_configured\":true,\"api_protocol\":\"chat_completions\",\"async_edit_endpoint\":\"\",\"async_generate_endpoint\":\"\",\"async_mapping\":{\"configured\":false,\"keys\":[]},\"async_poll_endpoint_template\":\"\",\"auth_mode\":\"api_key\",\"base_url\":\"http://127.0.0.1:42815/chat/v1\",\"edit_endpoint\":\"\",\"generate_endpoint\":\"\",\"model\":\"mock-image-model\",\"use_async\":false,\"use_custom_endpoints\":false},\"requested_protocol\":\"chat_completions\",\"requests\":[{\"attempts\":1,\"elapsed_ms\":1,\"endpoint\":\"http://127.0.0.1:42815/chat/v1/chat/completions\",\"http_status\":200,\"index\":1,\"request_id\":null}],\"selected_protocol\":\"chat_completions\"}"
+      ]
+    },
+    {
+      "case": "custom-sync",
+      "prompt_id": "95580c90-4215-41f3-abba-ffcd0655ae01",
+      "status": "success",
+      "elapsed_seconds": 0.21,
+      "calls": [
+        {
+          "case": "custom-sync",
+          "method": "POST",
+          "path": "/custom-sync/v1/vendor/render",
+          "fields": {
+            "model": "mock-image-model",
+            "size": "1024x1024",
+            "quality": "low",
+            "background": "opaque",
+            "output_format": "png",
+            "moderation": "low"
+          },
+          "image_count": 0
+        }
+      ],
+      "pass": true,
+      "image_count": 1,
+      "revised_prompt": [
+        "mock revised prompt"
+      ],
+      "report": [
+        "{\"async\":{\"attempted\":false,\"effective_mode\":\"sync\",\"requested\":false,\"skipped_reason\":\"Disabled by the API Provider switch.\"},\"elapsed_ms\":2,\"input\":{\"mask\":{\"encoded_bytes\":0,\"present\":false},\"prompt\":{\"characters\":19,\"sha256\":\"43a25fa04ce56c210876cd2ee3c32f0feaa51023f809d5c682df0f430be78de5\",\"type\":\"input_text\"},\"roles\":[]},\"ok\":true,\"operation\":\"generate\",\"output\":{\"count\":1,\"images\":[{\"bytes\":95,\"format\":\"PNG\",\"height\":24,\"mime_type\":null,\"width\":32}],\"revised_prompt_present\":true},\"protocol_selection_basis\":\"explicit provider protocol 'images'\",\"provider\":{\"api_key_configured\":true,\"api_protocol\":\"images\",\"async_edit_endpoint\":\"\",\"async_generate_endpoint\":\"\",\"async_mapping\":{\"configured\":false,\"keys\":[]},\"async_poll_endpoint_template\":\"\",\"auth_mode\":\"api_key\",\"base_url\":\"http://127.0.0.1:42815/custom-sync/v1\",\"edit_endpoint\":\"\",\"generate_endpoint\":\"vendor/render\",\"model\":\"mock-image-model\",\"use_async\":false,\"use_custom_endpoints\":true},\"requested_protocol\":\"images\",\"requests\":[{\"attempts\":1,\"elapsed_ms\":1,\"endpoint\":\"http://127.0.0.1:42815/custom-sync/v1/vendor/render\",\"http_status\":200,\"phase\":\"sync\",\"request_id\":null}],\"selected_protocol\":\"images\"}"
+      ]
+    },
+    {
+      "case": "async",
+      "prompt_id": "9b3c9d56-35ba-4de1-a4d4-46e49df5de35",
+      "status": "success",
+      "elapsed_seconds": 3.03,
+      "calls": [
+        {
+          "case": "async",
+          "method": "POST",
+          "path": "/async/v1/images/generations/async",
+          "fields": {
+            "model": "mock-image-model",
+            "size": "1024x1024",
+            "quality": "low",
+            "background": "opaque",
+            "output_format": "png",
+            "moderation": "low"
+          },
+          "image_count": 0
+        },
+        {
+          "case": "async",
+          "method": "GET",
+          "path": "/async/v1/images/tasks/mock-task"
+        }
+      ],
+      "pass": true,
+      "image_count": 1,
+      "revised_prompt": [
+        ""
+      ],
+      "report": [
+        "{\"async\":{\"attempted\":true,\"contract\":\"standard\",\"effective_mode\":\"async\",\"final_task_status\":\"success\",\"mapping_mode\":\"standard\",\"poll_count\":1,\"poll_elapsed_ms\":3001,\"poll_interval_sec\":3.0,\"requested\":true,\"submit_elapsed_ms\":1,\"task_id\":{\"present\":true,\"sha256\":\"c7618a934d8f973602fa576998c70ab79edef6712d460a191655af53972b4e03\"},\"transient_poll_errors\":0},\"elapsed_ms\":3003,\"input\":{\"mask\":{\"encoded_bytes\":0,\"present\":false},\"prompt\":{\"characters\":19,\"sha256\":\"43a25fa04ce56c210876cd2ee3c32f0feaa51023f809d5c682df0f430be78de5\",\"type\":\"input_text\"},\"roles\":[]},\"ok\":true,\"operation\":\"generate\",\"output\":{\"count\":1,\"images\":[{\"bytes\":95,\"format\":\"PNG\",\"height\":24,\"mime_type\":null,\"width\":32}],\"revised_prompt_present\":false},\"protocol_selection_basis\":\"explicit provider protocol 'images'\",\"provider\":{\"api_key_configured\":true,\"api_protocol\":\"images\",\"async_edit_endpoint\":\"\",\"async_generate_endpoint\":\"\",\"async_mapping\":{\"configured\":false,\"keys\":[]},\"async_poll_endpoint_template\":\"\",\"auth_mode\":\"api_key\",\"base_url\":\"http://127.0.0.1:42815/async/v1\",\"edit_endpoint\":\"\",\"generate_endpoint\":\"\",\"model\":\"mock-image-model\",\"use_async\":true,\"use_custom_endpoints\":false},\"requested_protocol\":\"images\",\"requests\":[{\"attempts\":1,\"elapsed_ms\":1,\"endpoint\":\"http://127.0.0.1:42815/async/v1/images/generations/async\",\"http_status\":202,\"phase\":\"async_submit\",\"request_id\":null},{\"attempts\":1,\"elapsed_ms\":3001,\"endpoint\":\"http://127.0.0.1:42815/async/v1/images/tasks/{task_id}\",\"http_status\":200,\"phase\":\"async_poll\",\"poll_count\":1,\"request_id\":null,\"transient_errors\":0}],\"selected_protocol\":\"images\"}"
+      ]
+    },
+    {
+      "case": "custom-async",
+      "prompt_id": "dee69b6b-c3e8-41bd-a464-0db70c63e3ea",
+      "status": "success",
+      "elapsed_seconds": 3.03,
+      "calls": [
+        {
+          "case": "custom-async",
+          "method": "POST",
+          "path": "/custom-async/v1/queue/create",
+          "fields": {
+            "model": "mock-image-model",
+            "size": "1024x1024",
+            "quality": "low",
+            "background": "opaque",
+            "output_format": "png",
+            "moderation": "low"
+          },
+          "image_count": 0
+        },
+        {
+          "case": "custom-async",
+          "method": "GET",
+          "path": "/custom-async/v1/queue/status?task=mock-task"
+        }
+      ],
+      "pass": true,
+      "image_count": 1,
+      "revised_prompt": [
+        "mapped mock prompt"
+      ],
+      "report": [
+        "{\"async\":{\"attempted\":true,\"contract\":\"custom\",\"effective_mode\":\"async\",\"final_task_status\":\"done\",\"mapping_mode\":\"custom\",\"poll_count\":1,\"poll_elapsed_ms\":3001,\"poll_interval_sec\":3.0,\"requested\":true,\"submit_elapsed_ms\":1,\"task_id\":{\"present\":true,\"sha256\":\"c7618a934d8f973602fa576998c70ab79edef6712d460a191655af53972b4e03\"},\"transient_poll_errors\":0},\"elapsed_ms\":3002,\"input\":{\"mask\":{\"encoded_bytes\":0,\"present\":false},\"prompt\":{\"characters\":19,\"sha256\":\"43a25fa04ce56c210876cd2ee3c32f0feaa51023f809d5c682df0f430be78de5\",\"type\":\"input_text\"},\"roles\":[]},\"ok\":true,\"operation\":\"generate\",\"output\":{\"count\":1,\"images\":[{\"bytes\":95,\"format\":\"PNG\",\"height\":24,\"mime_type\":null,\"width\":32}],\"revised_prompt_present\":true},\"protocol_selection_basis\":\"explicit provider protocol 'images'\",\"provider\":{\"api_key_configured\":true,\"api_protocol\":\"images\",\"async_edit_endpoint\":\"\",\"async_generate_endpoint\":\"queue/create\",\"async_mapping\":{\"configured\":true,\"keys\":[\"failure_statuses\",\"image_b64_paths\",\"image_items_paths\",\"result_paths\",\"revised_prompt_paths\",\"status_paths\",\"success_statuses\",\"task_id_paths\"]},\"async_poll_endpoint_template\":\"queue/status?task={task_id}\",\"auth_mode\":\"api_key\",\"base_url\":\"http://127.0.0.1:42815/custom-async/v1\",\"edit_endpoint\":\"\",\"generate_endpoint\":\"vendor/render\",\"model\":\"mock-image-model\",\"use_async\":true,\"use_custom_endpoints\":true},\"requested_protocol\":\"images\",\"requests\":[{\"attempts\":1,\"elapsed_ms\":1,\"endpoint\":\"http://127.0.0.1:42815/custom-async/v1/queue/create\",\"http_status\":202,\"phase\":\"async_submit\",\"request_id\":null},{\"attempts\":1,\"elapsed_ms\":3001,\"endpoint\":\"http://127.0.0.1:42815/custom-async/v1/queue/status?task=[REDACTED]\",\"http_status\":200,\"phase\":\"async_poll\",\"poll_count\":1,\"request_id\":null,\"transient_errors\":0}],\"selected_protocol\":\"images\"}"
+      ]
+    },
+    {
+      "case": "async-failure",
+      "prompt_id": "9ea96caa-7b8b-452a-9f70-93e55fa14a20",
+      "status": "error",
+      "elapsed_seconds": 3.27,
+      "calls": [
+        {
+          "case": "async-failure",
+          "method": "POST",
+          "path": "/async-failure/v1/images/generations/async",
+          "fields": {
+            "model": "mock-image-model",
+            "size": "1024x1024",
+            "quality": "low",
+            "background": "opaque",
+            "output_format": "png",
+            "moderation": "low"
+          },
+          "image_count": 0
+        },
+        {
+          "case": "async-failure",
+          "method": "GET",
+          "path": "/async-failure/v1/images/tasks/mock-task"
+        }
+      ],
+      "pass": true,
+      "errors": [
+        {
+          "event": "execution_error",
+          "message": "{\"ok\":false,\"message\":\"intentional mock task failure\",\"http_status\":200,\"request_id\":null,\"error_type\":null,\"error_code\":null,\"moderation_category\":null,\"retry_after\":null,\"operation\":\"generate\",\"protocol\":\"images\",\"endpoint\":\"http://127.0.0.1:42815/async-failure/v1/images/tasks/{task_id}\",\"retryable\":false,\"attempts\":1,\"phase\":\"async_poll\",\"safe_to_resubmit\":false,\"remote_task_may_continue\":false}\n",
+          "exception_type": "BridgeError"
+        }
+      ]
+    },
+    {
+      "case": "async-timeout",
+      "prompt_id": "8532153f-3355-43a4-bc05-feaf3341502c",
+      "status": "error",
+      "elapsed_seconds": 30.25,
+      "calls": [
+        {
+          "case": "async-timeout",
+          "method": "POST",
+          "path": "/async-timeout/v1/images/generations/async",
+          "fields": {
+            "model": "mock-image-model",
+            "size": "1024x1024",
+            "quality": "low",
+            "background": "opaque",
+            "output_format": "png",
+            "moderation": "low"
+          },
+          "image_count": 0
+        },
+        {
+          "case": "async-timeout",
+          "method": "GET",
+          "path": "/async-timeout/v1/images/tasks/mock-task"
+        },
+        {
+          "case": "async-timeout",
+          "method": "GET",
+          "path": "/async-timeout/v1/images/tasks/mock-task"
+        },
+        {
+          "case": "async-timeout",
+          "method": "GET",
+          "path": "/async-timeout/v1/images/tasks/mock-task"
+        },
+        {
+          "case": "async-timeout",
+          "method": "GET",
+          "path": "/async-timeout/v1/images/tasks/mock-task"
+        },
+        {
+          "case": "async-timeout",
+          "method": "GET",
+          "path": "/async-timeout/v1/images/tasks/mock-task"
+        },
+        {
+          "case": "async-timeout",
+          "method": "GET",
+          "path": "/async-timeout/v1/images/tasks/mock-task"
+        },
+        {
+          "case": "async-timeout",
+          "method": "GET",
+          "path": "/async-timeout/v1/images/tasks/mock-task"
+        },
+        {
+          "case": "async-timeout",
+          "method": "GET",
+          "path": "/async-timeout/v1/images/tasks/mock-task"
+        },
+        {
+          "case": "async-timeout",
+          "method": "GET",
+          "path": "/async-timeout/v1/images/tasks/mock-task"
+        }
+      ],
+      "pass": true,
+      "errors": [
+        {
+          "event": "execution_error",
+          "message": "{\"ok\":false,\"message\":\"Async image task did not finish before timeout_sec. The remote task may still be running; no synchronous retry was attempted.\",\"http_status\":null,\"request_id\":null,\"error_type\":null,\"error_code\":\"async_poll_timeout\",\"moderation_category\":null,\"retry_after\":null,\"operation\":\"generate\",\"protocol\":\"images\",\"endpoint\":\"http://127.0.0.1:42815/async-timeout/v1/images/tasks/{task_id}\",\"retryable\":false,\"attempts\":1,\"phase\":\"async_poll\",\"safe_to_resubmit\":false,\"remote_task_may_continue\":true}\n",
+          "exception_type": "BridgeError"
+        }
+      ]
+    },
+    {
+      "case": "cancel",
+      "prompt_id": "b33305e8-ca94-4687-8012-c26f02f4dfaf",
+      "status": "error",
+      "elapsed_seconds": 3.26,
+      "calls": [
+        {
+          "case": "cancel",
+          "method": "POST",
+          "path": "/cancel/v1/images/generations/async",
+          "fields": {
+            "model": "mock-image-model",
+            "size": "1024x1024",
+            "quality": "low",
+            "background": "opaque",
+            "output_format": "png",
+            "moderation": "low"
+          },
+          "image_count": 0
+        }
+      ],
+      "pass": true,
+      "errors": []
+    },
+    {
+      "case": "401",
+      "prompt_id": "f2abc603-43b8-4bbe-a51a-0c6d01cf0742",
+      "status": "error",
+      "elapsed_seconds": 0.21,
+      "calls": [
+        {
+          "case": "401",
+          "method": "POST",
+          "path": "/401/v1/images/generations",
+          "fields": {
+            "model": "mock-image-model",
+            "size": "1024x1024",
+            "quality": "low",
+            "background": "opaque",
+            "output_format": "png",
+            "moderation": "low"
+          },
+          "image_count": 0
+        }
+      ],
+      "pass": true,
+      "errors": [
+        {
+          "event": "execution_error",
+          "message": "{\"ok\":false,\"message\":\"expected rejection\",\"http_status\":401,\"request_id\":null,\"error_type\":null,\"error_code\":null,\"moderation_category\":null,\"retry_after\":null,\"operation\":\"generate\",\"protocol\":\"images\",\"endpoint\":\"http://127.0.0.1:46793/401/v1/images/generations\",\"retryable\":false,\"attempts\":1,\"phase\":null,\"safe_to_resubmit\":null,\"remote_task_may_continue\":null}\n",
+          "exception_type": "BridgeError"
+        }
+      ]
+    },
+    {
+      "case": "429",
+      "prompt_id": "6df551d3-7b06-49c9-a703-49fc19c34f79",
+      "status": "error",
+      "elapsed_seconds": 0.21,
+      "calls": [
+        {
+          "case": "429",
+          "method": "POST",
+          "path": "/429/v1/images/generations",
+          "fields": {
+            "model": "mock-image-model",
+            "size": "1024x1024",
+            "quality": "low",
+            "background": "opaque",
+            "output_format": "png",
+            "moderation": "low"
+          },
+          "image_count": 0
+        }
+      ],
+      "pass": true,
+      "errors": [
+        {
+          "event": "execution_error",
+          "message": "{\"ok\":false,\"message\":\"expected rejection\",\"http_status\":429,\"request_id\":null,\"error_type\":null,\"error_code\":null,\"moderation_category\":null,\"retry_after\":null,\"operation\":\"generate\",\"protocol\":\"images\",\"endpoint\":\"http://127.0.0.1:46793/429/v1/images/generations\",\"retryable\":true,\"attempts\":1,\"phase\":null,\"safe_to_resubmit\":null,\"remote_task_may_continue\":null}\n",
+          "exception_type": "BridgeError"
+        }
+      ]
+    },
+    {
+      "case": "malformed",
+      "prompt_id": "350643c4-1c6a-4e28-8d5b-19b2f7508cf2",
+      "status": "error",
+      "elapsed_seconds": 0.2,
+      "calls": [
+        {
+          "case": "malformed",
+          "method": "POST",
+          "path": "/malformed/v1/images/generations",
+          "fields": {
+            "model": "mock-image-model",
+            "size": "1024x1024",
+            "quality": "low",
+            "background": "opaque",
+            "output_format": "png",
+            "moderation": "low"
+          },
+          "image_count": 0
+        }
+      ],
+      "pass": true,
+      "errors": [
+        {
+          "event": "execution_error",
+          "message": "{\"ok\":false,\"message\":\"Images API returned no image entries.\",\"http_status\":200,\"request_id\":null,\"error_type\":null,\"error_code\":\"image_output_missing\",\"moderation_category\":null,\"retry_after\":null,\"operation\":null,\"protocol\":\"images\",\"endpoint\":\"http://127.0.0.1:46793/malformed/v1/images/generations\",\"retryable\":false,\"attempts\":1,\"phase\":null,\"safe_to_resubmit\":null,\"remote_task_may_continue\":null}\n",
+          "exception_type": "BridgeError"
+        }
+      ]
+    },
+    {
+      "case": "unsafe-url",
+      "prompt_id": "cc77fce9-5c3c-43ed-b5a9-de0d5ce1dcff",
+      "status": "error",
+      "elapsed_seconds": 0.21,
+      "calls": [
+        {
+          "case": "unsafe-url",
+          "method": "POST",
+          "path": "/unsafe-url/v1/images/generations",
+          "fields": {
+            "model": "mock-image-model",
+            "size": "1024x1024",
+            "quality": "low",
+            "background": "opaque",
+            "output_format": "png",
+            "moderation": "low"
+          },
+          "image_count": 0
+        }
+      ],
+      "pass": true,
+      "errors": [
+        {
+          "event": "execution_error",
+          "message": "{\"ok\":false,\"message\":\"Provider returned a non-public image URL, which was blocked.\",\"http_status\":200,\"request_id\":null,\"error_type\":null,\"error_code\":\"unsafe_image_url\",\"moderation_category\":null,\"retry_after\":null,\"operation\":null,\"protocol\":\"images\",\"endpoint\":\"http://127.0.0.1:46793/unsafe-url/v1/images/generations\",\"retryable\":false,\"attempts\":1,\"phase\":null,\"safe_to_resubmit\":null,\"remote_task_may_continue\":null}\n",
+          "exception_type": "BridgeError"
+        }
+      ]
+    },
+    {
+      "case": "mask",
+      "prompt_id": "635d3627-019d-4840-be17-e78d41bdd17b",
+      "status": "success",
+      "elapsed_seconds": 0.21,
+      "calls": [
+        {
+          "case": "mask",
+          "method": "POST",
+          "path": "/mask/v1/images/edits",
+          "fields": {
+            "model": "mock-image-model",
+            "size": "1024x1024",
+            "quality": "low",
+            "background": "opaque",
+            "output_format": "png",
+            "moderation": "low",
+            "mask": "present"
+          },
+          "image_count": 1
+        }
+      ],
+      "pass": true,
+      "image_count": 1,
+      "revised_prompt": [
+        "mock revised prompt"
+      ],
+      "report": [
+        "{\"async\":{\"attempted\":false,\"effective_mode\":\"sync\",\"requested\":false,\"skipped_reason\":\"Disabled by the API Provider switch.\"},\"elapsed_ms\":2,\"input\":{\"mask\":{\"encoded_bytes\":729,\"present\":true},\"prompt\":{\"characters\":19,\"sha256\":\"43a25fa04ce56c210876cd2ee3c32f0feaa51023f809d5c682df0f430be78de5\",\"type\":\"input_text\"},\"roles\":[{\"batch_index\":0,\"encoded_bytes\":2605,\"height\":512,\"mime_type\":\"image/png\",\"role\":\"base\",\"source_slot\":1,\"width\":512}]},\"ok\":true,\"operation\":\"edit\",\"output\":{\"count\":1,\"images\":[{\"bytes\":95,\"format\":\"PNG\",\"height\":24,\"mime_type\":null,\"width\":32}],\"revised_prompt_present\":true},\"protocol_selection_basis\":\"explicit provider protocol 'images'\",\"provider\":{\"api_key_configured\":true,\"api_protocol\":\"images\",\"async_edit_endpoint\":\"\",\"async_generate_endpoint\":\"\",\"async_mapping\":{\"configured\":false,\"keys\":[]},\"async_poll_endpoint_template\":\"\",\"auth_mode\":\"api_key\",\"base_url\":\"http://127.0.0.1:46793/mask/v1\",\"edit_endpoint\":\"\",\"generate_endpoint\":\"\",\"model\":\"mock-image-model\",\"use_async\":false,\"use_custom_endpoints\":false},\"requested_protocol\":\"images\",\"requests\":[{\"attempts\":1,\"elapsed_ms\":2,\"endpoint\":\"http://127.0.0.1:46793/mask/v1/images/edits\",\"http_status\":200,\"multipart_image_field\":\"image\",\"phase\":\"sync\",\"request_id\":null}],\"selected_protocol\":\"images\"}"
+      ]
+    },
+    {
+      "case": "raw-key",
+      "pass": true,
+      "http_status": 400,
+      "requests": 0
+    },
+    {
+      "case": "credential-empty",
+      "http_status": 400,
+      "pass": true
+    },
+    {
+      "case": "credential-non-object",
+      "http_status": 400,
+      "pass": true
+    },
+    {
+      "case": "credential-oversized",
+      "http_status": 413,
+      "pass": true
+    }
+  ],
+  "route_checks": [
+    {
+      "case": "invalid-json",
+      "status": 400,
+      "pass": true
+    },
+    {
+      "case": "overlong-key",
+      "status": 400,
+      "pass": true
+    }
+  ],
+  "live_cases": [
+    {
+      "case": "flare_default",
+      "options": {},
+      "prompt_id": "e800e00a-851c-4d9b-94d6-8ed85b7ca0d8",
+      "plugin_commit": "2340796",
+      "queue_status": "success",
+      "elapsed_seconds": 13.03,
+      "history_key_absent": true,
+      "request_report": {
+        "async": {
+          "attempted": false,
+          "effective_mode": "sync",
+          "requested": false,
+          "skipped_reason": "Disabled by the API Provider switch."
+        },
+        "elapsed_ms": 12486,
+        "input": {
+          "mask": {
+            "encoded_bytes": 0,
+            "present": false
+          },
+          "prompt": {
+            "characters": 127,
+            "sha256": "0e06df2e0f36f245c75558810288ab37b71d8dde3d70fab147a4ac87f38a78c6",
+            "type": "input_text"
+          },
+          "roles": []
+        },
+        "ok": true,
+        "operation": "generate",
+        "output": {
+          "count": 1,
+          "images": [
+            {
+              "bytes": 1184508,
+              "format": "PNG",
+              "height": 1024,
+              "mime_type": null,
+              "width": 1536
+            }
+          ],
+          "revised_prompt_present": false
+        },
+        "protocol_notes": {
+          "n_transport": "one synchronous Images API request per requested output"
+        },
+        "protocol_selection_basis": "auto: plain text-to-image uses /images/generations",
+        "provider": {
+          "api_key_configured": true,
+          "api_protocol": "auto",
+          "async_edit_endpoint": "",
+          "async_generate_endpoint": "",
+          "async_mapping": {
+            "configured": false,
+            "keys": []
+          },
+          "async_poll_endpoint_template": "",
+          "auth_mode": "api_key",
+          "base_url": "http://127.0.0.1:8317/v1",
+          "edit_endpoint": "",
+          "generate_endpoint": "",
+          "model": "gpt-image-2.6-flare",
+          "reference_generate_mode": "images_edit",
+          "use_async": false,
+          "use_custom_endpoints": false
+        },
+        "requested_protocol": "auto",
+        "requests": [
+          {
+            "attempts": 1,
+            "elapsed_ms": 12476,
+            "endpoint": "http://127.0.0.1:8317/v1/images/generations",
+            "http_status": 200,
+            "index": 1,
+            "phase": "sync",
+            "request_id": null
+          }
+        ],
+        "selected_protocol": "images"
+      },
+      "images": [
+        {
+          "filename": "flare_default_00001_.png",
+          "format": "PNG",
+          "mode": "RGB",
+          "dimensions": [
+            1536,
+            1024
+          ],
+          "bytes": 955041,
+          "sha256": "d3d6f2ffa384f2798312c1edc250b3343d9b63d6fde52245d99a2ec72a80f241",
+          "alpha_extrema": null
+        }
+      ],
+      "checks": {
+        "count_matches_n": true,
+        "output_decodes": true,
+        "key_absent": true
+      },
+      "build": "main 2340796",
+      "feature_checks": {
+        "upstream_format_matches_request": true
+      }
+    },
+    {
+      "case": "sunburst_default",
+      "options": {
+        "model": "gpt-image-2.6-sunburst"
+      },
+      "prompt_id": "87689261-6beb-49a0-9679-29bd57e68af4",
+      "plugin_commit": "2340796",
+      "queue_status": "success",
+      "elapsed_seconds": 13.08,
+      "history_key_absent": true,
+      "request_report": {
+        "async": {
+          "attempted": false,
+          "effective_mode": "sync",
+          "requested": false,
+          "skipped_reason": "Disabled by the API Provider switch."
+        },
+        "elapsed_ms": 12611,
+        "input": {
+          "mask": {
+            "encoded_bytes": 0,
+            "present": false
+          },
+          "prompt": {
+            "characters": 127,
+            "sha256": "0e06df2e0f36f245c75558810288ab37b71d8dde3d70fab147a4ac87f38a78c6",
+            "type": "input_text"
+          },
+          "roles": []
+        },
+        "ok": true,
+        "operation": "generate",
+        "output": {
+          "count": 1,
+          "images": [
+            {
+              "bytes": 1192293,
+              "format": "PNG",
+              "height": 1024,
+              "mime_type": null,
+              "width": 1536
+            }
+          ],
+          "revised_prompt_present": false
+        },
+        "protocol_notes": {
+          "n_transport": "one synchronous Images API request per requested output"
+        },
+        "protocol_selection_basis": "auto: plain text-to-image uses /images/generations",
+        "provider": {
+          "api_key_configured": true,
+          "api_protocol": "auto",
+          "async_edit_endpoint": "",
+          "async_generate_endpoint": "",
+          "async_mapping": {
+            "configured": false,
+            "keys": []
+          },
+          "async_poll_endpoint_template": "",
+          "auth_mode": "api_key",
+          "base_url": "http://127.0.0.1:8317/v1",
+          "edit_endpoint": "",
+          "generate_endpoint": "",
+          "model": "gpt-image-2.6-sunburst",
+          "reference_generate_mode": "images_edit",
+          "use_async": false,
+          "use_custom_endpoints": false
+        },
+        "requested_protocol": "auto",
+        "requests": [
+          {
+            "attempts": 1,
+            "elapsed_ms": 12603,
+            "endpoint": "http://127.0.0.1:8317/v1/images/generations",
+            "http_status": 200,
+            "index": 1,
+            "phase": "sync",
+            "request_id": null
+          }
+        ],
+        "selected_protocol": "images"
+      },
+      "images": [
+        {
+          "filename": "sunburst_default_00001_.png",
+          "format": "PNG",
+          "mode": "RGB",
+          "dimensions": [
+            1536,
+            1024
+          ],
+          "bytes": 962260,
+          "sha256": "51e4932a692a1ff4b7e3025cedc56941511a5b055971c7a0286e1eed2dfab293",
+          "alpha_extrema": null
+        }
+      ],
+      "checks": {
+        "count_matches_n": true,
+        "output_decodes": true,
+        "key_absent": true
+      },
+      "build": "main 2340796",
+      "feature_checks": {
+        "upstream_format_matches_request": true
+      }
+    },
+    {
+      "case": "reference_images_default",
+      "options": {
+        "refs": 2
+      },
+      "prompt_id": "471399c8-6151-4296-8cab-8275c85f405b",
+      "plugin_commit": "2340796",
+      "queue_status": "success",
+      "elapsed_seconds": 15.03,
+      "history_key_absent": true,
+      "request_report": {
+        "async": {
+          "attempted": false,
+          "effective_mode": "sync",
+          "requested": false,
+          "skipped_reason": "Disabled by the API Provider switch."
+        },
+        "elapsed_ms": 14263,
+        "input": {
+          "mask": {
+            "encoded_bytes": 0,
+            "present": false
+          },
+          "prompt": {
+            "characters": 127,
+            "sha256": "0e06df2e0f36f245c75558810288ab37b71d8dde3d70fab147a4ac87f38a78c6",
+            "type": "input_text"
+          },
+          "roles": [
+            {
+              "batch_index": 0,
+              "encoded_bytes": 640,
+              "height": 130,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 1,
+              "width": 132
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 650,
+              "height": 132,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 2,
+              "width": 136
+            }
+          ]
+        },
+        "ok": true,
+        "operation": "generate",
+        "output": {
+          "count": 1,
+          "images": [
+            {
+              "bytes": 1194333,
+              "format": "PNG",
+              "height": 1024,
+              "mime_type": null,
+              "width": 1536
+            }
+          ],
+          "revised_prompt_present": false
+        },
+        "protocol_notes": {
+          "n_transport": "one synchronous Images API request per requested output",
+          "reference_mode": "images_edit"
+        },
+        "protocol_selection_basis": "auto: reference-guided new image via /images/edits",
+        "provider": {
+          "api_key_configured": true,
+          "api_protocol": "auto",
+          "async_edit_endpoint": "",
+          "async_generate_endpoint": "",
+          "async_mapping": {
+            "configured": false,
+            "keys": []
+          },
+          "async_poll_endpoint_template": "",
+          "auth_mode": "api_key",
+          "base_url": "http://127.0.0.1:8317/v1",
+          "edit_endpoint": "",
+          "generate_endpoint": "",
+          "model": "gpt-image-2.6-flare",
+          "reference_generate_mode": "images_edit",
+          "use_async": false,
+          "use_custom_endpoints": false
+        },
+        "reference_generation": {
+          "mode": "images_edit",
+          "requested_operation": "generate",
+          "semantics": "Images Edit uses Reference 1 as the source image and remaining references in order; this is guided generation, not pure text-to-image or strict identity-preserving editing.",
+          "transport_operation": "edit"
+        },
+        "requested_protocol": "auto",
+        "requests": [
+          {
+            "attempts": 1,
+            "elapsed_ms": 14256,
+            "endpoint": "http://127.0.0.1:8317/v1/images/edits",
+            "http_status": 200,
+            "index": 1,
+            "multipart_image_field": "image[]",
+            "phase": "sync",
+            "request_id": null
+          }
+        ],
+        "selected_protocol": "images"
+      },
+      "images": [
+        {
+          "filename": "reference_images_default_00001_.png",
+          "format": "PNG",
+          "mode": "RGB",
+          "dimensions": [
+            1536,
+            1024
+          ],
+          "bytes": 961812,
+          "sha256": "71ae2202ee291fa1f60bd52e2187de2d906169dc4a543baa8a1b3203e92e8d84",
+          "alpha_extrema": null
+        }
+      ],
+      "checks": {
+        "count_matches_n": true,
+        "output_decodes": true,
+        "key_absent": true
+      },
+      "build": "main 2340796",
+      "feature_checks": {
+        "upstream_format_matches_request": true
+      }
+    },
+    {
+      "case": "edit_mask",
+      "options": {
+        "model": "gpt-image-2.6-sunburst",
+        "edit": true,
+        "mask": true,
+        "complexity": "high"
+      },
+      "prompt_id": "52525eae-ed4f-43f5-9666-ec0e63deb263",
+      "plugin_commit": "2340796",
+      "queue_status": "success",
+      "elapsed_seconds": 18.03,
+      "history_key_absent": true,
+      "request_report": {
+        "async": {
+          "attempted": false,
+          "effective_mode": "sync",
+          "requested": false,
+          "skipped_reason": "Disabled by the API Provider switch."
+        },
+        "elapsed_ms": 17364,
+        "input": {
+          "mask": {
+            "encoded_bytes": 729,
+            "present": true
+          },
+          "prompt": {
+            "characters": 125,
+            "sha256": "641a48e11773e295df92f3e2baf427c0d633e297c6deba0fca357e0b0bd7d996",
+            "type": "input_text"
+          },
+          "roles": [
+            {
+              "batch_index": 0,
+              "encoded_bytes": 2605,
+              "height": 512,
+              "mime_type": "image/png",
+              "role": "base",
+              "source_slot": 1,
+              "width": 512
+            }
+          ]
+        },
+        "ok": true,
+        "operation": "edit",
+        "output": {
+          "count": 1,
+          "images": [
+            {
+              "bytes": 1205282,
+              "format": "PNG",
+              "height": 1254,
+              "mime_type": null,
+              "width": 1254
+            }
+          ],
+          "revised_prompt_present": false
+        },
+        "protocol_notes": {
+          "n_transport": "one synchronous Images API request per requested output"
+        },
+        "protocol_selection_basis": "auto: explicit base-image semantics use /images/edits",
+        "provider": {
+          "api_key_configured": true,
+          "api_protocol": "auto",
+          "async_edit_endpoint": "",
+          "async_generate_endpoint": "",
+          "async_mapping": {
+            "configured": false,
+            "keys": []
+          },
+          "async_poll_endpoint_template": "",
+          "auth_mode": "api_key",
+          "base_url": "http://127.0.0.1:8317/v1",
+          "edit_endpoint": "",
+          "generate_endpoint": "",
+          "image_complexity": "high",
+          "model": "gpt-image-2.6-sunburst",
+          "reference_generate_mode": "images_edit",
+          "use_async": false,
+          "use_custom_endpoints": false
+        },
+        "requested_protocol": "auto",
+        "requests": [
+          {
+            "attempts": 1,
+            "elapsed_ms": 17359,
+            "endpoint": "http://127.0.0.1:8317/v1/images/edits",
+            "http_status": 200,
+            "index": 1,
+            "multipart_image_field": "image",
+            "phase": "sync",
+            "request_id": null
+          }
+        ],
+        "selected_protocol": "images"
+      },
+      "images": [
+        {
+          "filename": "edit_mask_00001_.png",
+          "format": "PNG",
+          "mode": "RGB",
+          "dimensions": [
+            1254,
+            1254
+          ],
+          "bytes": 986452,
+          "sha256": "e8f74dcc5cff698ae5c7666854e4e8efd44cfaa7888b63f85faed052868e6e2b",
+          "alpha_extrema": null
+        }
+      ],
+      "checks": {
+        "count_matches_n": true,
+        "output_decodes": true,
+        "key_absent": true
+      },
+      "build": "main 2340796",
+      "feature_checks": {
+        "upstream_format_matches_request": true
+      }
+    },
+    {
+      "case": "custom_jpeg_xhigh",
+      "options": {
+        "size": "Custom",
+        "custom_width": 1024,
+        "custom_height": 768,
+        "format": "jpeg",
+        "quality": "xhigh",
+        "complexity": "low"
+      },
+      "prompt_id": "f6f543a9-43ee-426b-9782-8545e036c0ec",
+      "plugin_commit": "2340796",
+      "queue_status": "success",
+      "elapsed_seconds": 13.02,
+      "history_key_absent": true,
+      "request_report": {
+        "async": {
+          "attempted": false,
+          "effective_mode": "sync",
+          "requested": false,
+          "skipped_reason": "Disabled by the API Provider switch."
+        },
+        "elapsed_ms": 11890,
+        "input": {
+          "mask": {
+            "encoded_bytes": 0,
+            "present": false
+          },
+          "prompt": {
+            "characters": 127,
+            "sha256": "0e06df2e0f36f245c75558810288ab37b71d8dde3d70fab147a4ac87f38a78c6",
+            "type": "input_text"
+          },
+          "roles": []
+        },
+        "ok": true,
+        "operation": "generate",
+        "output": {
+          "count": 1,
+          "images": [
+            {
+              "bytes": 1119338,
+              "format": "PNG",
+              "height": 1024,
+              "mime_type": null,
+              "width": 1536
+            }
+          ],
+          "revised_prompt_present": false
+        },
+        "protocol_notes": {
+          "n_transport": "one synchronous Images API request per requested output"
+        },
+        "protocol_selection_basis": "auto: plain text-to-image uses /images/generations",
+        "provider": {
+          "api_key_configured": true,
+          "api_protocol": "auto",
+          "async_edit_endpoint": "",
+          "async_generate_endpoint": "",
+          "async_mapping": {
+            "configured": false,
+            "keys": []
+          },
+          "async_poll_endpoint_template": "",
+          "auth_mode": "api_key",
+          "base_url": "http://127.0.0.1:8317/v1",
+          "edit_endpoint": "",
+          "generate_endpoint": "",
+          "image_complexity": "low",
+          "model": "gpt-image-2.6-flare",
+          "reference_generate_mode": "images_edit",
+          "use_async": false,
+          "use_custom_endpoints": false
+        },
+        "requested_protocol": "auto",
+        "requests": [
+          {
+            "attempts": 1,
+            "elapsed_ms": 11886,
+            "endpoint": "http://127.0.0.1:8317/v1/images/generations",
+            "http_status": 200,
+            "index": 1,
+            "phase": "sync",
+            "request_id": null
+          }
+        ],
+        "selected_protocol": "images"
+      },
+      "images": [
+        {
+          "filename": "custom_jpeg_xhigh_00001_.png",
+          "format": "PNG",
+          "mode": "RGB",
+          "dimensions": [
+            1536,
+            1024
+          ],
+          "bytes": 894720,
+          "sha256": "98ddaa1552ed18b988d72ea0cd9a4bd38356aa1cff48093753494cc2aef3eb9c",
+          "alpha_extrema": null
+        }
+      ],
+      "checks": {
+        "count_matches_n": true,
+        "output_decodes": true,
+        "key_absent": true
+      },
+      "build": "main 2340796",
+      "feature_checks": {
+        "exact_dimensions": false,
+        "upstream_format_matches_request": false
+      }
+    },
+    {
+      "case": "custom_webp_max",
+      "options": {
+        "model": "gpt-image-2.6-sunburst",
+        "size": "Custom",
+        "custom_width": 1024,
+        "custom_height": 1024,
+        "format": "webp",
+        "quality": "max",
+        "complexity": "medium",
+        "moderation": "low"
+      },
+      "prompt_id": "54549847-8577-4d38-b78f-c2b2526c4869",
+      "plugin_commit": "2340796",
+      "queue_status": "success",
+      "elapsed_seconds": 13.06,
+      "history_key_absent": true,
+      "request_report": {
+        "async": {
+          "attempted": false,
+          "effective_mode": "sync",
+          "requested": false,
+          "skipped_reason": "Disabled by the API Provider switch."
+        },
+        "elapsed_ms": 12596,
+        "input": {
+          "mask": {
+            "encoded_bytes": 0,
+            "present": false
+          },
+          "prompt": {
+            "characters": 127,
+            "sha256": "0e06df2e0f36f245c75558810288ab37b71d8dde3d70fab147a4ac87f38a78c6",
+            "type": "input_text"
+          },
+          "roles": []
+        },
+        "ok": true,
+        "operation": "generate",
+        "output": {
+          "count": 1,
+          "images": [
+            {
+              "bytes": 1181119,
+              "format": "PNG",
+              "height": 1024,
+              "mime_type": null,
+              "width": 1536
+            }
+          ],
+          "revised_prompt_present": false
+        },
+        "protocol_notes": {
+          "n_transport": "one synchronous Images API request per requested output"
+        },
+        "protocol_selection_basis": "auto: plain text-to-image uses /images/generations",
+        "provider": {
+          "api_key_configured": true,
+          "api_protocol": "auto",
+          "async_edit_endpoint": "",
+          "async_generate_endpoint": "",
+          "async_mapping": {
+            "configured": false,
+            "keys": []
+          },
+          "async_poll_endpoint_template": "",
+          "auth_mode": "api_key",
+          "base_url": "http://127.0.0.1:8317/v1",
+          "edit_endpoint": "",
+          "generate_endpoint": "",
+          "image_complexity": "medium",
+          "model": "gpt-image-2.6-sunburst",
+          "reference_generate_mode": "images_edit",
+          "use_async": false,
+          "use_custom_endpoints": false
+        },
+        "requested_protocol": "auto",
+        "requests": [
+          {
+            "attempts": 1,
+            "elapsed_ms": 12591,
+            "endpoint": "http://127.0.0.1:8317/v1/images/generations",
+            "http_status": 200,
+            "index": 1,
+            "phase": "sync",
+            "request_id": null
+          }
+        ],
+        "selected_protocol": "images"
+      },
+      "images": [
+        {
+          "filename": "custom_webp_max_00001_.png",
+          "format": "PNG",
+          "mode": "RGB",
+          "dimensions": [
+            1536,
+            1024
+          ],
+          "bytes": 951604,
+          "sha256": "9c71a2ca3c704e58bb230c35597dede4289e7bdca97839a6f1cfbb14737dca82",
+          "alpha_extrema": null
+        }
+      ],
+      "checks": {
+        "count_matches_n": true,
+        "output_decodes": true,
+        "key_absent": true
+      },
+      "build": "main 2340796",
+      "feature_checks": {
+        "exact_dimensions": false,
+        "upstream_format_matches_request": false
+      }
+    },
+    {
+      "case": "transparent_png",
+      "options": {
+        "background": "transparent",
+        "quality": "low",
+        "prompt": "A single simple orange circle icon. Completely transparent background, no shadow or surrounding objects."
+      },
+      "prompt_id": "2e50603e-9df1-4e57-99e6-f6c76b493ba3",
+      "plugin_commit": "2340796",
+      "queue_status": "success",
+      "elapsed_seconds": 25.05,
+      "history_key_absent": true,
+      "request_report": {
+        "async": {
+          "attempted": false,
+          "effective_mode": "sync",
+          "requested": false,
+          "skipped_reason": "Disabled by the API Provider switch."
+        },
+        "elapsed_ms": 24209,
+        "input": {
+          "mask": {
+            "encoded_bytes": 0,
+            "present": false
+          },
+          "prompt": {
+            "characters": 104,
+            "sha256": "1b8d80c799d228cada70eb71cce870365fd8fb1983c56e2cae6d3900dbcf97c6",
+            "type": "input_text"
+          },
+          "roles": []
+        },
+        "ok": true,
+        "operation": "generate",
+        "output": {
+          "count": 1,
+          "images": [
+            {
+              "bytes": 1293354,
+              "format": "PNG",
+              "height": 1024,
+              "mime_type": null,
+              "width": 1536
+            }
+          ],
+          "revised_prompt_present": false
+        },
+        "protocol_notes": {
+          "n_transport": "one synchronous Images API request per requested output"
+        },
+        "protocol_selection_basis": "auto: plain text-to-image uses /images/generations",
+        "provider": {
+          "api_key_configured": true,
+          "api_protocol": "auto",
+          "async_edit_endpoint": "",
+          "async_generate_endpoint": "",
+          "async_mapping": {
+            "configured": false,
+            "keys": []
+          },
+          "async_poll_endpoint_template": "",
+          "auth_mode": "api_key",
+          "base_url": "http://127.0.0.1:8317/v1",
+          "edit_endpoint": "",
+          "generate_endpoint": "",
+          "model": "gpt-image-2.6-flare",
+          "reference_generate_mode": "images_edit",
+          "use_async": false,
+          "use_custom_endpoints": false
+        },
+        "requested_protocol": "auto",
+        "requests": [
+          {
+            "attempts": 1,
+            "elapsed_ms": 24204,
+            "endpoint": "http://127.0.0.1:8317/v1/images/generations",
+            "http_status": 200,
+            "index": 1,
+            "phase": "sync",
+            "request_id": null
+          }
+        ],
+        "selected_protocol": "images"
+      },
+      "images": [
+        {
+          "filename": "transparent_png_00001_.png",
+          "format": "PNG",
+          "mode": "RGB",
+          "dimensions": [
+            1536,
+            1024
+          ],
+          "bytes": 1107334,
+          "sha256": "de1947272f42a9f7978df65c6458b82ac7c986ed7e71f4ce511003739bdb87bf",
+          "alpha_extrema": null
+        }
+      ],
+      "checks": {
+        "count_matches_n": true,
+        "output_decodes": true,
+        "key_absent": true,
+        "alpha_preserved": false
+      },
+      "build": "main 2340796",
+      "feature_checks": {
+        "upstream_format_matches_request": true,
+        "alpha_preserved": false
+      }
+    },
+    {
+      "case": "batch_2k",
+      "options": {
+        "size": "2048x1152",
+        "n": 2,
+        "quality": "low",
+        "complexity": "low"
+      },
+      "prompt_id": "3e75cd5c-2371-43e1-828f-5bc385c4e991",
+      "plugin_commit": "2340796",
+      "queue_status": "success",
+      "elapsed_seconds": 28.14,
+      "history_key_absent": true,
+      "request_report": {
+        "async": {
+          "attempted": false,
+          "effective_mode": "sync",
+          "requested": false,
+          "skipped_reason": "Disabled by the API Provider switch."
+        },
+        "elapsed_ms": 27560,
+        "input": {
+          "mask": {
+            "encoded_bytes": 0,
+            "present": false
+          },
+          "prompt": {
+            "characters": 127,
+            "sha256": "0e06df2e0f36f245c75558810288ab37b71d8dde3d70fab147a4ac87f38a78c6",
+            "type": "input_text"
+          },
+          "roles": []
+        },
+        "ok": true,
+        "operation": "generate",
+        "output": {
+          "count": 2,
+          "images": [
+            {
+              "bytes": 1183547,
+              "format": "PNG",
+              "height": 1024,
+              "mime_type": null,
+              "width": 1536
+            },
+            {
+              "bytes": 1192938,
+              "format": "PNG",
+              "height": 1024,
+              "mime_type": null,
+              "width": 1536
+            }
+          ],
+          "revised_prompt_present": false
+        },
+        "protocol_notes": {
+          "n_transport": "one synchronous Images API request per requested output"
+        },
+        "protocol_selection_basis": "auto: plain text-to-image uses /images/generations",
+        "provider": {
+          "api_key_configured": true,
+          "api_protocol": "auto",
+          "async_edit_endpoint": "",
+          "async_generate_endpoint": "",
+          "async_mapping": {
+            "configured": false,
+            "keys": []
+          },
+          "async_poll_endpoint_template": "",
+          "auth_mode": "api_key",
+          "base_url": "http://127.0.0.1:8317/v1",
+          "edit_endpoint": "",
+          "generate_endpoint": "",
+          "image_complexity": "low",
+          "model": "gpt-image-2.6-flare",
+          "reference_generate_mode": "images_edit",
+          "use_async": false,
+          "use_custom_endpoints": false
+        },
+        "requested_protocol": "auto",
+        "requests": [
+          {
+            "attempts": 1,
+            "elapsed_ms": 13298,
+            "endpoint": "http://127.0.0.1:8317/v1/images/generations",
+            "http_status": 200,
+            "index": 1,
+            "phase": "sync",
+            "request_id": null
+          },
+          {
+            "attempts": 1,
+            "elapsed_ms": 14251,
+            "endpoint": "http://127.0.0.1:8317/v1/images/generations",
+            "http_status": 200,
+            "index": 2,
+            "phase": "sync",
+            "request_id": null
+          }
+        ],
+        "selected_protocol": "images"
+      },
+      "images": [
+        {
+          "filename": "batch_2k_00001_.png",
+          "format": "PNG",
+          "mode": "RGB",
+          "dimensions": [
+            1536,
+            1024
+          ],
+          "bytes": 955375,
+          "sha256": "6e0e05b357aa344da099083f2d64c7e867e8eb299b2939dbfb4068352a59983e",
+          "alpha_extrema": null
+        },
+        {
+          "filename": "batch_2k_00002_.png",
+          "format": "PNG",
+          "mode": "RGB",
+          "dimensions": [
+            1536,
+            1024
+          ],
+          "bytes": 961366,
+          "sha256": "8a71926f971a0c5b015461f118a36b615ba9be9383c337b1027fa53ee05b5cce",
+          "alpha_extrema": null
+        }
+      ],
+      "checks": {
+        "count_matches_n": true,
+        "output_decodes": true,
+        "key_absent": true
+      },
+      "build": "main 2340796",
+      "feature_checks": {
+        "exact_dimensions": false,
+        "upstream_format_matches_request": true
+      }
+    },
+    {
+      "case": "preset_4k",
+      "options": {
+        "model": "gpt-image-2.6-sunburst",
+        "size": "3840x2160",
+        "quality": "low",
+        "complexity": "low"
+      },
+      "prompt_id": "31f1490f-83ab-4294-8fb2-5224a5e8e5c5",
+      "plugin_commit": "2340796",
+      "queue_status": "success",
+      "elapsed_seconds": 17.13,
+      "history_key_absent": true,
+      "request_report": {
+        "async": {
+          "attempted": false,
+          "effective_mode": "sync",
+          "requested": false,
+          "skipped_reason": "Disabled by the API Provider switch."
+        },
+        "elapsed_ms": 16701,
+        "input": {
+          "mask": {
+            "encoded_bytes": 0,
+            "present": false
+          },
+          "prompt": {
+            "characters": 127,
+            "sha256": "0e06df2e0f36f245c75558810288ab37b71d8dde3d70fab147a4ac87f38a78c6",
+            "type": "input_text"
+          },
+          "roles": []
+        },
+        "ok": true,
+        "operation": "generate",
+        "output": {
+          "count": 1,
+          "images": [
+            {
+              "bytes": 1125315,
+              "format": "PNG",
+              "height": 1024,
+              "mime_type": null,
+              "width": 1536
+            }
+          ],
+          "revised_prompt_present": false
+        },
+        "protocol_notes": {
+          "n_transport": "one synchronous Images API request per requested output"
+        },
+        "protocol_selection_basis": "auto: plain text-to-image uses /images/generations",
+        "provider": {
+          "api_key_configured": true,
+          "api_protocol": "auto",
+          "async_edit_endpoint": "",
+          "async_generate_endpoint": "",
+          "async_mapping": {
+            "configured": false,
+            "keys": []
+          },
+          "async_poll_endpoint_template": "",
+          "auth_mode": "api_key",
+          "base_url": "http://127.0.0.1:8317/v1",
+          "edit_endpoint": "",
+          "generate_endpoint": "",
+          "image_complexity": "low",
+          "model": "gpt-image-2.6-sunburst",
+          "reference_generate_mode": "images_edit",
+          "use_async": false,
+          "use_custom_endpoints": false
+        },
+        "requested_protocol": "auto",
+        "requests": [
+          {
+            "attempts": 1,
+            "elapsed_ms": 16696,
+            "endpoint": "http://127.0.0.1:8317/v1/images/generations",
+            "http_status": 200,
+            "index": 1,
+            "phase": "sync",
+            "request_id": null
+          }
+        ],
+        "selected_protocol": "images"
+      },
+      "images": [
+        {
+          "filename": "preset_4k_00001_.png",
+          "format": "PNG",
+          "mode": "RGB",
+          "dimensions": [
+            1536,
+            1024
+          ],
+          "bytes": 900339,
+          "sha256": "3fdcfb10b9647383e4f8c47d346bb96fc0118efe9f2bdf2539d0d6195b8cd851",
+          "alpha_extrema": null
+        }
+      ],
+      "checks": {
+        "count_matches_n": true,
+        "output_decodes": true,
+        "key_absent": true
+      },
+      "build": "main 2340796",
+      "feature_checks": {
+        "exact_dimensions": false,
+        "upstream_format_matches_request": true
+      }
+    },
+    {
+      "case": "generate_16_references",
+      "options": {
+        "refs": 16,
+        "quality": "low"
+      },
+      "prompt_id": "32a33ac8-9eb2-43de-b447-7b18afabed00",
+      "plugin_commit": "2340796",
+      "queue_status": "success",
+      "elapsed_seconds": 15.03,
+      "history_key_absent": true,
+      "request_report": {
+        "async": {
+          "attempted": false,
+          "effective_mode": "sync",
+          "requested": false,
+          "skipped_reason": "Disabled by the API Provider switch."
+        },
+        "elapsed_ms": 14064,
+        "input": {
+          "mask": {
+            "encoded_bytes": 0,
+            "present": false
+          },
+          "prompt": {
+            "characters": 127,
+            "sha256": "0e06df2e0f36f245c75558810288ab37b71d8dde3d70fab147a4ac87f38a78c6",
+            "type": "input_text"
+          },
+          "roles": [
+            {
+              "batch_index": 0,
+              "encoded_bytes": 640,
+              "height": 130,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 1,
+              "width": 132
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 650,
+              "height": 132,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 2,
+              "width": 136
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 658,
+              "height": 134,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 3,
+              "width": 140
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 691,
+              "height": 136,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 4,
+              "width": 144
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 668,
+              "height": 138,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 5,
+              "width": 148
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 678,
+              "height": 140,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 6,
+              "width": 152
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 678,
+              "height": 142,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 7,
+              "width": 156
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 681,
+              "height": 144,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 8,
+              "width": 160
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 688,
+              "height": 146,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 9,
+              "width": 164
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 715,
+              "height": 148,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 10,
+              "width": 168
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 665,
+              "height": 150,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 11,
+              "width": 172
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 725,
+              "height": 152,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 12,
+              "width": 176
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 740,
+              "height": 154,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 13,
+              "width": 180
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 762,
+              "height": 156,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 14,
+              "width": 184
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 767,
+              "height": 158,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 15,
+              "width": 188
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 754,
+              "height": 160,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 16,
+              "width": 192
+            }
+          ]
+        },
+        "ok": true,
+        "operation": "generate",
+        "output": {
+          "count": 1,
+          "images": [
+            {
+              "bytes": 1189719,
+              "format": "PNG",
+              "height": 1024,
+              "mime_type": null,
+              "width": 1536
+            }
+          ],
+          "revised_prompt_present": false
+        },
+        "protocol_notes": {
+          "n_transport": "one synchronous Images API request per requested output",
+          "reference_mode": "images_edit"
+        },
+        "protocol_selection_basis": "auto: reference-guided new image via /images/edits",
+        "provider": {
+          "api_key_configured": true,
+          "api_protocol": "auto",
+          "async_edit_endpoint": "",
+          "async_generate_endpoint": "",
+          "async_mapping": {
+            "configured": false,
+            "keys": []
+          },
+          "async_poll_endpoint_template": "",
+          "auth_mode": "api_key",
+          "base_url": "http://127.0.0.1:8317/v1",
+          "edit_endpoint": "",
+          "generate_endpoint": "",
+          "model": "gpt-image-2.6-flare",
+          "reference_generate_mode": "images_edit",
+          "use_async": false,
+          "use_custom_endpoints": false
+        },
+        "reference_generation": {
+          "mode": "images_edit",
+          "requested_operation": "generate",
+          "semantics": "Images Edit uses Reference 1 as the source image and remaining references in order; this is guided generation, not pure text-to-image or strict identity-preserving editing.",
+          "transport_operation": "edit"
+        },
+        "requested_protocol": "auto",
+        "requests": [
+          {
+            "attempts": 1,
+            "elapsed_ms": 14059,
+            "endpoint": "http://127.0.0.1:8317/v1/images/edits",
+            "http_status": 200,
+            "index": 1,
+            "multipart_image_field": "image[]",
+            "phase": "sync",
+            "request_id": null
+          }
+        ],
+        "selected_protocol": "images"
+      },
+      "images": [
+        {
+          "filename": "generate_16_references_00001_.png",
+          "format": "PNG",
+          "mode": "RGB",
+          "dimensions": [
+            1536,
+            1024
+          ],
+          "bytes": 962340,
+          "sha256": "5947770e3fe0c70afa7dd381d36809b8c1b995c06d1ac7c0e106fda2d05b28a4",
+          "alpha_extrema": null
+        }
+      ],
+      "checks": {
+        "count_matches_n": true,
+        "output_decodes": true,
+        "key_absent": true
+      },
+      "build": "main 2340796",
+      "feature_checks": {
+        "upstream_format_matches_request": true
+      }
+    },
+    {
+      "case": "edit_15_references",
+      "options": {
+        "edit": true,
+        "refs": 15,
+        "quality": "low"
+      },
+      "prompt_id": "6e2f1a12-6961-4fe3-818e-1b5ece15e601",
+      "plugin_commit": "2340796",
+      "queue_status": "success",
+      "elapsed_seconds": 19.04,
+      "history_key_absent": true,
+      "request_report": {
+        "async": {
+          "attempted": false,
+          "effective_mode": "sync",
+          "requested": false,
+          "skipped_reason": "Disabled by the API Provider switch."
+        },
+        "elapsed_ms": 18180,
+        "input": {
+          "mask": {
+            "encoded_bytes": 0,
+            "present": false
+          },
+          "prompt": {
+            "characters": 125,
+            "sha256": "641a48e11773e295df92f3e2baf427c0d633e297c6deba0fca357e0b0bd7d996",
+            "type": "input_text"
+          },
+          "roles": [
+            {
+              "batch_index": 0,
+              "encoded_bytes": 2605,
+              "height": 512,
+              "mime_type": "image/png",
+              "role": "base",
+              "source_slot": 1,
+              "width": 512
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 640,
+              "height": 130,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 2,
+              "width": 132
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 650,
+              "height": 132,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 3,
+              "width": 136
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 658,
+              "height": 134,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 4,
+              "width": 140
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 691,
+              "height": 136,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 5,
+              "width": 144
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 668,
+              "height": 138,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 6,
+              "width": 148
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 678,
+              "height": 140,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 7,
+              "width": 152
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 678,
+              "height": 142,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 8,
+              "width": 156
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 681,
+              "height": 144,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 9,
+              "width": 160
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 688,
+              "height": 146,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 10,
+              "width": 164
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 715,
+              "height": 148,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 11,
+              "width": 168
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 665,
+              "height": 150,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 12,
+              "width": 172
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 725,
+              "height": 152,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 13,
+              "width": 176
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 740,
+              "height": 154,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 14,
+              "width": 180
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 762,
+              "height": 156,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 15,
+              "width": 184
+            },
+            {
+              "batch_index": 0,
+              "encoded_bytes": 767,
+              "height": 158,
+              "mime_type": "image/png",
+              "role": "reference",
+              "source_slot": 16,
+              "width": 188
+            }
+          ]
+        },
+        "ok": true,
+        "operation": "edit",
+        "output": {
+          "count": 1,
+          "images": [
+            {
+              "bytes": 1203287,
+              "format": "PNG",
+              "height": 1254,
+              "mime_type": null,
+              "width": 1254
+            }
+          ],
+          "revised_prompt_present": false
+        },
+        "protocol_notes": {
+          "n_transport": "one synchronous Images API request per requested output"
+        },
+        "protocol_selection_basis": "auto: explicit base-image semantics use /images/edits",
+        "provider": {
+          "api_key_configured": true,
+          "api_protocol": "auto",
+          "async_edit_endpoint": "",
+          "async_generate_endpoint": "",
+          "async_mapping": {
+            "configured": false,
+            "keys": []
+          },
+          "async_poll_endpoint_template": "",
+          "auth_mode": "api_key",
+          "base_url": "http://127.0.0.1:8317/v1",
+          "edit_endpoint": "",
+          "generate_endpoint": "",
+          "model": "gpt-image-2.6-flare",
+          "reference_generate_mode": "images_edit",
+          "use_async": false,
+          "use_custom_endpoints": false
+        },
+        "requested_protocol": "auto",
+        "requests": [
+          {
+            "attempts": 1,
+            "elapsed_ms": 18175,
+            "endpoint": "http://127.0.0.1:8317/v1/images/edits",
+            "http_status": 200,
+            "index": 1,
+            "multipart_image_field": "image[]",
+            "phase": "sync",
+            "request_id": null
+          }
+        ],
+        "selected_protocol": "images"
+      },
+      "images": [
+        {
+          "filename": "edit_15_references_00001_.png",
+          "format": "PNG",
+          "mode": "RGB",
+          "dimensions": [
+            1254,
+            1254
+          ],
+          "bytes": 990364,
+          "sha256": "cbaad1c1cc1c36217bb81adf7f52569eb8801ade0cbd3ed5a1c973bc1595236b",
+          "alpha_extrema": null
+        }
+      ],
+      "checks": {
+        "count_matches_n": true,
+        "output_decodes": true,
+        "key_absent": true
+      },
+      "build": "main 2340796",
+      "feature_checks": {
+        "upstream_format_matches_request": true
+      }
+    },
+    {
+      "case": "reference_responses",
+      "options": {
+        "refs": 1,
+        "reference_mode": "responses",
+        "responses_model": "gpt-6.1-sol",
+        "quality": "low"
+      },
+      "prompt_id": "5d5f7fdd-2feb-4c03-a0a9-3033988e5311",
+      "plugin_commit": "2340796",
+      "queue_status": "error",
+      "elapsed_seconds": 1.01,
+      "history_key_absent": true,
+      "errors": [
+        {
+          "ok": false,
+          "message": "Post \"https://chatgpt.com/backend-api/codex/responses\": utls: dial upstream: dial tcp: lookup chatgpt.com: no such host",
+          "http_status": 500,
+          "request_id": null,
+          "error_type": "server_error",
+          "error_code": "internal_server_error",
+          "moderation_category": null,
+          "retry_after": null,
+          "operation": "generate",
+          "protocol": "responses",
+          "endpoint": "http://127.0.0.1:8317/v1/responses",
+          "retryable": true,
+          "attempts": 1,
+          "phase": null,
+          "safe_to_resubmit": null,
+          "remote_task_may_continue": null
+        }
+      ],
+      "build": "main 2340796",
+      "feature_checks": {}
+    },
+    {
+      "case": "generic_images",
+      "options": {
+        "generic": true,
+        "protocol": "images",
+        "quality": "low"
+      },
+      "prompt_id": "96a38fd8-1d4e-4ead-8b3c-268518b3291b",
+      "plugin_commit": "2340796",
+      "queue_status": "success",
+      "elapsed_seconds": 14.03,
+      "history_key_absent": true,
+      "request_report": {
+        "async": {
+          "attempted": false,
+          "effective_mode": "sync",
+          "requested": false,
+          "skipped_reason": "Disabled by the API Provider switch."
+        },
+        "elapsed_ms": 12921,
+        "input": {
+          "mask": {
+            "encoded_bytes": 0,
+            "present": false
+          },
+          "prompt": {
+            "characters": 127,
+            "sha256": "0e06df2e0f36f245c75558810288ab37b71d8dde3d70fab147a4ac87f38a78c6",
+            "type": "input_text"
+          },
+          "roles": []
+        },
+        "ok": true,
+        "operation": "generate",
+        "output": {
+          "count": 1,
+          "images": [
+            {
+              "bytes": 1185732,
+              "format": "PNG",
+              "height": 1024,
+              "mime_type": null,
+              "width": 1536
+            }
+          ],
+          "revised_prompt_present": false
+        },
+        "protocol_selection_basis": "explicit provider protocol 'images'",
+        "provider": {
+          "api_key_configured": true,
+          "api_protocol": "images",
+          "async_edit_endpoint": "",
+          "async_generate_endpoint": "",
+          "async_mapping": {
+            "configured": false,
+            "keys": []
+          },
+          "async_poll_endpoint_template": "",
+          "auth_mode": "api_key",
+          "base_url": "http://127.0.0.1:8317/v1",
+          "edit_endpoint": "",
+          "generate_endpoint": "",
+          "model": "gpt-image-2.6-flare",
+          "use_async": false,
+          "use_custom_endpoints": false
+        },
+        "requested_protocol": "images",
+        "requests": [
+          {
+            "attempts": 1,
+            "elapsed_ms": 12916,
+            "endpoint": "http://127.0.0.1:8317/v1/images/generations",
+            "http_status": 200,
+            "phase": "sync",
+            "request_id": null
+          }
+        ],
+        "selected_protocol": "images"
+      },
+      "images": [
+        {
+          "filename": "generic_images_00001_.png",
+          "format": "PNG",
+          "mode": "RGB",
+          "dimensions": [
+            1536,
+            1024
+          ],
+          "bytes": 959442,
+          "sha256": "70b8c4e11f81103acec3f62b684499a2cc748376ace84a9401033ba309c54000",
+          "alpha_extrema": null
+        }
+      ],
+      "checks": {
+        "count_matches_n": true,
+        "output_decodes": true,
+        "key_absent": true
+      },
+      "build": "main 2340796",
+      "feature_checks": {
+        "upstream_format_matches_request": true
+      }
+    },
+    {
+      "case": "generic_chat",
+      "options": {
+        "generic": true,
+        "protocol": "chat_completions",
+        "quality": "low"
+      },
+      "prompt_id": "367bb97f-391b-43d8-86c2-90026f459188",
+      "plugin_commit": "2340796",
+      "queue_status": "error",
+      "elapsed_seconds": 1.0,
+      "history_key_absent": true,
+      "errors": [
+        {
+          "ok": false,
+          "message": "model gpt-image-2.6-flare is only supported on /v1/images/generations and /v1/images/edits",
+          "http_status": 503,
+          "request_id": null,
+          "error_type": "server_error",
+          "error_code": "internal_server_error",
+          "moderation_category": null,
+          "retry_after": null,
+          "operation": "generate",
+          "protocol": "chat_completions",
+          "endpoint": "http://127.0.0.1:8317/v1/chat/completions",
+          "retryable": true,
+          "attempts": 1,
+          "phase": null,
+          "safe_to_resubmit": null,
+          "remote_task_may_continue": null
+        }
+      ],
+      "build": "main 2340796",
+      "feature_checks": {}
+    },
+    {
+      "case": "generic_async_fallback",
+      "options": {
+        "generic": true,
+        "protocol": "images",
+        "async": true,
+        "quality": "low"
+      },
+      "prompt_id": "85a70716-442d-4127-abba-a6e4885342ae",
+      "plugin_commit": "2340796",
+      "queue_status": "success",
+      "elapsed_seconds": 14.15,
+      "history_key_absent": true,
+      "request_report": {
+        "async": {
+          "attempted": true,
+          "contract": "standard",
+          "effective_mode": "sync_fallback",
+          "fallback_error_code": null,
+          "fallback_http_status": 404,
+          "fallback_reason": "Async endpoint explicitly unsupported.",
+          "mapping_mode": "standard",
+          "poll_interval_sec": 3.0,
+          "requested": true
+        },
+        "elapsed_ms": 13751,
+        "input": {
+          "mask": {
+            "encoded_bytes": 0,
+            "present": false
+          },
+          "prompt": {
+            "characters": 127,
+            "sha256": "0e06df2e0f36f245c75558810288ab37b71d8dde3d70fab147a4ac87f38a78c6",
+            "type": "input_text"
+          },
+          "roles": []
+        },
+        "ok": true,
+        "operation": "generate",
+        "output": {
+          "count": 1,
+          "images": [
+            {
+              "bytes": 1107262,
+              "format": "PNG",
+              "height": 1024,
+              "mime_type": null,
+              "width": 1536
+            }
+          ],
+          "revised_prompt_present": false
+        },
+        "protocol_selection_basis": "explicit provider protocol 'images'",
+        "provider": {
+          "api_key_configured": true,
+          "api_protocol": "images",
+          "async_edit_endpoint": "",
+          "async_generate_endpoint": "",
+          "async_mapping": {
+            "configured": false,
+            "keys": []
+          },
+          "async_poll_endpoint_template": "",
+          "auth_mode": "api_key",
+          "base_url": "http://127.0.0.1:8317/v1",
+          "edit_endpoint": "",
+          "generate_endpoint": "",
+          "model": "gpt-image-2.6-flare",
+          "use_async": true,
+          "use_custom_endpoints": false
+        },
+        "requested_protocol": "images",
+        "requests": [
+          {
+            "attempts": 1,
+            "endpoint": "http://127.0.0.1:8317/v1/images/generations/async",
+            "http_status": 404,
+            "outcome": "unsupported",
+            "phase": "async_submit",
+            "request_id": null
+          },
+          {
+            "attempts": 1,
+            "elapsed_ms": 13743,
+            "endpoint": "http://127.0.0.1:8317/v1/images/generations",
+            "http_status": 200,
+            "phase": "sync_fallback",
+            "request_id": null
+          }
+        ],
+        "selected_protocol": "images"
+      },
+      "images": [
+        {
+          "filename": "generic_async_fallback_00001_.png",
+          "format": "PNG",
+          "mode": "RGB",
+          "dimensions": [
+            1536,
+            1024
+          ],
+          "bytes": 885235,
+          "sha256": "3168b16647a9947dfb915fcdbdcbafaff8587ccfec5a4d9a4d422e359ffbf6a0",
+          "alpha_extrema": null
+        }
+      ],
+      "checks": {
+        "count_matches_n": true,
+        "output_decodes": true,
+        "key_absent": true
+      },
+      "build": "main 2340796",
+      "feature_checks": {
+        "upstream_format_matches_request": true
+      }
+    },
+    {
+      "case": "postfix_moderation_low",
+      "options": {
+        "moderation": "low",
+        "quality": "low"
+      },
+      "prompt_id": "64dcb51a-b3a3-4983-a40f-fd2ba483891c",
+      "plugin_commit": "2340796",
+      "queue_status": "success",
+      "elapsed_seconds": 15.03,
+      "history_key_absent": true,
+      "request_report": {
+        "async": {
+          "attempted": false,
+          "effective_mode": "sync",
+          "requested": false,
+          "skipped_reason": "Disabled by the API Provider switch."
+        },
+        "elapsed_ms": 14549,
+        "input": {
+          "mask": {
+            "encoded_bytes": 0,
+            "present": false
+          },
+          "prompt": {
+            "characters": 127,
+            "sha256": "0e06df2e0f36f245c75558810288ab37b71d8dde3d70fab147a4ac87f38a78c6",
+            "type": "input_text"
+          },
+          "roles": []
+        },
+        "ok": true,
+        "operation": "generate",
+        "output": {
+          "count": 1,
+          "images": [
+            {
+              "bytes": 1190107,
+              "format": "PNG",
+              "height": 1024,
+              "mime_type": null,
+              "width": 1536
+            }
+          ],
+          "revised_prompt_present": false
+        },
+        "protocol_notes": {
+          "n_transport": "one synchronous Images API request per requested output"
+        },
+        "protocol_selection_basis": "auto: plain text-to-image uses /images/generations",
+        "provider": {
+          "api_key_configured": true,
+          "api_protocol": "auto",
+          "async_edit_endpoint": "",
+          "async_generate_endpoint": "",
+          "async_mapping": {
+            "configured": false,
+            "keys": []
+          },
+          "async_poll_endpoint_template": "",
+          "auth_mode": "api_key",
+          "base_url": "http://127.0.0.1:8317/v1",
+          "edit_endpoint": "",
+          "generate_endpoint": "",
+          "model": "gpt-image-2.6-flare",
+          "reference_generate_mode": "images_edit",
+          "use_async": false,
+          "use_custom_endpoints": false
+        },
+        "requested_protocol": "auto",
+        "requests": [
+          {
+            "attempts": 1,
+            "elapsed_ms": 14544,
+            "endpoint": "http://127.0.0.1:8317/v1/images/generations",
+            "http_status": 200,
+            "index": 1,
+            "phase": "sync",
+            "request_id": null
+          }
+        ],
+        "selected_protocol": "images"
+      },
+      "images": [
+        {
+          "filename": "postfix_moderation_low_00001_.png",
+          "format": "PNG",
+          "mode": "RGB",
+          "dimensions": [
+            1536,
+            1024
+          ],
+          "bytes": 960935,
+          "sha256": "8f8512a75cbc2145981db234a2dff4d8d717a7ced489bce15cf0254607301ae6",
+          "alpha_extrema": null
+        }
+      ],
+      "checks": {
+        "count_matches_n": true,
+        "output_decodes": true,
+        "key_absent": true
+      },
+      "build": "main 2340796 + moderation fix",
+      "feature_checks": {
+        "upstream_format_matches_request": true
+      }
+    }
+  ]
+}

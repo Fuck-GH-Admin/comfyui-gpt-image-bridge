@@ -80,6 +80,9 @@ export function migrateProviderWidgetValues(values) {
 }
 
 export function migrateLegacyWorkflowData(data) {
+    if (data?.type === "GPTImageBridgeCLIProxyAPIProvider") {
+        return data;
+    }
     const values = data?.widgets_values;
     const migrated = migrateProviderWidgetValues(values);
     if (migrated === values) {

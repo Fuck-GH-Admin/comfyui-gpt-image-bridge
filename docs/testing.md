@@ -2,28 +2,32 @@
 
 本项目严格区分**源码核对**、**单元测试**、**真实 ComfyUI 后端测试**、**CLIProxyAPI 实际进程测试**和**Codex 上游真实图片生成**。前面的测试通过不能代替后面的验收。
 
-**真实账号实机证据**：[2026-11-06 本地验收报告](local-acceptance-2026-11-06.md)和[脱敏证据 JSON](evidence/local-acceptance-2026-11-06.json)。旧型号 `gpt-image-2` 的纯文 Generate、基础 Edit、带参考图 Edit 和浏览器控件已通过；当时 Responses 参考图 Generate 失败，不能记为 PASS。**新版 2.6 两个型号及默认 Images Edit 参考图生成尚未通过真实账户验收。**
+**最新完整证据**：[Main 0.7.0 全功能验收报告](main-acceptance-2026-11-06.md)及[脱敏证据 JSON](evidence/main-acceptance-2026-11-06.json)。此前 PR #2 的 `gpt-image-2` 旧型号报告仍保留作历史记录；2.6 新型号和新默认参考图模式的后续实测以 Main 0.7.0 报告为准。
 
-## 1. 当前验收矩阵（2026-11-06）
+**更新：** [Main 0.7.0 全功能验收](main-acceptance-2026-11-06.md)已完成两个 2.6 型号及默认参考图模式的真实测试，并记录尺寸、格式、透明度和 Responses 等失败项。补测为 291 passed、1 xfailed、JS 14 passed，另有 19 项 HTTP 替身检查。下表给出当前证据状态；不能将“请求成功”理解为全部参数生效。
+
+## 1. 当前验收矩阵（截至 2026-11-06，Main 0.7.0）
 
 | 层次 | 验证方法 | 当前结论 |
 | --- | --- | --- |
-| 源码与协议 | 代码审查 | 已有 CLIProxyAPI Provider、Images/Responses 适配和凭据守卫 |
-| Python 单元测试 | GitHub Actions pytest | **235 PASS（当前新版分支测试记录）** |
-| JavaScript 单元测试 | Node.js Test Runner | **13 PASS（当前新版分支测试记录）** |
-| 实际 ComfyUI 后端 | Ubuntu + CPU，真正安装 ComfyUI 0.44.0 | **PASS** |
-| ComfyUI 节点注册与任务执行 | HTTP `/object_info`、`/prompt`、`/history` | **PASS** |
-| 生成/参考图/编辑请求 | 本机假 CLIProxyAPI HTTP 服务器 | **PASS（协议替身）** |
-| Save Image 文件 | 检查真正写出的五张 32×24 PNG 及元数据 | **PASS** |
-| CLIProxyAPI 真实进程 | 当前 CI 未启动此进程 | **NOT_RUN** |
-| 真实 Codex OAuth、账户额度 | CI 不导入个人凭据 | **CI NOT_RUN；已有 PR #2 的用户实机登录证据** |
-| 上游真实生图、编辑 | 用户 PR #2 验证旧模型 `gpt-image-2` 的纯文 Generate 和 Edit；**2.6 两个变体未验证** | **旧模型实机 PASS；2.6 NOT_RUN** |
-| 浏览器中的密码控件人工点击 | CI 只运行后端与前端逻辑单元测试 | **NOT_RUN** |
-| Windows、macOS、Docker 长期运行 | Linux CI 无法覆盖 | **NOT_RUN** |
+| Python 单元测试 | PR #4 精确 HEAD 的 GitHub Actions | **291 passed，1 xfailed**；XFAIL 是透明输出 Alpha 丢失，不计作通过 |
+| JavaScript 单元测试 | PR #4 精确 HEAD 的 GitHub Actions | **14/14 PASS** |
+| 真实 ComfyUI 后端 | Ubuntu Runner 启动 ComfyUI 0.44.0，HTTP/队列执行 | **PASS**；远端图片 API 是模拟服务，不是真实 CLIProxyAPI |
+| 本机 HTTP 协议矩阵 | 19/19 场景，另有凭据路由 2/2 | **PASS**；使用 HTTP 替身 |
+| 浏览器控件与工作流重载 | 本机真实浏览器，DOM/图对象检查 | **17/17 PASS**；这是人工本机验收，不是 GitHub CI |
+| CLIProxyAPI 8.0.57 + Codex OAuth | 用户本机真实进程和账户 | 已实测；结论仅适用于本次环境与账户 |
+| GPT Image 2.6 Flare / Sunburst | 用户本机真实请求 | 两个型号均完成真实生成 |
+| 默认参考图生成 | 两张参考图，Images Edit 路径，空 Responses 主模型 | 真实请求成功 |
+| Mask、16 张 Generate 参考图、Edit 基础图+15张参考图 | 用户本机真实工作流 | 已执行成功；不等于复杂身份一致性或蒙版外逐像素保证 |
+| 自定义/2K/4K 尺寸、JPEG/WebP | 用户本机真实服务 | **未达标**；多个请求仍返回 PNG 1536×1024，详见实机报告 |
+| 透明输出 | RGBA 边界测试及真实透明请求 | **未达标**；当前 IMAGE 转换丢失 Alpha，严格 XFAIL 保留 |
+| Responses 参考图 | 用户本机真实请求 | **失败**；代理访问 `chatgpt.com` DNS 解析失败 |
+| Chat Completions 图片路由 | 用户本机真实请求 | **失败**；当前 CLIProxyAPI 图片型号拒绝该路由 |
+| Windows/macOS、Docker 组合及长期并发 | 本轮环境未覆盖 | **NOT_RUN** |
 
-**证据链接**：[新版 Python + JavaScript CI](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42208174584)；[新版真实 ComfyUI 运行 CI](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42208174647)。
+最终组合 CI 记录：[Python + JavaScript（291 passed、1 xfailed）](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42215450895)；[真实 ComfyUI 后端集成（远端为模拟服务）](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42215450854)。
 
-真实 ComfyUI 固定基线：`Comfy-Org/ComfyUI@63e5bf594339f676b4b15e072529873e3448409e`，运行报告版本 `0.44.0`，Ubuntu Runner、Python 3.11、CPU PyTorch，不需要 GPU 也没有本地模型权重。
+本轮真实服务工作流为 16 次：14 次队列执行成功、2 次失败。**队列成功不代表每个请求参数都生效**；尺寸、格式、透明度的未达标项必须继续按失败处理。HTTP/浏览器替身测试也不能替代真实上游能力验收。
 
 ## 2. 自动化测试如何运行
 
@@ -78,11 +82,7 @@ python tests/integration/comfyui_server_smoke.py /abs/path/to/ComfyUI
 
 ### 更新版额外验证
 
-- [ ] `gpt-image-2.6-flare` 的 `n=1` 图片生成：PASS / FAIL / NOT_RUN
-- [ ] `gpt-image-2.6-sunburst` 的 `n=1` 图片生成：PASS / FAIL / NOT_RUN
-- [ ] 有参考图 Generate 默认 `reference_mode=images_edit`，确认真实代理以 Images Edit 生成新图：PASS / FAIL / NOT_RUN
-- [ ] 仅在需要时选 `reference_mode=responses` 并输入实际可用的文本主模型（PR #2 记录过 model_not_found/DNS 问题，不能假设成功）
-- [ ] `quality=xhigh/max`、`size=Custom`、`image_complexity=low/medium/high`：按真实账户和模型逐项验证，避免连续消耗额度
+已完成的实机项目与未通过项不再留作待办勾选，统一以 [Main 0.7.0 全功能验收报告](main-acceptance-2026-11-06.md) 为准：Flare/Sunburst 真实生成、默认 Images Edit 参考图、Mask 和 16 输入场景均有实测；Custom/2K/4K 尺寸、JPEG/WebP、透明 Alpha、Responses DNS 与 Chat Completions 限制仍未达标。若更换账户、代理版本或部署方式，应重新执行相应单项测试。
 
 ## 4. 本机真实生图验收顺序
 
@@ -151,4 +151,4 @@ Remaining problems:
 - 最小 Edit、参考图 Generate 取得实证，或明确记录服务端实际不支持的路径。
 - 用户侧 UI 的密码控件、分享工作流脱敏流程可用。
 
-**旧型号 `gpt-image-2` 已有真实生图成功证据**；但 2.6 Flare/Sunburst、高画质/自定义尺寸和新默认参考图模式还需要实机验证。不要把 CI 生成的模拟 PNG 冒充新的 Codex 实机结果。
+**当前实机证据**：`gpt-image-2`、2.6 Flare/Sunburst 的纯文生成及默认 Images Edit 参考图模式均有真实成功记录。仍未达标的是自定义/2K/4K 尺寸、JPEG/WebP 和透明 Alpha；Responses 与 Chat 路由存在已记录的外部限制。不要把 CI 生成的模拟 PNG 冒充真实 Codex 实机结果。

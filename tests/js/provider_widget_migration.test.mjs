@@ -66,12 +66,22 @@ test("keeps the current layout and unknown future layouts unchanged", () => {
 test("migrates a workflow copy without mutating its input", () => {
     const input = {
         id: 7,
+        type: "GPTImageBridgeAPIProvider",
         widgets_values: ["", "", "", "auto", "", ""],
     };
     const migrated = migrateLegacyWorkflowData(input);
     assert.notEqual(migrated, input);
     assert.equal(input.widgets_values.length, 6);
     assert.equal(migrated.widgets_values.length, PROVIDER_WIDGET_COUNT);
+});
+
+test("preserves the six-widget CLIProxyAPI provider on workflow reload", () => {
+    const input = {
+        type: "GPTImageBridgeCLIProxyAPIProvider",
+        widgets_values: ["", "http://127.0.0.1:8317/v1", "gpt-image-2.6-flare", "", "images_edit", "auto"],
+    };
+    assert.equal(migrateLegacyWorkflowData(input), input);
+    assert.deepEqual(input.widgets_values.slice(4), ["images_edit", "auto"]);
 });
 
 test("clamps a stale sidebar width only on the main graph canvas", () => {

@@ -2,6 +2,8 @@
 
 更新时间：2026-11-06。本文对 **OpenAI 正式公告**、**CLIProxyAPI v8.0.57 的源代码实现**以及**本仓库测试证据**分层说明，避免把任意代理别名写成官方模型。
 
+**本机更新验收：** [Main 0.7.0 报告](main-acceptance-2026-11-06.md)已对两个 2.6 型号完成真实生成与默认参考图请求；尺寸、格式和透明度存在未达标项，Responses 路径仍被网络阻塞。本文早先的“待验证”状态须结合该报告阅读。
+
 ## 1. OpenAI 官方确认的最新图片模型
 
 OpenAI 于 **2026-11-04** 正式发布 **GPT Image 2.6** 两个变体：
@@ -28,7 +30,7 @@ Provider 的 `image_model` 仍是普通字符串输入。不会通过本插件�
 
 OpenAI 的 Images API 文档也列出 `gpt-image-2`、`gpt-image-2-2026-04-21`、`gpt-image-2.5-flare`、`gpt-image-2.5-sunburst` 及它们的部分快照等旧型号。
 
-你的历史实机报告只验证过 `gpt-image-2`：纯文生图、单图 Edit、带参考图 Edit 通过。更新默认值**不会自动证明** 2.6 Flare/Sunburst 已在你账号上开放。建议两者分别进行一次 `n=1` 的短提示词生图验证；若代理或账户不支持，可在 Provider 将型号改回已经通过的 `gpt-image-2`。
+此前 PR #2 的历史报告只验证过 `gpt-image-2`。后续 [Main 0.7.0 实机报告](main-acceptance-2026-11-06.md)已在本次 CLIProxyAPI 8.0.57 + Codex OAuth 环境中分别验证 Flare、Sunburst 真实生成，并验证默认 Images Edit 参考图生成。**这证明当前测试账户和链路可用，不代表其他账户、代理版本或区域都已开放。** 若其他环境不支持，可改回已验证的 `gpt-image-2`，并重新记录结果。
 
 特别注意：OpenAI 正式 API 的模型目录，与 Codex **订阅型授权**、CLIProxyAPI 的实际 OAuth 路由不是一个保证；官方支持不代表订阅永远包含全部模型。
 
@@ -64,7 +66,7 @@ OpenAI 文档将 `complexity` 描述为图片生成前的规划计算强度，�
 
 在 Images Generate 中为 JSON 字段，在 Images Edit 中为 multipart 字段；选择可选 Responses 模式时进入图片工具参数。当前源码对这三个合法值做了校验。
 
-**不要在老型号上盲目开启**：不同模型/代理版本可能拒绝未知字段。2.6 官方指南称未设置时其默认规划复杂度为 `high`；这里 UI 的 `auto` 表示“不指定”，并不保证低延迟或低额度消耗。
+**不要在老型号上盲目开启**：不同模型/代理版本可能拒绝未知字段。2.6 官方指南称未设置时其默认规划复杂度为 `high`；这里 UI 的 `auto` 表示“不指定”，并不保证低延迟或低额度消耗。Main 0.7.0 实机工作流使用过 low/medium/high，但没有进行隔离变量的 A/B 对照，因此不能据此量化复杂度对效果、延迟或费用的影响。
 
 ## 5. 从官方 ComfyUI 节点补齐的高级控制
 
@@ -84,7 +86,7 @@ OpenAI 官方还介绍了 2.6 的 SVG 输出、GIF 动画和 markup-guided editi
 - `output_format` 仅支持 `png`、`jpeg`、`webp`。
 - ComfyUI 的 `IMAGE` 输出是图片张量，不能未经处理就把 SVG 源文件或完整 GIF 动画当成同一张 `IMAGE` 返回。
 - 未暴露 GIF 帧数/帧间隔、markup-guided edit 相关输入语法，也没有实测它们在 CLIProxyAPI 的订阅路由下的支持情况。
-- 新增的 `complexity` 目前有 Mock 请求形态测试，真实 2.6 的上游结果仍需本人账号测试。
+- `complexity` 的合法值有请求形态测试，Main 0.7.0 实机工作流也使用过 low/medium/high；但没有隔离变量的 A/B 对照，不能据此断言复杂度对质量、延迟或费用的实际影响。
 
 这些限制不是 OpenAI 2.6 不支持，而是**本插件还没有实现或验证完整的新媒体输出通道**。不要把「可选择 2.6 生图模型」写成「2.6 全部能力都已支持」。
 
@@ -109,5 +111,5 @@ OpenAI 官方还介绍了 2.6 的 SVG 输出、GIF 动画和 markup-guided editi
 | CLIProxyAPI v8.0.57 识别两个型号及 Images 端点 | 指定发布标签源码 |
 | ComfyUI 可通过插件传递 2.6 型号及 complexity | 本 fork 请求形态单元测试（Mock HTTP） |
 | 参考图默认 Images Edit，Responses 可手动选择 | 本 fork 源码、单元和真实 ComfyUI + 假代理集成测试 |
-| 2.6 在用户真实 Codex 订阅账户上的生图权限与可靠性 | **尚需实机验收** |
+| 2.6 Flare / Sunburst 在本次真实账户的生图与默认参考图链路 | **已实机通过**；自定义尺寸/格式、透明输出仍未达标，Responses 另受 DNS 阻塞；其他账户需自行验证 |
 | SVG、GIF、markup-guided 编辑在当前 ComfyUI 节点可用 | **未实现/未验证** |

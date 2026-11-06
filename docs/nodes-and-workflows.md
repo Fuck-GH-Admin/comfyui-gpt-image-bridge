@@ -45,7 +45,7 @@
 
 **参考图引导的 Images Edit 并非真正无参考图的 Generations。** 模型可能保留原有构图；此差异不会被隐藏。初次验收建议默认 Images 路线，`n=1`，`image_complexity=auto`。
 
-OpenAI 官方 2026-11-04 发布了 Flare / Sunburst；CLIProxyAPI v8.0.57 代码识别这两个 ID，但订阅账号的访问权限需要自行实测。详见[模型兼容说明](model-support.md)。
+OpenAI 官方 2026-11-04 发布了 Flare / Sunburst；CLIProxyAPI v8.0.57 代码识别这两个 ID。本仓库的 Main 0.7.0 报告已在一套真实账户上验证两者生成；其他订阅账号仍需自行实测。详见[模型兼容说明](model-support.md)。
 
 ## 3. Generate 参数表
 
