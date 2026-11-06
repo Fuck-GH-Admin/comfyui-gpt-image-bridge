@@ -214,6 +214,38 @@ def test_comfyui_registration_and_provider_responsibilities_are_separate():
     assert "references" not in generate_types["optional"]
 
 
+def test_contextual_frontend_is_packaged_and_preserves_backend_schemas():
+    extension = PROJECT / "gpt_image_bridge" / "web" / "node_presentation_extension.js"
+    policy = PROJECT / "gpt_image_bridge" / "web" / "node_presentation.js"
+    assert extension.is_file()
+    assert policy.is_file()
+
+    frontend = extension.read_text(encoding="utf-8")
+    implementation = policy.read_text(encoding="utf-8")
+    assert "GPTImageBridge.ContextualNodeControls" in frontend
+    assert "onWidgetChanged" in frontend
+    assert "afterConfigureGraph()" in frontend
+    assert "widget.serialize = false" in implementation
+    assert "widget.options.serialize = false" in implementation
+    assert "widget.hidden = hidden" in implementation
+    assert "widget.options.hidden = hidden" in implementation
+
+    module = import_comfy_package()
+    generated = module.NODE_CLASS_MAPPINGS["GPTImageBridgeGenerate"].INPUT_TYPES()
+    edited = module.NODE_CLASS_MAPPINGS["GPTImageBridgeEdit"].INPUT_TYPES()
+    assert list(generated["required"]) == [
+        "provider", "prompt", "size", "quality", "background",
+        "output_format", "moderation", "n", "timeout_sec",
+    ]
+    assert list(edited["required"]) == [
+        "provider", "base_image（Image 1）", "prompt", "size",
+        "quality", "background", "output_format", "moderation", "n",
+        "timeout_sec",
+    ]
+    assert list(generated["optional"])[-2:] == ["custom_width", "custom_height"]
+    assert list(edited["optional"])[-2:] == ["custom_width", "custom_height"]
+
+
 def test_api_provider_frontend_migrates_legacy_widgets_before_configuration():
     widget_source = (
         PROJECT / "gpt_image_bridge" / "web" / "api_key_widget.js"
