@@ -2,6 +2,8 @@
 
 本项目严格区分**源码核对**、**单元测试**、**真实 ComfyUI 后端测试**、**CLIProxyAPI 实际进程测试**和**Codex 上游真实图片生成**。前面的测试通过不能代替后面的验收。
 
+**真实账号实机证据**：[2026-11-06 本地验收报告](local-acceptance-2026-11-06.md)和[脱敏证据 JSON](evidence/local-acceptance-2026-11-06.json)。旧型号 `gpt-image-2` 的纯文 Generate、基础 Edit、带参考图 Edit 和浏览器控件已通过；当时 Responses 参考图 Generate 失败，不能记为 PASS。**新版 2.6 两个型号及默认 Images Edit 参考图生成尚未通过真实账户验收。**
+
 ## 1. 当前验收矩阵（2026-11-06）
 
 | 层次 | 验证方法 | 当前结论 |
@@ -104,7 +106,7 @@ python tests/integration/comfyui_server_smoke.py /abs/path/to/ComfyUI
 ### C. 编辑和参考图（可能消耗额度）
 
 - [ ] Edit：只连接一张基础图，先不接 Mask/参考图，成功后再追加。
-- [ ] Generate 参考图：从 `reference_1` 接一张图片，确认 Responses 端点真实可用。
+- [ ] Generate 参考图：从 `reference_1` 接一张图片，先验证默认 `images_edit`，必要时才单独切换 `responses` 并验证模型工具权限。
 - [ ] Edit + Reference List：再接至少一张独立参考图并检查顺序。
 - [ ] 需要时才测试 Mask、多种格式、多参考图、`n>1`、更高并发和失败恢复。
 
@@ -141,7 +143,7 @@ Remaining problems:
 
 不要上传 `auth.json`、带凭据的 `config.yaml`、原始 Bearer Header、工作流中尚未删除的 API Key 或包含敏感查询参数的 URL。
 
-## 6. 合并前建议的最低验收条件
+## 6. 宣称全部远端功能可用前的验收条件
 
 - 单元 CI 和真实 ComfyUI 后端 CI 通过（**已经有证据**）。
 - 本机**真实 CLIProxyAPI 进程**可启动并通过客户端 Key 鉴权。
@@ -149,4 +151,4 @@ Remaining problems:
 - 最小 Edit、参考图 Generate 取得实证，或明确记录服务端实际不支持的路径。
 - 用户侧 UI 的密码控件、分享工作流脱敏流程可用。
 
-当前并未达到全部条件。不要把 GitHub CI 中生成的固定蓝色 PNG 冒充实际 Codex 生图。
+**旧型号 `gpt-image-2` 已有真实生图成功证据**；但 2.6 Flare/Sunburst、高画质/自定义尺寸和新默认参考图模式还需要实机验证。不要把 CI 生成的模拟 PNG 冒充新的 Codex 实机结果。

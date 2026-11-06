@@ -15,6 +15,7 @@
 | [凭据与安全](security.md) | 部署/分享工作流 | 授权边界、一次性队列句柄、本地工作流明文、网络暴露、错误脱敏 |
 | [故障排查](troubleshooting.md) | 遇到失败时 | 按错误类别定位登录、网络、模型、图片编辑、前端、额度 |
 | [测试与验收](testing.md) | 实机验收/开发 | 真实 ComfyUI CI 证据、自动化测试、手工验收、限制与结果记录 |
+| [2026-11-06 本地实机报告](local-acceptance-2026-11-06.md) | 验收证据 | 真实 `gpt-image-2` 的成功案例、失败记录、脱敏 JSON 和图片 |
 
 ## 示例工作流
 
@@ -23,8 +24,8 @@
 
 ## 目前有哪些证据？
 
-- **已通过**：Python + JavaScript 测试；Ubuntu GitHub Runner 上真正启动 ComfyUI 0.44.0，注册插件节点，通过 `/prompt` 执行三种工作流、检查生成的 PNG 与队列/历史脱敏。
-- **未通过真实验收**：CLIProxyAPI 的真实进程 + Codex OAuth 授权 + 上游真实图片生成；测试中的代理是实现相同 HTTP 返回格式的本机替身。两者不可混为一谈。
+- **自动验证通过**：Python + JavaScript 测试；Ubuntu GitHub Runner 上真正启动 ComfyUI 0.44.0，执行纯文 Generate、Images Edit 参考图 Generate、可选 Responses 和 Edit，检查 PNG 与队列/历史脱敏；远端为模拟 HTTP 服务。
+- **真实账号已部分验证**：[2026-11-06 本地实机报告](local-acceptance-2026-11-06.md)记录 `gpt-image-2` 纯文生图和两类编辑成功；原 Responses 参考图生成未通过。**2.6 Flare/Sunburst 和新的默认参考图生成尚无真实账号成功证据**。
 - **未声称覆盖**：Windows/macOS 图形界面、Docker 组合、所有第三方兼容 API、长时间持续运行、上游额度/计费及内容审核行为。
 - **原生 Codex OAuth**：保留旧节点以兼容旧工作流，但新部署优先使用专用 CLIProxyAPI Provider。
 
