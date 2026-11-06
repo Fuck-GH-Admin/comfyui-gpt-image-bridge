@@ -31,7 +31,7 @@
 | `image_model` | `gpt-image-2.6-flare` | 图片型号；可选 `gpt-image-2.6-sunburst` 或实际授权的旧型号 |
 | `responses_model` | 空 | 仅在 `reference_mode=responses` 时需要文本主模型 |
 | `reference_mode` | `images_edit` | 参考图默认经 Images Edit 生成新图，或手动选择 `responses` |
-| `image_complexity` | `auto` | 2.6 规划复杂度；`low`、`medium`、`high` 可选 |
+| `image_complexity` | `auto` | 保留 `low/medium/high` 选项用于兼容；CLIProxyAPI v8.0.57 默认 Images 路径会丢弃该字段，当前请保持 `auto` |
 
 新增 `reference_mode` 和 `image_complexity` 是可选字段。旧 Provider 的四个必需输入保持原名，旧的 Generate/Edit 节点 ID 均不变。通用 API Provider / 旧 Codex OAuth Provider 的原有自动选路没有改动。
 
@@ -58,7 +58,7 @@ OpenAI 官方 2026-11-04 发布了 Flare / Sunburst；CLIProxyAPI v8.0.57 代码
 | `custom_width`、`custom_height` | 可选整数，默认 1024×1024 | 仅 `size=Custom` 时有效：480–3840、16 的倍数、比例 ≤3:1、像素 655,360–8,294,400 |
 | `quality` | `auto`、`low`、`medium`、`high`、`xhigh`、`max` | 2.5/2.6 可用更高质量档位，旧型号可能拒绝 |
 | `background` | `auto`、`opaque`、`transparent` | 透明图建议配 PNG/WebP；不保证上游兑现 |
-| `output_format` | `png`、`jpeg`、`webp` | 这是上游 API 响应编码请求，不是本地文件保存格式；解码成 `IMAGE` 后原始编码不保留，默认 Save Image 仍保存 PNG |
+| `output_format` | `png`、`jpeg`、`webp` | 这是上游 API 响应编码请求，不是本地文件保存格式；ComfyUI 原生 Save Image 仍保存 PNG，本插件新增 Save Image 可重新编码为 PNG/JPEG/WebP |
 | `moderation` | `auto`、`low` | 服务端可能忽略或拒绝 |
 | `n` | 整数 1–8 | 需要多少张输出。**CLIProxyAPI 专用模式每张对应一次独立上游请求** |
 | `timeout_sec` | 整数 30–3600 | 超过后本地等待结束，未必代表上游操作已取消 |
