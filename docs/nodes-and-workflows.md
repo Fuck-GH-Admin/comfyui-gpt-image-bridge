@@ -20,7 +20,7 @@
 
 - `image`：真实 `IMAGE` 张量，可连 Save Image、放大、裁剪等后处理。实际转换为 ComfyUI 图像 batch；当 `n>1` 时，输出多张。
 - `revised_prompt`：上游若返回修订后的提示词则提供文本，否则为空串；**不要假定一定有值**。
-- `request_report`：字符串形式的脱敏 JSON，包括协议选择依据、请求次数、端点、响应状态与耗时等。它不是图片，也不是上游原始响应；见 [诊断与安全](security.md)。
+- `request_report`：字符串形式的脱敏 JSON，包括协议选择依据、请求次数、端点、响应状态与耗时等；`output.conformance` 会将请求尺寸/格式/透明背景与解码后的实际图片逐项比对，发现上游未兑现时给出 warning。被协议忽略或无法比较的字段不会被误报为 pass。它不是图片，也不是上游原始响应；见 [诊断与安全](security.md)。
 
 ## 2. CLIProxyAPI Provider 配置
 
@@ -173,5 +173,7 @@ ComfyUI Generate (n=4)
 若已配置其他 ComfyUI 本地后处理节点（例如自定义放大器），是否需要 GPU/ROCm 取决于那些节点，**不由本插件决定**。
 
 本插件保存节点的详细编码行为见[本地图片导出](local-image-export.md)。
+
+请求参数与真实响应的核验规则见[输出参数兑现核验](output-conformance.md)。
 
 继续：[故障排查](troubleshooting.md) · [协议与实现](protocol-reference.md) · [安全与凭据](security.md)。
