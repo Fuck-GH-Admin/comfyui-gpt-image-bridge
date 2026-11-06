@@ -10,6 +10,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: comfyui-image-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   comfyui-cpu-smoke:
     name: Real ComfyUI server (CPU) + fake CLIProxyAPI
