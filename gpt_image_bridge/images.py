@@ -184,20 +184,42 @@ def b64_image_to_bytes(value: str) -> tuple[bytes, dict[str, Any]]:
 
 
 def image_bytes_to_tensor(payloads: list[bytes]):
+    """Decode image bytes into a ComfyUI IMAGE batch without discarding alpha.
+
+    RGB frames remain three-channel when every result is opaque. If any result
+    carries alpha (including palette transparency), the whole batch is promoted
+    to RGBA and RGB frames receive fully opaque alpha so torch can stack them.
+    """
     import torch
 
-    frames = []
+    arrays = []
     dimensions = set()
+    has_alpha = False
     for payload in payloads:
         with Image.open(io.BytesIO(payload)) as image:
-            rgb = image.convert("RGB")
-            dimensions.add(rgb.size)
-            array = np.asarray(rgb).astype(np.float32) / 255.0
-        frames.append(torch.from_numpy(array)[None,])
-    if not frames:
+            carries_alpha = "A" in image.getbands() or "transparency" in image.info
+            decoded = image.convert("RGBA" if carries_alpha else "RGB")
+            dimensions.add(decoded.size)
+            array = np.asarray(decoded).astype(np.float32) / 255.0
+        has_alpha = has_alpha or array.shape[-1] == 4
+        arrays.append(array)
+
+    if not arrays:
         raise ValueError("No output images were decoded.")
     if len(dimensions) != 1:
         raise ValueError(
             "Provider returned images with different dimensions; ComfyUI cannot form one IMAGE batch."
         )
-    return torch.cat(frames, dim=0)
+
+    if has_alpha:
+        opaque_alpha = None
+        normalized = []
+        for array in arrays:
+            if array.shape[-1] == 3:
+                if opaque_alpha is None or opaque_alpha.shape[:2] != array.shape[:2]:
+                    opaque_alpha = np.ones((*array.shape[:2], 1), dtype=np.float32)
+                array = np.concatenate((array, opaque_alpha), axis=-1)
+            normalized.append(array)
+        arrays = normalized
+
+    return torch.from_numpy(np.stack(arrays, axis=0))

@@ -4,14 +4,14 @@
 
 **最新完整证据**：[Main 0.7.0 全功能验收报告](main-acceptance-2026-11-06.md)及[脱敏证据 JSON](evidence/main-acceptance-2026-11-06.json)。此前 PR #2 的 `gpt-image-2` 旧型号报告仍保留作历史记录；2.6 新型号和新默认参考图模式的后续实测以 Main 0.7.0 报告为准。
 
-**更新：** [Main 0.7.0 全功能验收](main-acceptance-2026-11-06.md)已完成两个 2.6 型号及默认参考图模式的真实测试，并记录尺寸、格式、透明度和 Responses 等失败项。补测为 291 passed、1 xfailed、JS 14 passed，另有 19 项 HTTP 替身检查。下表给出当前证据状态；不能将“请求成功”理解为全部参数生效。
+**后续修复：** [Alpha 保留修复报告](alpha-preservation-2026-11-06.md)记录 PR #5 的 RGBA 解码修复和真实 ComfyUI SaveImage 集成验证。最新 CI 为 Python 294 passed、JS 14 passed，0 xfailed。注意：真实 Codex 透明背景请求仍返回 RGB；本次修复保证上游提供 Alpha 时不再由插件丢弃。尺寸和格式未达标项也仍需按失败处理。
 
 ## 1. 当前验收矩阵（截至 2026-11-06，Main 0.7.0）
 
 | 层次 | 验证方法 | 当前结论 |
 | --- | --- | --- |
-| Python 单元测试 | PR #4 精确 HEAD 的 GitHub Actions | **291 passed，1 xfailed**；XFAIL 是透明输出 Alpha 丢失，不计作通过 |
-| JavaScript 单元测试 | PR #4 精确 HEAD 的 GitHub Actions | **14/14 PASS** |
+| Python 单元测试 | PR #5 精确 HEAD 的 GitHub Actions | **294 passed，0 xfailed** |
+| JavaScript 单元测试 | PR #5 精确 HEAD 的 GitHub Actions | **14/14 PASS** |
 | 真实 ComfyUI 后端 | Ubuntu Runner 启动 ComfyUI 0.44.0，HTTP/队列执行 | **PASS**；远端图片 API 是模拟服务，不是真实 CLIProxyAPI |
 | 本机 HTTP 协议矩阵 | 19/19 场景，另有凭据路由 2/2 | **PASS**；使用 HTTP 替身 |
 | 浏览器控件与工作流重载 | 本机真实浏览器，DOM/图对象检查 | **17/17 PASS**；这是人工本机验收，不是 GitHub CI |
@@ -20,14 +20,14 @@
 | 默认参考图生成 | 两张参考图，Images Edit 路径，空 Responses 主模型 | 真实请求成功 |
 | Mask、16 张 Generate 参考图、Edit 基础图+15张参考图 | 用户本机真实工作流 | 已执行成功；不等于复杂身份一致性或蒙版外逐像素保证 |
 | 自定义/2K/4K 尺寸、JPEG/WebP | 用户本机真实服务 | **未达标**；多个请求仍返回 PNG 1536×1024，详见实机报告 |
-| 透明输出 | RGBA 边界测试及真实透明请求 | **未达标**；当前 IMAGE 转换丢失 Alpha，严格 XFAIL 保留 |
+| Alpha 解码与 ComfyUI 保存 | RGBA/调色板透明/混合批次单测 + 真实 ComfyUI SaveImage 集成 | **PASS**；上游返回 RGBA 时完整保留。真实 Codex `background=transparent` 请求仍返回 RGB，透明生成尚未 PASS |
 | Responses 参考图 | 用户本机真实请求 | **失败**；代理访问 `chatgpt.com` DNS 解析失败 |
 | Chat Completions 图片路由 | 用户本机真实请求 | **失败**；当前 CLIProxyAPI 图片型号拒绝该路由 |
 | Windows/macOS、Docker 组合及长期并发 | 本轮环境未覆盖 | **NOT_RUN** |
 
-最终组合 CI 记录：[Python + JavaScript（291 passed、1 xfailed）](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42215450895)；[真实 ComfyUI 后端集成（远端为模拟服务）](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42215450854)。
+当前代码 CI 记录：[Python + JavaScript（294 passed、0 xfailed）](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42220463919)；[真实 ComfyUI 0.44.0 RGBA/SaveImage 集成（远端图像 API 为模拟服务）](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42220463982)。旧 PR #4 结果保留作历史基线。
 
-本轮真实服务工作流为 16 次：14 次队列执行成功、2 次失败。**队列成功不代表每个请求参数都生效**；尺寸、格式、透明度的未达标项必须继续按失败处理。HTTP/浏览器替身测试也不能替代真实上游能力验收。
+本轮真实服务工作流为 16 次：14 次队列执行成功、2 次失败。**队列成功不代表每个请求参数都生效**；尺寸、格式和真实上游透明背景仍未达标。PR #5 的 RGBA 集成测试使用模拟上游，只验证本地解码与 ComfyUI 保存链路。
 
 ## 2. 自动化测试如何运行
 
@@ -82,7 +82,7 @@ python tests/integration/comfyui_server_smoke.py /abs/path/to/ComfyUI
 
 ### 更新版额外验证
 
-已完成的实机项目与未通过项不再留作待办勾选，统一以 [Main 0.7.0 全功能验收报告](main-acceptance-2026-11-06.md) 为准：Flare/Sunburst 真实生成、默认 Images Edit 参考图、Mask 和 16 输入场景均有实测；Custom/2K/4K 尺寸、JPEG/WebP、透明 Alpha、Responses DNS 与 Chat Completions 限制仍未达标。若更换账户、代理版本或部署方式，应重新执行相应单项测试。
+已完成的实机项目与未通过项以 [Main 0.7.0 全功能验收报告](main-acceptance-2026-11-06.md) 和 [Alpha 保留修复报告](alpha-preservation-2026-11-06.md) 合并阅读：Flare/Sunburst 真实生成、默认 Images Edit 参考图、Mask 和 16 输入场景均有实测；插件侧 RGBA 解码已修复，但真实透明背景仍返回 RGB；Custom/2K/4K 尺寸、JPEG/WebP、Responses DNS 与 Chat Completions 限制仍未达标。若更换账户、代理版本或部署方式，应重新执行相应单项测试。
 
 ## 4. 本机真实生图验收顺序
 
@@ -151,4 +151,4 @@ Remaining problems:
 - 最小 Edit、参考图 Generate 取得实证，或明确记录服务端实际不支持的路径。
 - 用户侧 UI 的密码控件、分享工作流脱敏流程可用。
 
-**当前实机证据**：`gpt-image-2`、2.6 Flare/Sunburst 的纯文生成及默认 Images Edit 参考图模式均有真实成功记录。仍未达标的是自定义/2K/4K 尺寸、JPEG/WebP 和透明 Alpha；Responses 与 Chat 路由存在已记录的外部限制。不要把 CI 生成的模拟 PNG 冒充真实 Codex 实机结果。
+**当前实机证据**：`gpt-image-2`、2.6 Flare/Sunburst 的纯文生成及默认 Images Edit 参考图模式均有真实成功记录。插件已能保留 RGBA；但本轮真实 Codex 透明背景请求仍返回 RGB。自定义/2K/4K 尺寸、JPEG/WebP 和 Responses/Chat 路由仍存在已记录的限制。不要把 CI 生成的模拟 PNG 冒充真实 Codex 实机结果。

@@ -2,7 +2,7 @@
 
 基线为合并 PR #1/#2/#3 后的 `main@2340796`。三个旧分支 `docs/local-acceptance-20261106`、`feat/cliproxyapi-native-provider`、`feat/image26-images-first-reference-mode` 均确认已合并并删除。
 
-本轮为每个公开功能建立了验证条目，**不等于全部远端功能通过**。真实 2.6 Flare/Sunburst 和 Images 参考图已能生成图片；当前服务链路未兑现自定义/2K/4K 尺寸与 JPEG/WebP，透明输出也有节点层 Alpha 丢失问题。Responses 的网络和当前图片模型的 Chat Completions 限制仍存在。
+本报告记录的是 PR #5 之前的验收状态。真实 2.6 Flare/Sunburst 和 Images 参考图已能生成图片；当时观察到尺寸/格式未兑现，透明请求返回 RGB，插件解码也会丢弃 Alpha。**插件侧 Alpha 丢失已由后续 [PR #5](alpha-preservation-2026-11-06.md) 修复**，但真实 Codex 透明背景请求仍需上游返回 RGBA 才能标记通过。Responses 的网络和当前图片模型的 Chat Completions 限制仍存在。
 
 ## 环境和证据
 
