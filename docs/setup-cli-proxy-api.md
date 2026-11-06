@@ -8,7 +8,7 @@
 
 **仍需你本人验证**：本机 CLIProxyAPI 二进制是否能启动、Codex OAuth 是否登录成功、实际账号是否能生成图片、使用哪些模型，以及真实生成结果是否满足预期。
 
-当前新版 fork 代码在 `feat/image26-images-first-reference-mode`，没有合并到 `main`；从 Registry 安装原作者版本没有此 Provider。不要同时安装同一个包的两个副本，否则可能出现节点 ID 重复。
+当前 fork 的 `main` 已包含新版 Provider。Registry 若仍提供原作者版本，则没有这个 Provider。不要同时安装同一个包的两个副本，否则可能出现节点 ID 重复。
 
 ## 1. 环境要求
 
@@ -24,12 +24,12 @@
 
 ## 2. 安装本 fork 的 ComfyUI 插件
 
-**Ubuntu / Linux，务必检出开发分支**：
+**Ubuntu / Linux，使用主分支**：
 
 ```bash
 cd /path/to/ComfyUI/custom_nodes
 
-git clone --branch feat/image26-images-first-reference-mode --single-branch \
+git clone --branch main --single-branch \
   https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge.git \
   comfyui-gpt-image-bridge
 
@@ -166,11 +166,11 @@ Generate 初次建议：`prompt` 用一句简短提示词；`size=auto`、`quali
 
 ```bash
 git fetch origin
-git switch feat/image26-images-first-reference-mode
-git pull --ff-only origin feat/image26-images-first-reference-mode
+git switch main
+git pull --ff-only origin main
 ```
 
-更新后重启 ComfyUI。**不要直接 `git pull` 到主分支**：此 PR 还没有合并，`main` 尚无专用 Provider。
+更新后重启 ComfyUI。功能已集成在本 fork 的 `main`；不再要求切换旧 feature 分支。
 
 如果需要回滚，保存自己修改的工作流并记录当前版本 SHA 后，通过 Git checkout 指定旧提交恢复；同时保持 CLIProxyAPI 版本与所需模型路径一致。升级代理后如突然失败，应先检查代理的 Changes、`config.example.yaml` 和 [故障排查](troubleshooting.md)。
 
