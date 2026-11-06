@@ -1,6 +1,6 @@
 # GPT Image Bridge：文档目录
 
-本目录面向使用者、部署者、维护者，**所有操作以本 fork 的 `feat/image26-images-first-reference-mode` 分支为准**。目前 [PR #3](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/pull/3) 尚未合并到 `main`；ComfyUI Registry 仍提供原作者版本，**安装 Registry 版本不会得到 CLIProxyAPI Provider**。
+本目录面向使用者、部署者、维护者，**所有操作以本 fork 的 `main` 为准**，相关开发与验收记录保存在 [PR #1](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/pull/1)、[PR #2](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/pull/2)、[PR #3](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/pull/3)。ComfyUI Registry 如仍提供原作者版本，安装它不会得到本 fork 的 CLIProxyAPI Provider。
 
 ## 文档导航
 
