@@ -53,20 +53,20 @@ CLIProxyAPI 会将 `/v1/images/generations` 或 `/v1/images/edits` 映射到它�
 
 ## 4. 2.6 新参数：`complexity`
 
-OpenAI 文档将 `complexity` 描述为图片生成前的规划计算强度，独立于 `quality` 渲染质量。支持 `low`、`medium`、`high`。
+OpenAI 官方 Images API 将 `complexity` 定义为图片生成前的规划计算强度，独立于 `quality` 渲染质量，支持 `low`、`medium`、`high`。但**模型/API 支持不等于当前 Codex OAuth 中转路径支持**。
 
-此 fork 在 CLIProxyAPI Provider 新增：
+本仓库参考的 CLIProxyAPI **v8.0.57** 在 `internal/runtime/executor/codex_openai_images.go` 中构造 Codex `image_generation` 工具时：
 
-| `image_complexity` | 请求行为 |
-| --- | --- |
-| `auto`（默认） | **不发送** `complexity`，由服务端/模型采用默认值 |
-| `low` | 请求包含 `complexity=low` |
-| `medium` | 请求包含 `complexity=medium` |
-| `high` | 请求包含 `complexity=high` |
+- Generate 只转发 `size`、`quality`、`background`、`output_format`、`moderation` 等字段。
+- Edit 只转发上述字段及 `input_fidelity`。
+- multipart Edit 也使用相同的字符串字段白名单。
+- `complexity` 不在这些白名单内，因此该版本会在代理转换层丢弃它。
 
-在 Images Generate 中为 JSON 字段，在 Images Edit 中为 multipart 字段；选择可选 Responses 模式时进入图片工具参数。当前源码对这三个合法值做了校验。
+因此，当前 CLIProxyAPI 8.0.57 的默认 Images Generate / Images Edit 路径中，Provider 上的 `image_complexity=low/medium/high` **不会生效**。节点保留该控件是为了兼容未来加入透传能力的代理版本；使用当前基线请保持 `auto`。即使请求报告能证明插件把字段发给了 CLIProxyAPI，也不能证明代理继续转发或模型执行了它。
 
-**不要在老型号上盲目开启**：不同模型/代理版本可能拒绝未知字段。2.6 官方指南称未设置时其默认规划复杂度为 `high`；这里 UI 的 `auto` 表示“不指定”，并不保证低延迟或低额度消耗。Main 0.7.0 实机工作流使用过 low/medium/high，但没有进行隔离变量的 A/B 对照，因此不能据此量化复杂度对效果、延迟或费用的影响。
+可核对源码：[CLIProxyAPI v8.0.57 `codex_openai_images.go`](https://github.com/router-for-me/CLIProxyAPI/blob/v8.0.57/internal/runtime/executor/codex_openai_images.go)。OpenAI 官方直接 Images API 的 `complexity` 文档不能作为 Codex OAuth 转换路径的实测证据。
+
+**不要在老型号上盲目开启**：不同模型/代理版本可能拒绝未知字段。对于当前 CLIProxyAPI 8.0.57，建议保持 `auto`；未来升级代理后，应先在其请求转换测试中确认字段保留，再做真实账户 A/B 测试。
 
 ## 5. 从官方 ComfyUI 节点补齐的高级控制
 
@@ -83,10 +83,10 @@ OpenAI 文档将 `complexity` 描述为图片生成前的规划计算强度，�
 
 OpenAI 官方还介绍了 2.6 的 SVG 输出、GIF 动画和 markup-guided editing。但是本插件目前：
 
-- `output_format` 仅支持 `png`、`jpeg`、`webp`。
+- `output_format` 仅支持 `png`、`jpeg`、`webp`；虽然 CLIProxyAPI 8.0.57 会转发 `output_format` 字符串，但本插件当前没有 SVG/GIF 的文件/动画输出通道。
 - ComfyUI 的 `IMAGE` 输出是图片张量，不能未经处理就把 SVG 源文件或完整 GIF 动画当成同一张 `IMAGE` 返回。
-- 未暴露 GIF 帧数/帧间隔、markup-guided edit 相关输入语法，也没有实测它们在 CLIProxyAPI 的订阅路由下的支持情况。
-- `complexity` 的合法值有请求形态测试，Main 0.7.0 实机工作流也使用过 low/medium/high；但没有隔离变量的 A/B 对照，不能据此断言复杂度对质量、延迟或费用的实际影响。
+- 未暴露 GIF 帧数/帧间隔、SVG authoring 配置、markup-guided edit 输入语法；CLIProxyAPI 8.0.57 的 Images 转换代码也没有映射这些结构化字段。
+- `complexity` 控件会向代理提交该字段，但 CLIProxyAPI 8.0.57 在 Codex Images 转换层将其丢弃；默认 Images 路径不要将其视为有效控制。
 
 这些限制不是 OpenAI 2.6 不支持，而是**本插件还没有实现或验证完整的新媒体输出通道**。不要把「可选择 2.6 生图模型」写成「2.6 全部能力都已支持」。
 
@@ -112,4 +112,5 @@ OpenAI 官方还介绍了 2.6 的 SVG 输出、GIF 动画和 markup-guided editi
 | ComfyUI 可通过插件传递 2.6 型号及 complexity | 本 fork 请求形态单元测试（Mock HTTP） |
 | 参考图默认 Images Edit，Responses 可手动选择 | 本 fork 源码、单元和真实 ComfyUI + 假代理集成测试 |
 | 2.6 Flare / Sunburst 在本次真实账户的生图与默认参考图链路 | **已实机通过**；自定义尺寸/格式未达标；插件 Alpha 解码已修复，但真实透明背景请求仍返回 RGB；Responses 另受 DNS 阻塞；其他账户需自行验证 |
+| `complexity` 在 CLIProxyAPI 8.0.57 默认 Images 路径生效 | **未实现**；代理源码白名单不转发该字段 |
 | SVG、GIF、markup-guided 编辑在当前 ComfyUI 节点可用 | **未实现/未验证** |
