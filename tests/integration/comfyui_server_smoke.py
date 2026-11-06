@@ -473,7 +473,7 @@ def run(root: Path):
             "edit",
         ], "Unexpected proxy requests: " + str(observed)
         assert all(item["valid"] for item in observed)
-        print("[PASS] 5 proxy HTTP requests matched both reference modes", flush=True)
+        print("[PASS] 7 proxy HTTP requests matched both reference modes and local saver paths", flush=True)
         print("COMFYUI_SMOKE_PASS", flush=True)
 
     except Exception:
