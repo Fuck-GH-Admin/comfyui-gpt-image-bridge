@@ -62,6 +62,7 @@ def test_output_conformance_passes_when_actual_image_matches_request():
     )
 
     assert result["status"] == "pass"
+    assert result["checked_fields"] == ["size", "output_format", "background"]
     assert result["warnings"] == []
     assert result["checked_images"] == 1
 
@@ -101,8 +102,20 @@ def test_output_conformance_respects_protocol_options_that_are_ignored():
         ignored_options=("size", "background", "output_format"),
     )
 
-    assert result["status"] == "pass"
+    assert result["status"] == "not_checked"
+    assert result["checked_fields"] == []
     assert result["warnings"] == []
+
+
+def test_output_conformance_does_not_pass_when_no_image_was_returned():
+    result = image_output_conformance(
+        size="1024x1024",
+        background="transparent",
+        output_format="png",
+        images=[],
+    )
+    assert result["status"] == "not_checked"
+    assert result["checked_images"] == 0
 
 
 def test_images_api_report_marks_real_response_mismatches(api_provider):
