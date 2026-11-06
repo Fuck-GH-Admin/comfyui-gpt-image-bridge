@@ -18,6 +18,7 @@
 | [2026-11-06 本地实机报告](local-acceptance-2026-11-06.md) | 历史验收证据 | 旧型号 `gpt-image-2` 的成功案例、失败记录和脱敏图片 |
 | [Main 0.7.0 全功能验收](main-acceptance-2026-11-06.md) | 实机验收证据 | Flare/Sunburst、默认参考图、Mask、多图、HTTP/浏览器测试和未达标项 |
 | [Alpha 保留修复](alpha-preservation-2026-11-06.md) | PR #5 修复证据 | RGBA/调色板透明、混合批次、真实 ComfyUI SaveImage 集成验证 |
+| [输出参数兑现核验](output-conformance.md) | 使用者/开发者 | 对比请求尺寸、文件编码、透明 Alpha 与真实响应，解释 warning 的适用边界 |
 
 ## 示例工作流
 
