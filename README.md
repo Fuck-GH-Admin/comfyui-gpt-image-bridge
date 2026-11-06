@@ -2,14 +2,14 @@
 
 在 ComfyUI 中通过 **CLIProxyAPI** 调用 Codex 图片生成与编辑接口，支持纯文生图、参考图生成和已有图片编辑。也保留通用 API Provider 与旧的 Codex OAuth Provider。
 
-> 本 fork 的 **CLIProxyAPI Provider 目前在开发分支 `feat/image26-images-first-reference-mode`**（[PR #3](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/pull/3)），尚未合入 `main` / 发布到 ComfyUI Registry。**不要使用 Registry 安装本 fork 的新功能。**
+> 本 fork 的 **`main` 已包含 CLIProxyAPI Provider、GPT Image 2.6 和参考图模式**。ComfyUI Registry 若仍指向上游原作者发布版本，则不包含本 fork 的新功能；请从此仓库安装。
 
 ## 1. 安装插件
 
 关闭 ComfyUI，在其 `custom_nodes` 目录中执行：
 
 ```bash
-git clone --branch feat/image26-images-first-reference-mode --single-branch \
+git clone --branch main --single-branch \
   https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge.git \
   comfyui-gpt-image-bridge
 cd comfyui-gpt-image-bridge
