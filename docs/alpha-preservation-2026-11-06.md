@@ -2,7 +2,7 @@
 
 ## Scope
 
-This follow-up fixes the plugin-side image decode boundary discovered in the Main 0.7.0 acceptance run. It does not claim that the live Codex image service now generates transparent pixels when asked.
+This follow-up fixes the plugin-side image decode boundary discovered in the Main 0.7.0 acceptance run. A subsequent real-service retest below returned transparent pixels; this is one observed result, not an upstream guarantee.
 
 Baseline: `main@f8773d5df5d94feb0c11efb80d174cf55cbdc141`
 
@@ -32,16 +32,29 @@ Code verification HEAD: `b0d47579ba7f98b03db43260633d346d43b5674a` (the later PR
 - [Python/JavaScript CI](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42220463919)
 - [Real ComfyUI integration CI](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42220463982)
 
-## Remaining upstream limitation
+## Real-service retest after PR #5
 
-The earlier live acceptance case `transparent_png` sent `background=transparent` through CLIProxyAPI 8.0.57, but the real service returned a PNG decoded as RGB at 1536×1024; the evidence had no alpha extrema. Therefore:
+At `main@abfacd3`, the same `transparent_png` case was queued once against the real CLIProxyAPI 8.0.57 / Codex service, without automatic retries. Unlike the earlier pre-fix RGB result, this response passed through the plugin and actual ComfyUI `SaveImage` as **RGBA PNG, 1536×1024, alpha extrema `(0, 254)`**. No alpha was synthesized locally. **This case is now PASS.**
 
-- The plugin now preserves alpha **if the upstream response contains it**.
-- The actual Codex/CLIProxyAPI live path still needs a successful transparent RGBA response before transparent generation can be marked PASS.
-- This local fix does not synthesize an alpha mask from an opaque image.
+- Request: `gpt-image-2.6-flare`, `background=transparent`, `quality=low`, `n=1`.
+- Prompt ID: `32123eac-4c04-4fa7-a281-cf97bb89348f`; elapsed: 30.05 seconds.
+- Saved PNG SHA-256: `630d3f1d288623934def60e5bbd5a507a237f01d3a3bb3586970c7bc2e5d3f96`.
+- [Sanitized request report and pixel evidence](evidence/live-alpha-retest-2026-11-06.json); raw credentials were absent from history and PNG metadata.
+- Local regression rerun: Python **294 passed**, JavaScript **14 passed**; real ComfyUI + simulated upstream **PASS**, including `(0, 255)` RGBA round-trip.
+
+This single real success does not establish reliable transparency for every prompt, model or account. The earlier RGB observation remains valid evidence of the saved file only: the old decoder always converted to RGB, so that file alone cannot establish whether the original upstream bytes contained alpha or whether upstream behavior has changed. The plugin preserves alpha when returned by upstream; it does not force upstream transparency. Size/format and Responses/Chat failures from the earlier matrix were not reclassified or re-tested here.
+
+Reproduce with the existing runner (one potentially billable request):
+
+```bash
+python tools/real_acceptance_matrix.py --case transparent_png \
+  --comfy-root /path/to/ComfyUI \
+  --proxy-config /path/to/cliproxyapi/config.yaml \
+  --output-dir /path/to/acceptance-evidence
+```
 
 ## Separate format and size boundaries
 
 The `IMAGE` output is a pixel tensor, not the original encoded file. The default ComfyUI `SaveImage` writes PNG. In the pinned ComfyUI source, `SaveImageAdvanced` exposes PNG, EXR and AVIF; AVIF's encoder explicitly rejects four-channel alpha. The Codex image-generation extension's request model has a GIF output override and otherwise stores the returned PNG/GIF bytes directly; it does not expose a general JPEG/WebP output selection.
 
-The plugin's API `output_format` control and the local file encoder therefore remain separate concerns. The live CLIProxyAPI 8.0.57 tests still returned PNG 1536×1024 for JPEG/WebP, Custom, 2K and 4K requests. CLIProxyAPI forwards those request fields and passes the returned image payload through; this repository must not pretend it can force the upstream model to render a requested native size or format. A local JPEG/WebP saver can be added as a separate ComfyUI node if desired, but that would re-encode the tensor rather than preserve the upstream response bytes.
+The plugin's API `output_format` control and the local file encoder therefore remain separate concerns. The live CLIProxyAPI 8.0.57 tests still returned PNG 1536×1024 for JPEG/WebP, Custom, 2K and 4K requests. CLIProxyAPI forwards those request fields and passes the returned image payload through; this repository must not pretend it can force the upstream model to render a requested native size or format. PR #6 now adds a separate local `GPT Image Bridge · Save Image` node for PNG/JPEG/WebP. It re-encodes the decoded IMAGE tensor and does not preserve the upstream response bytes or prove that the API's native `output_format` request was honored.

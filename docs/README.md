@@ -29,7 +29,7 @@
 ## 目前有哪些证据？
 
 - **自动验证通过**：Python + JavaScript 测试；Ubuntu GitHub Runner 上真正启动 ComfyUI 0.44.0，执行纯文 Generate、Images Edit 参考图 Generate、可选 Responses 和 Edit，检查 PNG 与队列/历史脱敏；远端为模拟 HTTP 服务。
-- **真实账号已部分验证**：[Main 0.7.0 全功能验收](main-acceptance-2026-11-06.md)记录 Flare/Sunburst 真实生成、默认 Images Edit 参考图、Mask 和 16 输入场景成功。插件侧 Alpha 保留已由 [PR #5](alpha-preservation-2026-11-06.md) 修复，但真实透明背景响应仍为 RGB；尺寸/格式、Responses 与 Chat 路由仍有未达标项。旧型号 `gpt-image-2` 的历史证据仍单独保留。
+- **真实账号已部分验证**：[Main 0.7.0 全功能验收](main-acceptance-2026-11-06.md)记录 Flare/Sunburst 真实生成、默认 Images Edit 参考图、Mask 和 16 输入场景成功。插件侧 Alpha 保留已由 [PR #5](alpha-preservation-2026-11-06.md) 修复；修复后的一次真实透明背景复测已保存 RGBA（不保证所有请求）。尺寸/格式、Responses 与 Chat 路由仍有未达标项。旧型号 `gpt-image-2` 的历史证据仍单独保留。
 - **未声称覆盖**：Windows/macOS 图形界面、Docker 组合、所有第三方兼容 API、长时间持续运行、上游额度/计费及内容审核行为。
 - **原生 Codex OAuth**：保留旧节点以兼容旧工作流，但新部署优先使用专用 CLIProxyAPI Provider。
 
