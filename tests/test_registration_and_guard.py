@@ -35,6 +35,7 @@ def test_comfyui_registration_and_provider_responsibilities_are_separate():
         "GPTImageBridgeReferenceList",
         "GPTImageBridgeGenerate",
         "GPTImageBridgeEdit",
+        "GPTImageBridgeSaveImage",
     }
     assert set(module.NODE_CLASS_MAPPINGS) == expected
     for name, node in module.NODE_CLASS_MAPPINGS.items():

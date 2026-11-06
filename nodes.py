@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import io
+import os
+import re
 
+import numpy as np
 from PIL import Image
 
 if __package__:
@@ -648,3 +651,169 @@ class GPTImageBridgeEdit:
             n=n,
             timeout=timeout_sec,
         )
+
+class GPTImageBridgeSaveImage:
+    """Save a ComfyUI IMAGE batch as PNG, JPEG, or WebP in ComfyUI output."""
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "images": ("IMAGE",),
+                "file_format": (("png", "jpeg", "webp"), {"default": "png"}),
+                "filename_prefix": (
+                    "STRING",
+                    {
+                        "default": "GPTImageBridge",
+                        "tooltip": "Saved under the ComfyUI output directory. Subfolders and ComfyUI filename tokens are supported.",
+                    },
+                ),
+                "quality": (
+                    "INT",
+                    {
+                        "default": 90,
+                        "min": 1,
+                        "max": 100,
+                        "tooltip": "JPEG/WebP quality. Ignored by PNG.",
+                    },
+                ),
+                "png_compress_level": (
+                    "INT",
+                    {
+                        "default": 4,
+                        "min": 0,
+                        "max": 9,
+                        "tooltip": "PNG compression level. Higher values save space but take longer.",
+                    },
+                ),
+                "webp_lossless": (
+                    "BOOLEAN",
+                    {
+                        "default": False,
+                        "tooltip": "Use lossless WebP encoding. WebP retains alpha in both modes.",
+                    },
+                ),
+                "jpeg_background": (
+                    "STRING",
+                    {
+                        "default": "#FFFFFF",
+                        "tooltip": "Six-digit #RRGGBB matte used when JPEG input contains alpha.",
+                    },
+                ),
+            }
+        }
+
+    RETURN_TYPES = ("IMAGE",)
+    RETURN_NAMES = ("images",)
+    FUNCTION = "save_images"
+    OUTPUT_NODE = True
+    CATEGORY = "GPT Image Bridge/Output"
+    DESCRIPTION = (
+        "Save IMAGE batches as PNG, JPEG, or WebP in the ComfyUI output folder. "
+        "PNG/WebP preserve alpha; JPEG composites alpha over a chosen matte color."
+    )
+    SEARCH_ALIASES = ["save", "export", "jpeg", "jpg", "webp", "png", "image output"]
+
+    @staticmethod
+    def _parse_jpeg_background(value: str) -> tuple[int, int, int]:
+        if not isinstance(value, str) or re.fullmatch(r"#[0-9a-fA-F]{6}", value) is None:
+            raise ValueError("jpeg_background must be a six-digit hex color such as #FFFFFF.")
+        return tuple(int(value[index:index + 2], 16) for index in (1, 3, 5))
+
+    def save_images(
+        self,
+        images,
+        file_format="png",
+        filename_prefix="GPTImageBridge",
+        quality=90,
+        png_compress_level=4,
+        webp_lossless=False,
+        jpeg_background="#FFFFFF",
+    ):
+        import folder_paths
+
+        if file_format not in ("png", "jpeg", "webp"):
+            raise ValueError("file_format must be png, jpeg, or webp.")
+        quality = int(quality)
+        png_compress_level = int(png_compress_level)
+        if not 1 <= quality <= 100:
+            raise ValueError("quality must be between 1 and 100.")
+        if not 0 <= png_compress_level <= 9:
+            raise ValueError("png_compress_level must be between 0 and 9.")
+        if not isinstance(filename_prefix, str) or not filename_prefix.strip():
+            raise ValueError("filename_prefix must not be empty.")
+
+        background = (
+            self._parse_jpeg_background(jpeg_background)
+            if file_format == "jpeg"
+            else None
+        )
+        if file_format == "webp" and Image.registered_extensions().get(".webp") != "WEBP":
+            raise RuntimeError(
+                "This ComfyUI Python environment's Pillow build does not support WebP encoding."
+            )
+
+        if not hasattr(images, "detach") or not hasattr(images, "shape"):
+            raise ValueError("images must be a ComfyUI IMAGE tensor.")
+        batch = images.detach().cpu().float().numpy()
+        if batch.ndim != 4 or batch.shape[0] < 1:
+            raise ValueError("images must have shape [batch, height, width, channels].")
+        height, width, channels = batch.shape[1:]
+        if height < 1 or width < 1 or channels not in (3, 4):
+            raise ValueError("images must contain non-empty RGB or RGBA frames.")
+        if not np.isfinite(batch).all():
+            raise ValueError("images contains NaN or infinite pixel values.")
+
+        output_dir = folder_paths.get_output_directory()
+        full_output_folder, filename, counter, subfolder, _ = (
+            folder_paths.get_save_image_path(
+                filename_prefix,
+                output_dir,
+                width,
+                height,
+            )
+        )
+        os.makedirs(full_output_folder, exist_ok=True)
+
+        extension = {"png": "png", "jpeg": "jpg", "webp": "webp"}[file_format]
+        encoder = {"png": "PNG", "jpeg": "JPEG", "webp": "WEBP"}[file_format]
+        results = []
+        for batch_number, frame in enumerate(batch):
+            pixels = np.clip(frame * 255.0, 0, 255).astype(np.uint8)
+            image = Image.fromarray(pixels)
+
+            if file_format == "jpeg":
+                if image.mode == "RGBA":
+                    matte = Image.new("RGBA", image.size, (*background, 255))
+                    image = Image.alpha_composite(matte, image).convert("RGB")
+                else:
+                    image = image.convert("RGB")
+
+            filename_with_batch_num = filename.replace("%batch_num%", str(batch_number))
+            file = f"{filename_with_batch_num}_{counter:05}_.{extension}"
+            destination = os.path.join(full_output_folder, file)
+
+            if file_format == "png":
+                image.save(destination, format=encoder, compress_level=png_compress_level)
+            elif file_format == "jpeg":
+                image.save(destination, format=encoder, quality=quality, optimize=True)
+            else:
+                image.save(
+                    destination,
+                    format=encoder,
+                    quality=quality,
+                    lossless=bool(webp_lossless),
+                    method=4,
+                )
+
+            results.append(
+                {
+                    "filename": file,
+                    "subfolder": subfolder,
+                    "type": "output",
+                }
+            )
+            counter += 1
+
+        return {"ui": {"images": results}, "result": (images,)}
+
