@@ -21,13 +21,14 @@
 | Mask、16 张 Generate 参考图、Edit 基础图+15张参考图 | 用户本机真实工作流 | 已执行成功；不等于复杂身份一致性或蒙版外逐像素保证 |
 | 自定义/2K/4K 尺寸、JPEG/WebP | 用户本机真实服务 | **未达标**；多个请求仍返回 PNG 1536×1024，详见实机报告 |
 | Alpha 解码与 ComfyUI 保存 | RGBA/调色板透明/混合批次单测 + 真实 ComfyUI SaveImage 集成 | **PASS**；上游返回 RGBA 时完整保留。真实 Codex `background=transparent` 请求仍返回 RGB，透明生成尚未 PASS |
+| 请求参数兑现核验 | 图片元数据单测 + Images API 报告测试 | **本分支待 CI**；检查尺寸、编码格式、透明像素，不把 HTTP 200 等同于参数成功 |
 | Responses 参考图 | 用户本机真实请求 | **失败**；代理访问 `chatgpt.com` DNS 解析失败 |
 | Chat Completions 图片路由 | 用户本机真实请求 | **失败**；当前 CLIProxyAPI 图片型号拒绝该路由 |
 | Windows/macOS、Docker 组合及长期并发 | 本轮环境未覆盖 | **NOT_RUN** |
 
 当前代码 CI 记录：[Python + JavaScript（294 passed、0 xfailed）](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42220463919)；[真实 ComfyUI 0.44.0 RGBA/SaveImage 集成（远端图像 API 为模拟服务）](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42220463982)。旧 PR #4 结果保留作历史基线。
 
-本轮真实服务工作流为 16 次：14 次队列执行成功、2 次失败。**队列成功不代表每个请求参数都生效**；尺寸、格式和真实上游透明背景仍未达标。PR #5 的 RGBA 集成测试使用模拟上游，只验证本地解码与 ComfyUI 保存链路。
+本轮真实服务工作流为 16 次：14 次队列执行成功、2 次失败。**队列成功不代表每个请求参数都生效**；尺寸、格式和真实上游透明背景仍未达标。PR #5 的 RGBA 集成测试使用模拟上游，只验证本地解码与 ComfyUI 保存链路。新版本的 `request_report.output.conformance` 会在真实响应不符合请求时明确给出 warning，但不会把已完成的付费请求伪装成失败或自动重试。
 
 ## 2. 自动化测试如何运行
 
