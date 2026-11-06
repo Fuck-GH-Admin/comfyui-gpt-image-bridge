@@ -33,4 +33,4 @@
 
 没有在本次整合中提交 OAuth token、`auth.json`、真实图片 Base64、Bearer Header、Cookie 或私有配置。工作流分享前必须清空客户端 Key；CLIProxyAPI 默认仅监听 `127.0.0.1`。
 
-#6–#9 的 PR 均已合并关闭；其旧源分支和两个历史 fix 分支仍需在 GitHub 端执行实际删除，**不得因为已 Squash Merge 就宣称分支已清理**。删除之前应再次确认与主线重叠内容。
+#6–#9 的 PR 均已合并关闭。[GitHub Actions 42266944295](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42266944295) 先核对六个旧分支完整 SHA，再成功删除四个 PR 源分支和两个历史 fix 分支；删除后重新枚举远端，**只剩 `main`，开放 PR 为零**。清理时使用了一次性、白名单化的临时工作流，完成后移除该工作流文件以避免保留不必要的写权限入口。
