@@ -80,7 +80,7 @@ Provider：
 
 - **参考图生成**：`Load Image.IMAGE` → `Generate.reference_1`，依次可连更多参考图。
 - **编辑图片**：`Load Image.IMAGE` → `Edit.base_image（Image 1）`；可选将更多参考图接到 `Edit Reference List`，再接 Edit 的参考图入口。
-- **保存图片**：Generate 或 Edit 的 `image` → ComfyUI 原生 `Save Image`。
+- **保存图片**：Generate 或 Edit 的 `image` → 本插件 `GPT Image Bridge · Save Image`，可选择 PNG/JPEG/WebP；也可以继续使用 ComfyUI 原生 `Save Image`。
 
 **默认所有生图/编辑均走 Images API**：纯文本生成用 `/images/generations`，有参考图的 Generate 使用 `/images/edits` 作参考图引导生成（不是严格意义的从零生图），Edit 同样使用 `/images/edits`。需要多轮文本模型协调时，手动将 `reference_mode` 改成 `responses` 并填写可用的 `responses_model`。`n>1` 会发出多次独立请求，可能分别消耗额度。
 
@@ -90,7 +90,7 @@ Provider：
 
 新的 Generate / Edit 支持 2.6 的 `xhigh`、`max` 画质档、2K/4K 尺寸预设和 `size=Custom` 自定义宽高（16 的倍数、大小与比例有校验）；最多可为 Generate 连接 16 张参考图、Edit 使用 1 张基础图加 15 张参考图。旧模型可能不接受某些选项，请先用 `auto` 测试。
 
-完整参数与限制见[节点手册](docs/nodes-and-workflows.md)；[官方节点对照](docs/official-node-comparison.md)解释哪些高级能力是故意保留或未实现的。
+本地文件编码与透明通道处理见[本地图片导出](docs/local-image-export.md)。完整参数与限制见[节点手册](docs/nodes-and-workflows.md)；[官方节点对照](docs/official-node-comparison.md)解释哪些高级能力是故意保留或未实现的。
 
 ## 文档与问题排查
 
@@ -99,6 +99,7 @@ Provider：
 - [OpenAI 官方 GPT Image 模型、2.6 能力与代理兼容](docs/model-support.md)
 - [CLIProxyAPI 安装、登录及本机连接](docs/setup-cli-proxy-api.md)
 - [节点参数、Generate/Edit 与参考图工作流](docs/nodes-and-workflows.md)
+- [本地 PNG/JPEG/WebP 保存与 Alpha 处理](docs/local-image-export.md)
 - [故障排查](docs/troubleshooting.md)
 - [凭据保护与分享工作流](docs/security.md)
 - [协议与代码实现](docs/protocol-reference.md)

@@ -33,6 +33,7 @@ EXPECTED_NODES = {
     "GPTImageBridgeReferenceList",
     "GPTImageBridgeGenerate",
     "GPTImageBridgeEdit",
+    "GPTImageBridgeSaveImage",
 }
 REQUESTS = []
 REQUESTS_LOCK = threading.Lock()
@@ -216,6 +217,7 @@ def queue_workflow(
     output_dir: Path,
     *,
     reference_mode: str = "images_edit",
+    expected_format: str = "png",
 ):
     credential, headers = http_json(
         base, "/gpt-image-bridge/session-credential", {"api_key": CLIENT_KEY}
@@ -258,20 +260,25 @@ def queue_workflow(
         "Expected %s saved images, received %s; history=%s"
         % (expected_count, len(images), str(history)[:2500])
     )
-    assert all(image.get("filename", "").endswith(".png") for image in images)
+    expected_extension = {"png": ".png", "jpeg": ".jpg", "webp": ".webp"}[expected_format]
+    expected_pillow_format = {"png": "PNG", "jpeg": "JPEG", "webp": "WEBP"}[expected_format]
+    assert all(image.get("filename", "").endswith(expected_extension) for image in images)
     for saved in images:
         full_path = (output_dir / saved.get("subfolder", "") / saved["filename"]).resolve()
         assert full_path.is_relative_to(output_dir.resolve()), "Invalid saved-image path"
-        assert full_path.is_file(), "SaveImage reported a missing output file"
+        assert full_path.is_file(), "Save node reported a missing output file"
         with Image.open(full_path) as loaded:
             loaded.verify()
         with Image.open(full_path) as loaded:
-            assert loaded.format == "PNG"
-            assert loaded.size == (32, 24), "Image file dimensions differ from proxy output"
-            assert loaded.mode == "RGBA", "ComfyUI SaveImage dropped the upstream alpha channel"
-            assert loaded.getchannel("A").getextrema() == (0, 255), "ComfyUI SaveImage changed alpha samples"
+            assert loaded.format == expected_pillow_format
+            assert loaded.size == (32, 24), "Saved dimensions differ from proxy output"
+            if expected_format in ("png", "webp"):
+                assert loaded.mode == "RGBA", "Lossless-alpha format dropped the upstream alpha channel"
+                assert loaded.getchannel("A").getextrema() == (0, 255), "Saved alpha samples changed"
+            else:
+                assert loaded.mode == "RGB", "JPEG must be flattened to RGB"
             metadata = json.dumps(loaded.info, ensure_ascii=False)
-            assert CLIENT_KEY not in metadata, "A raw client key leaked to PNG metadata"
+            assert CLIENT_KEY not in metadata, "A raw client key leaked to image metadata"
     return images
 
 
@@ -334,7 +341,7 @@ def run(root: Path):
         info, _ = http_json(comfy_url, "/system_stats")
         version = info.get("system", {}).get("comfyui_version")
         print("[PASS] Real ComfyUI server started. Version:", version, flush=True)
-        print("[PASS] All 6 GPT Image Bridge custom nodes registered", flush=True)
+        print("[PASS] All 7 GPT Image Bridge custom nodes registered", flush=True)
 
         # Fail closed on raw API keys: the ComfyUI queue must never persist them.
         raw_graph = {
@@ -360,6 +367,58 @@ def run(root: Path):
         images = queue_workflow(comfy_url, proxy_url, graph, "3", 2, log_path, root / "output")
         assert all(x["filename"].startswith("CI-Text") for x in images)
         print("[PASS] Text generation n=2 -> 2 actual PNG files (32x24), metadata scrubbed", flush=True)
+
+        # Local saver: preserve the upstream alpha in lossless WebP.
+        graph = {
+            "1": {"class_type": "GPTImageBridgeCLIProxyAPIProvider", "inputs": {}},
+            "2": {"class_type": "GPTImageBridgeGenerate", "inputs": generate_inputs("1")},
+            "12": {
+                "class_type": "GPTImageBridgeSaveImage",
+                "inputs": {
+                    "images": ["2", 0],
+                    "file_format": "webp",
+                    "filename_prefix": "CI-Bridge-WebP",
+                    "quality": 100,
+                    "png_compress_level": 4,
+                    "webp_lossless": True,
+                    "jpeg_background": "#FFFFFF",
+                },
+            },
+        }
+        webp_images = queue_workflow(
+            comfy_url, proxy_url, graph, "12", 1, log_path, root / "output",
+            expected_format="webp",
+        )
+        assert webp_images[0]["filename"].startswith("CI-Bridge-WebP")
+        print("[PASS] Custom saver writes lossless WebP and preserves RGBA alpha", flush=True)
+
+        # JPEG cannot carry alpha; the saver composites transparent pixels over the configured matte.
+        graph = {
+            "1": {"class_type": "GPTImageBridgeCLIProxyAPIProvider", "inputs": {}},
+            "2": {"class_type": "GPTImageBridgeGenerate", "inputs": generate_inputs("1")},
+            "13": {
+                "class_type": "GPTImageBridgeSaveImage",
+                "inputs": {
+                    "images": ["2", 0],
+                    "file_format": "jpeg",
+                    "filename_prefix": "CI-Bridge-JPEG",
+                    "quality": 100,
+                    "png_compress_level": 4,
+                    "webp_lossless": False,
+                    "jpeg_background": "#FFFFFF",
+                },
+            },
+        }
+        jpeg_images = queue_workflow(
+            comfy_url, proxy_url, graph, "13", 1, log_path, root / "output",
+            expected_format="jpeg",
+        )
+        assert jpeg_images[0]["filename"].startswith("CI-Bridge-JPEG")
+        jpeg_path = root / "output" / jpeg_images[0]["filename"]
+        with Image.open(jpeg_path) as jpeg:
+            pixels = jpeg.convert("RGB")
+            assert min(pixels.getpixel((4, 12))) > 235, "JPEG transparent area was not composited over white"
+        print("[PASS] Custom saver writes JPEG and composites alpha over the chosen matte", flush=True)
 
         # Reference generation: actual LoadImage -> Generate -> SaveImage graph.
         graph = {
@@ -405,10 +464,16 @@ def run(root: Path):
         with REQUESTS_LOCK:
             observed = list(REQUESTS)
         assert [item["kind"] for item in observed] == [
-            "generate", "generate", "reference_image_edit", "reference", "edit"
+            "generate",
+            "generate",
+            "generate",
+            "generate",
+            "reference_image_edit",
+            "reference",
+            "edit",
         ], "Unexpected proxy requests: " + str(observed)
         assert all(item["valid"] for item in observed)
-        print("[PASS] 5 proxy HTTP requests matched both reference modes", flush=True)
+        print("[PASS] 7 proxy HTTP requests matched both reference modes and local saver paths", flush=True)
         print("COMFYUI_SMOKE_PASS", flush=True)
 
     except Exception:
