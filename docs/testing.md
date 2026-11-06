@@ -4,7 +4,7 @@
 
 **最新完整证据**：[Main 0.7.0 全功能验收报告](main-acceptance-2026-11-06.md)及[脱敏证据 JSON](evidence/main-acceptance-2026-11-06.json)。此前 PR #2 的 `gpt-image-2` 旧型号报告仍保留作历史记录；2.6 新型号和新默认参考图模式的后续实测以 Main 0.7.0 报告为准。
 
-**更新：** [Main 0.7.0 全功能验收](main-acceptance-2026-11-06.md)已完成两个 2.6 型号及默认参考图模式的真实测试，并记录尺寸、格式、透明度和 Responses 等失败项。补测为 291 PASS + 1 XFAIL、JS 14 PASS，另有 19 项实际 HTTP 替身检查。下表保留原有 CI 基线，不能将“请求成功”理解为全部参数生效。
+**更新：** [Main 0.7.0 全功能验收](main-acceptance-2026-11-06.md)已完成两个 2.6 型号及默认参考图模式的真实测试，并记录尺寸、格式、透明度和 Responses 等失败项。补测为 291 passed、1 xfailed、JS 14 passed，另有 19 项 HTTP 替身检查。下表给出当前证据状态；不能将“请求成功”理解为全部参数生效。
 
 ## 1. 当前验收矩阵（截至 2026-11-06，Main 0.7.0）
 
@@ -151,4 +151,4 @@ Remaining problems:
 - 最小 Edit、参考图 Generate 取得实证，或明确记录服务端实际不支持的路径。
 - 用户侧 UI 的密码控件、分享工作流脱敏流程可用。
 
-**旧型号 `gpt-image-2` 已有真实生图成功证据**；但 2.6 Flare/Sunburst、高画质/自定义尺寸和新默认参考图模式还需要实机验证。不要把 CI 生成的模拟 PNG 冒充新的 Codex 实机结果。
+**当前实机证据**：`gpt-image-2`、2.6 Flare/Sunburst 的纯文生成及默认 Images Edit 参考图模式均有真实成功记录。仍未达标的是自定义/2K/4K 尺寸、JPEG/WebP 和透明 Alpha；Responses 与 Chat 路由存在已记录的外部限制。不要把 CI 生成的模拟 PNG 冒充真实 Codex 实机结果。
