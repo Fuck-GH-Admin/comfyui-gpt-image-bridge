@@ -6,7 +6,7 @@
   "nodes": [
     {
       "id": 1,
-      "type": "GPTImageBridgeCLIProxyAPIProvider",
+      "type": "GPTImageBridgeProviderProfile",
       "pos": [
         30,
         160
@@ -20,19 +20,11 @@
       "mode": 0,
       "inputs": [
         {
-          "name": "api_key",
-          "type": "STRING",
+          "name": "profile",
+          "type": "COMBO",
           "link": null,
           "widget": {
-            "name": "api_key"
-          }
-        },
-        {
-          "name": "base_url",
-          "type": "STRING",
-          "link": null,
-          "widget": {
-            "name": "base_url"
+            "name": "profile"
           }
         },
         {
@@ -44,14 +36,6 @@
           }
         },
         {
-          "name": "responses_model",
-          "type": "STRING",
-          "link": null,
-          "widget": {
-            "name": "responses_model"
-          }
-        },
-        {
           "name": "reference_mode",
           "type": "COMBO",
           "link": null,
@@ -60,11 +44,11 @@
           }
         },
         {
-          "name": "image_complexity",
-          "type": "COMBO",
+          "name": "responses_model",
+          "type": "STRING",
           "link": null,
           "widget": {
-            "name": "image_complexity"
+            "name": "responses_model"
           }
         }
       ],
@@ -79,12 +63,10 @@
       ],
       "properties": {},
       "widgets_values": [
+        "local_codex",
         "",
-        "http://127.0.0.1:8317/v1",
-        "gpt-image-2.6-flare",
-        "",
-        "images_edit",
-        "auto"
+        "profile",
+        ""
       ]
     },
     {
@@ -288,7 +270,7 @@
         20
       ]
     },
-    "gpt_image_bridge_example": "cliproxyapi-plaintext-no-secrets",
+    "gpt_image_bridge_example": "provider-profile-plaintext-no-secrets",
     "workflowRendererVersion": "LG"
   },
   "version": 0.4

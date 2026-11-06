@@ -22,6 +22,7 @@ if __package__:
         tensor_to_png,
     )
     from .gpt_image_bridge.protocols import execute_operation
+    from .gpt_image_bridge.provider_profiles import build_profile_provider, profile_names, profile_fingerprint
 else:
     from gpt_image_bridge.config import (
         API_PROTOCOLS,
@@ -37,6 +38,7 @@ else:
         tensor_to_png,
     )
     from gpt_image_bridge.protocols import execute_operation
+    from gpt_image_bridge.provider_profiles import build_profile_provider, profile_names, profile_fingerprint
 
 
 CATEGORY = "GPT Image Bridge"
@@ -66,7 +68,57 @@ GENERATE_REFERENCE_INPUT_NAMES = tuple(
 )
 
 
+class GPTImageBridgeProviderProfile:
+    """Recommended, key-free canvas provider backed by local service profiles."""
+
+    RETURN_TYPES = ("GPT_IMAGE_PROVIDER",)
+    RETURN_NAMES = ("provider",)
+    FUNCTION = "build"
+    CATEGORY = CATEGORY
+    DESCRIPTION = (
+        "Choose a locally configured image service. Base URL and API Key "
+        "are kept in providers.local.json, outside shareable ComfyUI workflows."
+    )
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        names = profile_names()
+        return {
+            "required": {
+                "profile": (names, {"default": names[0]}),
+            },
+            "optional": {
+                "image_model": ("STRING", {
+                    "default": "", "multiline": False,
+                    "tooltip": "Optional override. Leave blank to use the profile's default image model.",
+                }),
+                "reference_mode": (
+                    ("profile", "images_edit", "responses"),
+                    {"default": "profile", "tooltip": "Use the profile default or override reference-guided generation."},
+                ),
+                "responses_model": ("STRING", {
+                    "default": "", "multiline": False,
+                    "tooltip": "Optional Responses host model override; no effect on standard Images calls.",
+                }),
+            },
+        }
+
+    @classmethod
+    def IS_CHANGED(cls, **_kwargs):
+        return profile_fingerprint()
+
+    def build(self, profile, image_model="", reference_mode="profile", responses_model=""):
+        return (build_profile_provider(
+            profile,
+            image_model=image_model,
+            reference_mode=reference_mode,
+            responses_model=responses_model,
+        ),)
+
+
 class GPTImageBridgeAPIProvider:
+    DEPRECATED = True
+    DEV_ONLY = True
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -218,6 +270,8 @@ class GPTImageBridgeAPIProvider:
 
 
 class GPTImageBridgeCLIProxyAPIProvider:
+    DEPRECATED = True
+    DEV_ONLY = True
     """Provider preset for a local or remote CLIProxyAPI OpenAI-compatible server."""
 
     @classmethod
@@ -329,6 +383,8 @@ class GPTImageBridgeCLIProxyAPIProvider:
 
 
 class GPTImageBridgeOAuthProvider:
+    DEPRECATED = True
+    DEV_ONLY = True
     @classmethod
     def INPUT_TYPES(cls):
         return {

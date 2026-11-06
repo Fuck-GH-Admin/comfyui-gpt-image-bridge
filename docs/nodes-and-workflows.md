@@ -1,11 +1,12 @@
 # 节点及工作流完整手册
 
-本文面向实际使用 ComfyUI 画布的人。**CLIProxyAPI Provider 是推荐入口**；原生 OAuth Provider、通用 API Provider 继续保留，目的是兼容原有工作流和其他供应商。先按 [本机安装与登录](setup-cli-proxy-api.md) 完成环境准备。
+本文面向实际使用 ComfyUI 画布的人。**Provider Profile 是推荐入口**；原生 OAuth Provider、通用 API Provider 继续保留，目的是兼容原有工作流和其他供应商。先按 [本机安装与登录](setup-cli-proxy-api.md) 完成环境准备。
 
-## 1. 七个节点及其职责
+## 1. 节点与职责（八个已注册，默认推荐 Profile）
 
 | 画布节点名 | 实际类名 | 输入 | 输出/功能 |
 | --- | --- | --- | --- |
+| GPT Image Bridge · Provider Profile | `GPTImageBridgeProviderProfile` | 服务商名称、可选模型/参考图模式 | `GPT_IMAGE_PROVIDER`；推荐，不含 Key/Base URL |
 | GPT Image Bridge · CLIProxyAPI Provider | `GPTImageBridgeCLIProxyAPIProvider` | 客户端 Key、代理地址、图片模型、Responses 主模型 | `GPT_IMAGE_PROVIDER`；推荐 |
 | GPT Image Bridge · API Provider | `GPTImageBridgeAPIProvider` | 通用 API Key、Base URL、model、protocol、自定义端点/异步参数 | `GPT_IMAGE_PROVIDER`；第三方兼容 API |
 | GPT Image Bridge · Codex OAuth Provider | `GPTImageBridgeOAuthProvider` | 图片 model、protocol | `GPT_IMAGE_PROVIDER`；旧的内置 Codex 登录方案 |
@@ -13,6 +14,8 @@
 | GPT Image Bridge · Edit | `GPTImageBridgeEdit` | Provider、基础图、提示词、生成参数、参考图列表、可选 MASK | 同上 |
 | GPT Image Bridge · Edit Reference List (Image 2–16) | `GPTImageBridgeReferenceList` | `image_2`…`image_16` | `GPT_IMAGE_REFERENCES`，只用于 Edit |
 | GPT Image Bridge · Save Image | `GPTImageBridgeSaveImage` | `IMAGE`、文件格式、质量、文件名前缀、JPEG 背景色 | 保存 PNG/JPEG/WebP 到 ComfyUI `output/`，并继续输出原 IMAGE batch |
+
+旧 API / CLIProxyAPI / OAuth 三个 Provider 已标记 DEPRECATED / DEV_ONLY：默认新建菜单隐藏，但旧工作流可继续运行。配置请先参阅[服务商配置](provider-profiles.md)。
 
 所有节点都在 `GPT Image Bridge` 分类下。保存生成结果可以使用本插件的 **Save Image**（PNG/JPEG/WebP），也可以继续使用 ComfyUI 原生 Save Image。
 

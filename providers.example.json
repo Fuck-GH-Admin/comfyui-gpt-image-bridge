@@ -1,0 +1,20 @@
+{
+  "profiles": {
+    "local_codex": {
+      "base_url": "http://127.0.0.1:8317/v1",
+      "api_key": "REPLACE_WITH_CLIPROXY_CLIENT_KEY",
+      "model": "gpt-image-2.6-flare",
+      "api_protocol": "auto",
+      "reference_mode": "images_edit",
+      "use_async": false
+    },
+    "third_party": {
+      "base_url": "https://your-gateway.example/v1",
+      "api_key": "REPLACE_WITH_GATEWAY_KEY",
+      "model": "YOUR_ACTUAL_IMAGE_MODEL_ID",
+      "api_protocol": "images",
+      "reference_mode": "images_edit",
+      "use_async": false
+    }
+  }
+}

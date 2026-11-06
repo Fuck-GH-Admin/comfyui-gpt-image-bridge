@@ -2,6 +2,7 @@ if __package__:
     from .gpt_image_bridge.routes import register_routes
     from .nodes import (
         GPTImageBridgeEdit,
+        GPTImageBridgeProviderProfile,
         GPTImageBridgeGenerate,
         GPTImageBridgeAPIProvider,
         GPTImageBridgeCLIProxyAPIProvider,
@@ -13,6 +14,7 @@ else:
     from gpt_image_bridge.routes import register_routes
     from nodes import (
         GPTImageBridgeEdit,
+        GPTImageBridgeProviderProfile,
         GPTImageBridgeGenerate,
         GPTImageBridgeAPIProvider,
         GPTImageBridgeCLIProxyAPIProvider,
@@ -22,6 +24,7 @@ else:
     )
 
 NODE_CLASS_MAPPINGS = {
+    "GPTImageBridgeProviderProfile": GPTImageBridgeProviderProfile,
     "GPTImageBridgeAPIProvider": GPTImageBridgeAPIProvider,
     "GPTImageBridgeCLIProxyAPIProvider": GPTImageBridgeCLIProxyAPIProvider,
     "GPTImageBridgeOAuthProvider": GPTImageBridgeOAuthProvider,
@@ -32,6 +35,7 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
+    "GPTImageBridgeProviderProfile": "GPT Image Bridge · Provider Profile",
     "GPTImageBridgeAPIProvider": "GPT Image Bridge · API Provider",
     "GPTImageBridgeCLIProxyAPIProvider": "GPT Image Bridge · CLIProxyAPI Provider",
     "GPTImageBridgeOAuthProvider": "GPT Image Bridge · Codex OAuth Provider",
