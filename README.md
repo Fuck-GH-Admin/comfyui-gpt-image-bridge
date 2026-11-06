@@ -1,6 +1,6 @@
 # ComfyUI GPT Image Bridge
 
-在 ComfyUI 中通过 **CLIProxyAPI** 调用 Codex 图片生成与编辑接口，支持纯文生图、参考图生成和已有图片编辑。也保留通用 API Provider 与旧的 Codex OAuth Provider。
+在 ComfyUI 中通过 **CLIProxyAPI 或 OpenAI 兼容第三方中转站** 调用图片生成与编辑接口，支持纯文生图、参考图生成和已有图片编辑。也保留通用 API Provider 与旧的 Codex OAuth Provider。
 
 > 本 fork 的 **`main` 已包含 CLIProxyAPI Provider、GPT Image 2.6 和参考图模式**。ComfyUI Registry 若仍指向上游原作者发布版本，则不包含本 fork 的新功能；请从此仓库安装。
 
@@ -20,7 +20,13 @@ python -m pip install -r requirements.txt
 
 重启 ComfyUI。节点在 **GPT Image Bridge** 分类下。已有同名插件请先备份并避免同时装两个副本。
 
-## 2. 配置并启动 CLIProxyAPI
+## 2. 配置服务商（推荐，不在画布中保存 Key）
+
+从 [服务商配置示例](providers.example.json) 复制一份本机 `providers.local.json`，填写 CLIProxyAPI 或第三方 OpenAI 兼容中转站的 `base_url`、`api_key` 和图像模型，Linux/macOS 执行 `chmod 600 providers.local.json`。画布使用 **GPT Image Bridge · Provider Profile**，只需要选择服务商名称，必要时覆盖图像模型。配置不会随该节点的工作流 JSON 导出。
+
+完整说明与第三方服务支持边界见 [服务商配置手册](docs/provider-profiles.md)。旧 API、CLIProxyAPI、Codex OAuth Provider 保留注册供旧工作流使用，但已在默认新建菜单中隐藏并弃用。
+
+## 3. 配置并启动 CLIProxyAPI（本地 Codex 方案）
 
 从 [CLIProxyAPI Releases](https://github.com/router-for-me/CLIProxyAPI/releases) 获取适合系统的 v8 版本。在独立的 `config.yaml` 中配置客户端 Key 和本机监听，例如：
 
@@ -51,10 +57,10 @@ multimedia:
 
 ## 3. 在 ComfyUI 中使用
 
-添加并连接：
+推荐添加并连接（Profile 节点）：
 
 ```text
-GPT Image Bridge · CLIProxyAPI Provider
+GPT Image Bridge · Provider Profile
                   │ provider
                   ▼
 GPT Image Bridge · Generate
@@ -65,7 +71,7 @@ Save Image
 
 也可以直接[下载无密钥的 ComfyUI 文生图示例工作流](example_workflows/CLIProxyAPI-Text-to-Image.json)，拖入画布后填写客户端 Key。
 
-Provider：
+旧 CLIProxyAPI Provider（仅旧工作流兼容）：
 
 | 输入 | 初始值 |
 | --- | --- |
@@ -95,6 +101,7 @@ Provider：
 ## 文档与问题排查
 
 - [文档目录](docs/README.md)
+- [本机服务商配置与第三方中转站](docs/provider-profiles.md)
 - [官方 ComfyUI 云端生图节点能力对照](docs/official-node-comparison.md)
 - [OpenAI 官方 GPT Image 模型、2.6 能力与代理兼容](docs/model-support.md)
 - [CLIProxyAPI 安装、登录及本机连接](docs/setup-cli-proxy-api.md)
