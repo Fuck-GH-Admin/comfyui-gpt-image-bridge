@@ -179,8 +179,7 @@ def validate_image_bytes(
         "mode": mode,
         "has_alpha": has_alpha,
         "alpha_extrema": alpha_extrema,
-        "mime_type": content_type.split(";",
-        1)[0].strip() or None,
+        "mime_type": content_type.split(";", 1)[0].strip() or None,
         "bytes": len(payload),
     }
 
