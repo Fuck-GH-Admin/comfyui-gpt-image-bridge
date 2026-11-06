@@ -11,7 +11,7 @@
 | 层次 | 验证方法 | 当前结论 |
 | --- | --- | --- |
 | Python 单元测试 | PR #5 精确 HEAD 的 GitHub Actions | **294 passed，0 xfailed** |
-| JavaScript 单元测试 | PR #4 精确 HEAD 的 GitHub Actions | **14/14 PASS** |
+| JavaScript 单元测试 | PR #5 精确 HEAD 的 GitHub Actions | **14/14 PASS** |
 | 真实 ComfyUI 后端 | Ubuntu Runner 启动 ComfyUI 0.44.0，HTTP/队列执行 | **PASS**；远端图片 API 是模拟服务，不是真实 CLIProxyAPI |
 | 本机 HTTP 协议矩阵 | 19/19 场景，另有凭据路由 2/2 | **PASS**；使用 HTTP 替身 |
 | 浏览器控件与工作流重载 | 本机真实浏览器，DOM/图对象检查 | **17/17 PASS**；这是人工本机验收，不是 GitHub CI |
