@@ -2,14 +2,14 @@
 
 在 ComfyUI 中通过 **CLIProxyAPI** 调用 Codex 图片生成与编辑接口，支持纯文生图、参考图生成和已有图片编辑。也保留通用 API Provider 与旧的 Codex OAuth Provider。
 
-> 本 fork 的 **CLIProxyAPI Provider 目前在开发分支 `feat/cliproxyapi-native-provider`**（[PR #1](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/pull/1)），尚未合入 `main` / 发布到 ComfyUI Registry。**不要使用 Registry 安装本 fork 的新功能。**
+> 本 fork 的 **`main` 已包含 CLIProxyAPI Provider、GPT Image 2.6 和参考图模式**。ComfyUI Registry 若仍指向上游原作者发布版本，则不包含本 fork 的新功能；请从此仓库安装。
 
 ## 1. 安装插件
 
 关闭 ComfyUI，在其 `custom_nodes` 目录中执行：
 
 ```bash
-git clone --branch feat/cliproxyapi-native-provider --single-branch \
+git clone --branch main --single-branch \
   https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge.git \
   comfyui-gpt-image-bridge
 cd comfyui-gpt-image-bridge
@@ -71,8 +71,10 @@ Provider：
 | --- | --- |
 | `api_key` | CLIProxyAPI `access.api-keys` 里的客户端 Key |
 | `base_url` | `http://127.0.0.1:8317/v1` |
-| `image_model` | `gpt-image-2` |
-| `responses_model` | `gpt-5.4-mini`（参考图生成时使用） |
+| `image_model` | `gpt-image-2.6-flare`（速度优先）；可填 `gpt-image-2.6-sunburst`（细节/编辑优先），或你账号实际可用的旧型号 |
+| `responses_model` | 默认空，仅手动选择 Responses 模式时填写可用的文本主模型 |
+| `reference_mode` | `images_edit`（默认，参考图引导新图）；`responses`（可选） |
+| `image_complexity` | `auto`（不传复杂度），也可选 `low`、`medium`、`high`（2.6） |
 
 第一次用 Generate：设置一句提示词，`n=1`，其余先保持 `auto`、`output_format=png`，点击 Queue。
 
@@ -80,11 +82,21 @@ Provider：
 - **编辑图片**：`Load Image.IMAGE` → `Edit.base_image（Image 1）`；可选将更多参考图接到 `Edit Reference List`，再接 Edit 的参考图入口。
 - **保存图片**：Generate 或 Edit 的 `image` → ComfyUI 原生 `Save Image`。
 
-有参考图的 Generate 走 Responses；纯文生图和 Edit 使用 Images API。`n>1` 会发出多次独立请求，可能分别消耗额度。模型名是可调默认值，实际是否可用以你的 CLIProxyAPI 和 Codex 账号为准。
+**默认所有生图/编辑均走 Images API**：纯文本生成用 `/images/generations`，有参考图的 Generate 使用 `/images/edits` 作参考图引导生成（不是严格意义的从零生图），Edit 同样使用 `/images/edits`。需要多轮文本模型协调时，手动将 `reference_mode` 改成 `responses` 并填写可用的 `responses_model`。`n>1` 会发出多次独立请求，可能分别消耗额度。
+
+**OpenAI 已正式发布 GPT Image 2.6 Flare / Sunburst**；CLIProxyAPI v8.0.57 源码也识别这两个模型，但你的账户能否调用仍需要实测。参见[模型兼容与版本边界](docs/model-support.md)。
+
+### 高级画质与参考图
+
+新的 Generate / Edit 支持 2.6 的 `xhigh`、`max` 画质档、2K/4K 尺寸预设和 `size=Custom` 自定义宽高（16 的倍数、大小与比例有校验）；最多可为 Generate 连接 16 张参考图、Edit 使用 1 张基础图加 15 张参考图。旧模型可能不接受某些选项，请先用 `auto` 测试。
+
+完整参数与限制见[节点手册](docs/nodes-and-workflows.md)；[官方节点对照](docs/official-node-comparison.md)解释哪些高级能力是故意保留或未实现的。
 
 ## 文档与问题排查
 
 - [文档目录](docs/README.md)
+- [官方 ComfyUI 云端生图节点能力对照](docs/official-node-comparison.md)
+- [OpenAI 官方 GPT Image 模型、2.6 能力与代理兼容](docs/model-support.md)
 - [CLIProxyAPI 安装、登录及本机连接](docs/setup-cli-proxy-api.md)
 - [节点参数、Generate/Edit 与参考图工作流](docs/nodes-and-workflows.md)
 - [故障排查](docs/troubleshooting.md)

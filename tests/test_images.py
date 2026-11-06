@@ -29,8 +29,8 @@ def test_batch_within_slot_is_deterministic():
 
 
 def test_reference_limit_is_enforced():
-    batch = image_tensor(4, 6, 0.1).repeat(10, 1, 1, 1)
-    with pytest.raises(ValueError, match="At most 9"):
+    batch = image_tensor(4, 6, 0.1).repeat(17, 1, 1, 1)
+    with pytest.raises(ValueError, match="At most 16"):
         encode_reference_slots(batch)
 
 

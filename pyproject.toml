@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "comfyui-gpt-image-bridge"
-version = "0.6.0"
+version = "0.7.0"
 description = "Multi-provider GPT image generation and editing bridge for ComfyUI."
 readme = "README.md"
 requires-python = ">=3.10"

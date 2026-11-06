@@ -8,7 +8,7 @@
 
 **仍需你本人验证**：本机 CLIProxyAPI 二进制是否能启动、Codex OAuth 是否登录成功、实际账号是否能生成图片、使用哪些模型，以及真实生成结果是否满足预期。
 
-当前 fork 代码在 `feat/cliproxyapi-native-provider`，没有合并到 `main`；从 Registry 安装原作者版本没有此 Provider。不要同时安装同一个包的两个副本，否则可能出现节点 ID 重复。
+当前 fork 的 `main` 已包含新版 Provider。Registry 若仍提供原作者版本，则没有这个 Provider。不要同时安装同一个包的两个副本，否则可能出现节点 ID 重复。
 
 ## 1. 环境要求
 
@@ -24,12 +24,12 @@
 
 ## 2. 安装本 fork 的 ComfyUI 插件
 
-**Ubuntu / Linux，务必检出开发分支**：
+**Ubuntu / Linux，使用主分支**：
 
 ```bash
 cd /path/to/ComfyUI/custom_nodes
 
-git clone --branch feat/cliproxyapi-native-provider --single-branch \
+git clone --branch main --single-branch \
   https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge.git \
   comfyui-gpt-image-bridge
 
@@ -151,12 +151,14 @@ Provider 的字段：
 | --- | --- | --- |
 | `api_key` | 空 | 刚才配置的 **CLIProxyAPI 客户端 Key** |
 | `base_url` | `http://127.0.0.1:8317/v1` | ComfyUI 能访问的代理地址，含 `/v1` |
-| `image_model` | `gpt-image-2` | 当前代理实际提供的图片模型/别名 |
-| `responses_model` | `gpt-5.4-mini` | 参考图 Generate 时使用的普通 Responses 主模型；首次纯文生成暂不会用到 |
+| `image_model` | `gpt-image-2.6-flare` | 最新正式 Flare；可改 `gpt-image-2.6-sunburst`，账户若尚不支持则退回 `gpt-image-2` |
+| `responses_model` | 空 | 仅手动选择 `responses` 时填写可用文本主模型 |
+| `reference_mode` | `images_edit` | 默认参考图引导的新图通过 Images Edit，或切换为 Responses |
+| `image_complexity` | `auto` | 2.6 支持 `low`、`medium`、`high` 规划复杂度 |
 
 Generate 初次建议：`prompt` 用一句简短提示词；`size=auto`、`quality=auto`、`background=auto`、`output_format=png`、`moderation=auto`、`n=1`、`timeout_sec=300`。点击 Queue 执行。若模型不支持某个参数，按错误信息逐一调整，不要认定所有 GPT 图片模型具备完全相同选项。
 
-保存结果可在 ComfyUI 输出目录找到。想测试参考图，请把一张 `Load Image` 的 `IMAGE` 连接到 Generate 的 `reference_1`；要编辑已有图片，请改用 `Edit`（基础图为 `base_image（Image 1）`，参考图经 `Edit Reference List`）。完整接线与参数见 [节点及工作流手册](nodes-and-workflows.md)。
+保存结果可在 ComfyUI 输出目录找到。想测试参考图，请把一张 `Load Image` 的 `IMAGE` 连接到 Generate 的 `reference_1`；**默认使用 Images Edit，明确要求生成新图，但不等于严格从零生成**。只有需要 Agent 协调时才手动切换 `reference_mode=responses` 并填写可用的 `responses_model`。要编辑已有图片，请用 `Edit`（基础图为 `base_image（Image 1）`，其他参考图经 `Edit Reference List`）。完整接线见[节点手册](nodes-and-workflows.md)，官方 2.6 型号和功能边界见[模型兼容说明](model-support.md)。
 
 ## 6. 更新与回退
 
@@ -164,11 +166,11 @@ Generate 初次建议：`prompt` 用一句简短提示词；`size=auto`、`quali
 
 ```bash
 git fetch origin
-git switch feat/cliproxyapi-native-provider
-git pull --ff-only origin feat/cliproxyapi-native-provider
+git switch main
+git pull --ff-only origin main
 ```
 
-更新后重启 ComfyUI。**不要直接 `git pull` 到主分支**：此 PR 还没有合并，`main` 尚无专用 Provider。
+更新后重启 ComfyUI。功能已集成在本 fork 的 `main`；不再要求切换旧 feature 分支。
 
 如果需要回滚，保存自己修改的工作流并记录当前版本 SHA 后，通过 Git checkout 指定旧提交恢复；同时保持 CLIProxyAPI 版本与所需模型路径一致。升级代理后如突然失败，应先检查代理的 Changes、`config.example.yaml` 和 [故障排查](troubleshooting.md)。
 

@@ -59,7 +59,7 @@ app.registerExtension({
                     summary: "GPT Image Bridge",
                     detail: (
                         "旧 Generate 参考列表无法自动拆分，列表连接已移除。"
-                        + "请把图片直接连接到 reference_1–reference_9。"
+                        + "请把图片直接连接到 reference_1–reference_16。"
                     ),
                     life: 8000,
                 });

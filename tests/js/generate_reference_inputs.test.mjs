@@ -94,7 +94,7 @@ test("compacts a disconnected gap without changing connected order", () => {
     );
 });
 
-test("never grows past nine inputs", () => {
+test("never grows past sixteen inputs", () => {
     const node = fakeNode(
         Array.from({ length: MAX_GENERATE_REFERENCE_INPUTS }, (_, index) => (
             input(`reference_${index + 1}`, true)
@@ -107,6 +107,7 @@ test("never grows past nine inputs", () => {
         MAX_GENERATE_REFERENCE_INPUTS,
     );
     assert.equal(MIN_GENERATE_REFERENCE_INPUTS, 3);
+    assert.equal(node.inputs.at(-1).name, "reference_16");
 });
 
 test("migrates an old Reference List connection into direct image links", () => {
@@ -190,4 +191,16 @@ test("removes an unknown legacy list and reports that it needs attention", () =>
         node.inputs.slice(1).map(({ name }) => name),
         ["reference_1", "reference_2", "reference_3"],
     );
+});
+
+test("reference slots 10 through 16 are preserved and recognized", () => {
+    const node = fakeNode(
+        Array.from({ length: MAX_GENERATE_REFERENCE_INPUTS }, (_, index) => (
+            input(`reference_${index + 1}`, true)
+        )),
+    );
+    normalizeGenerateReferenceInputs(node);
+    assert.equal(node.inputs.length - 1, 16);
+    assert.equal(node.inputs.at(-1).name, "reference_16");
+    assert.equal(desiredGenerateReferenceInputCount(node.inputs.slice(1)), 16);
 });

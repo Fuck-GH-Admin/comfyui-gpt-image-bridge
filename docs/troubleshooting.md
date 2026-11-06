@@ -17,8 +17,8 @@ D. Codex 上游层 → OAuth 是否有效？服务端模型是否可用？额度
 
 | 症状/提示 | 优先检查 | 处理 |
 | --- | --- | --- |
-| ComfyUI 搜不到 `CLIProxyAPI Provider` | clone 到了 `main`/Registry 原版、错误的 `custom_nodes` 目录、没重启后端 | `git branch --show-current` 应是 `feat/cliproxyapi-native-provider`；检查 `__init__.py` 存在且后端启动日志没有 import error |
-| 只看到 API Provider 或 Codex OAuth Provider | 安装了原作者版或另一个 ComfyUI 实例 | 禁用重复包，使用 fork 当前开发分支 |
+| ComfyUI 搜不到 `CLIProxyAPI Provider` | 安装了原作者的 Registry 版本、错误的 `custom_nodes` 目录、没重启后端 | 确认 remote 指向 `Fuck-GH-Admin/comfyui-gpt-image-bridge` 且分支是 `main`；检查后端日志的 import error |
+| 只看到 API Provider 或 Codex OAuth Provider | 安装了原作者版或另一个 ComfyUI 实例 | 禁用重复包，使用 fork 当前 `main` |
 | ComfyUI 节点是红色/报 missing node | Python 环境依赖、目录嵌套、节点包导入失败 | 用启动 ComfyUI 的**相同 Python**安装 `requirements.txt`；检查日志 |
 | Queue 立即返回 400 或 Key 守卫拒绝 | 前端 JS 未正确加载，明文 Key 进入 `/prompt` | 完全重启 ComfyUI，浏览器强制刷新，重新输入 Key；不要通过普通 STRING 节点传明文 |
 | `session_credential_required` | 没有使用受保护的密码控件提交 | 确认插件前端扩展加载成功；重新输入 Key 再 Queue |
@@ -30,7 +30,7 @@ D. Codex 上游层 → OAuth 是否有效？服务端模型是否可用？额度
 | HTTP 400/422 | 请求参数或模型不兼容 | 先 `size=auto`、`quality=auto`、`output_format=png`，`n=1` |
 | HTTP 429 | 并发/配额/限流 | 停止并发，确认实际额度；不要立刻批量重试 |
 | HTTP 5xx / 断线 | 代理、上游或网络故障 | 看代理日志与 request ID，确认请求是否可能已完成后再重试 |
-| 纯文生图成功，但参考图 Generate 失败 | `/v1/responses` 主模型 / 图片工具 / `multimedia` 配置 | 检查 `responses_model`、`image_model`；参考图不是同一条 Images 路线 |
+| 纯文生图成功，但参考图 Generate 失败 | 先检查 `reference_mode`、`/v1/images/edits` | 默认 `images_edit` 无须文本主模型；只有手动切到 `responses` 时才排查 `responses_model`、工具路由及 DNS |
 | Generate 可以，Edit 失败 | multipart 支持、图片数量、Mask、编辑模型权限 | 用「单张基础图 + 无 Mask + n=1」先做最小 Edit |
 | 输出为空或报无图片 | 上游返回了文字/拒绝、SSE 不符合接口、Base64/URL 解析失败 | 记录脱敏的报告、代理的模型/HTTP 状态；不要把空输出称作成功 |
 | 保存后找不到 PNG | 没连接 Save Image、输出目录另设、其他 ComfyUI 实例 | 确认 Generate/Edit 的 `image` 接到 Save Image、检查当前实例输出目录 |
@@ -48,7 +48,7 @@ git branch --show-current
 git log -1 --format='%H %s'
 ```
 
-当前开发分支应是 `feat/cliproxyapi-native-provider`，并且在实际 ComfyUI 的 `custom_nodes` 里。若仍为 `main`，这份 fork 的 CLIProxyAPI Provider 很可能根本没安装进去。
+当前应该安装 **本 fork 的 `main`**，位于实际 ComfyUI 的 `custom_nodes` 中。原作者的 `main` 或 Registry 版本可能没有 CLIProxyAPI Provider；先核对 `git remote -v`，不要只看分支名称。
 
 完全停止 ComfyUI，再启动。需要看控制台中是否出现加载该包的成功记录以及 Python 报错。**浏览器重新打开画布不会自动重载服务器端 Python 插件**。
 
@@ -114,17 +114,12 @@ POST /v1/images/generations
 
 ### B：带参考图的 Generate
 
-期待：
+**默认 `reference_mode=images_edit`**：实际向 `POST /v1/images/edits` 发送 multipart，首张参考图是 Image 1，提示词要求生成新图。与无图 Generations 语义不同。
 
-```text
-POST /v1/responses
-top-level model = responses_model
-tools[0].model = image_model
-```
-
-这条请求还需携带 `input_image`。检查 `multimedia.disable-image-generation`：`true` 会全部禁用，`"chat"` 可能影响非 Images 路径的图片工具。主模型名和图片模型名必须分别正确。
-
-参考图应从 `reference_1` 开始连续接入。出现只有文字的响应、没有 image_generation_call 时，说明请求或服务端工具调用未得到可用图片结果；需要看代理与上游的诊断。
+1. 先用 `reference_1` 一张图、`image_complexity=auto`、`n=1` 验证 Images Edit。
+2. 图片模型为 `gpt-image-2.6-flare` 或 `gpt-image-2.6-sunburst` 时，确认代理 v8.0.57+ 源码能识别，并确认**你的账号确实有权限**；不行先退回本机已通过的 `gpt-image-2`。
+3. 如果手动切换了 `reference_mode=responses`，才需要设置 `responses_model` 并检查 `POST /v1/responses`。之前默认 `gpt-5.4-mini` 返回 `model_not_found`，所以新 Provider 不再强制填它。
+4. 如代理返回 `lookup chatgpt.com: no such host`，应先排查 CLIProxyAPI 自身 DNS / 上游代理配置；这是网络故障，不是图片模型错误。
 
 ### C：图片编辑
 

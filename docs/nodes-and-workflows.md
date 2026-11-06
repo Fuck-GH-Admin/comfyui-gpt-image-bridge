@@ -9,9 +9,9 @@
 | GPT Image Bridge · CLIProxyAPI Provider | `GPTImageBridgeCLIProxyAPIProvider` | 客户端 Key、代理地址、图片模型、Responses 主模型 | `GPT_IMAGE_PROVIDER`；推荐 |
 | GPT Image Bridge · API Provider | `GPTImageBridgeAPIProvider` | 通用 API Key、Base URL、model、protocol、自定义端点/异步参数 | `GPT_IMAGE_PROVIDER`；第三方兼容 API |
 | GPT Image Bridge · Codex OAuth Provider | `GPTImageBridgeOAuthProvider` | 图片 model、protocol | `GPT_IMAGE_PROVIDER`；旧的内置 Codex 登录方案 |
-| GPT Image Bridge · Generate | `GPTImageBridgeGenerate` | Provider、提示词、生成参数、至多 9 张独立参考图 | `IMAGE`、`revised_prompt`、`request_report` |
+| GPT Image Bridge · Generate | `GPTImageBridgeGenerate` | Provider、提示词、生成参数、至多 16 张独立参考图 | `IMAGE`、`revised_prompt`、`request_report` |
 | GPT Image Bridge · Edit | `GPTImageBridgeEdit` | Provider、基础图、提示词、生成参数、参考图列表、可选 MASK | 同上 |
-| GPT Image Bridge · Edit Reference List (Image 2–9) | `GPTImageBridgeReferenceList` | `image_2`…`image_9` | `GPT_IMAGE_REFERENCES`，只用于 Edit |
+| GPT Image Bridge · Edit Reference List (Image 2–16) | `GPTImageBridgeReferenceList` | `image_2`…`image_16` | `GPT_IMAGE_REFERENCES`，只用于 Edit |
 
 所有节点都在 `GPT Image Bridge` 分类下。需要保存输出时，**手动添加 ComfyUI 的 Save Image 节点**；本插件不是自动写文件节点。
 
@@ -23,26 +23,29 @@
 
 ## 2. CLIProxyAPI Provider 配置
 
-| 控件名 | 默认 | 实际含义 | 常见错误 |
-| --- | --- | --- | --- |
-| `api_key` | 空 | `config.yaml` 的 `access.api-keys` 中一条客户端 Key | 误填 Codex OAuth Token、误填 OpenAI 平台 API Key |
-| `base_url` | `http://127.0.0.1:8317/v1` | 必须是 **ComfyUI 进程可达** 的 CLIProxyAPI HTTP 地址；若是容器，localhost 不指向宿主机 | 把 `/v1` 填两次、端口错误、代理未启动 |
-| `image_model` | `gpt-image-2` | Images API 和 Responses 图片工具请求的模型名称；实际支持以当前代理为准 | 将主模型与图片模型混淆 |
-| `responses_model` | `gpt-5.4-mini` | 带参考图 Generate 时 `/v1/responses` 的主模型 | 选择未授权或不支持图片工具的模型 |
+| 控件 | 默认 | 用途 |
+| --- | --- | --- |
+| `api_key` | 空 | CLIProxyAPI 客户端访问 Key，非 Codex OAuth Token |
+| `base_url` | `http://127.0.0.1:8317/v1` | ComfyUI 能访问的代理地址 |
+| `image_model` | `gpt-image-2.6-flare` | 图片型号；可选 `gpt-image-2.6-sunburst` 或实际授权的旧型号 |
+| `responses_model` | 空 | 仅在 `reference_mode=responses` 时需要文本主模型 |
+| `reference_mode` | `images_edit` | 参考图默认经 Images Edit 生成新图，或手动选择 `responses` |
+| `image_complexity` | `auto` | 2.6 规划复杂度；`low`、`medium`、`high` 可选 |
 
-该 Provider **没有** `api_protocol`、`use_async`、`generate_endpoint`、`edit_endpoint` 等输入。代码固定采用自动路由和同步 Images API；不支持从画布配置自定义异步任务协议。需要其他服务特有协议时换用通用 API Provider。
+新增 `reference_mode` 和 `image_complexity` 是可选字段。旧 Provider 的四个必需输入保持原名，旧的 Generate/Edit 节点 ID 均不变。通用 API Provider / 旧 Codex OAuth Provider 的原有自动选路没有改动。
 
-即使只是第一次做纯文生图，`responses_model` 控件仍需非空（该值在纯文本 Images 请求中不会使用）。
+### 三条操作路径
 
-### 路由选择
+| 操作 | 路径 | 区别 |
+| --- | --- | --- |
+| Generate，无参考图 | `/v1/images/generations` | 真正从零生图，无文本主模型 |
+| Generate，有参考图、默认 `images_edit` | `/v1/images/edits` | 首张参考图作为输入 Image 1，以指令要求**生成新图**，其余参考图按顺序附加 |
+| Generate，有参考图、可选 `responses` | `/v1/responses` | 文本主模型调用 `image_generation` 工具，需要填写有效 `responses_model` |
+| Edit | `/v1/images/edits` | Image 1 是待修改基础图，非单纯视觉参考 |
 
-| 操作 | 条件 | 代理路径 | 特点 |
-| --- | --- | --- | --- |
-| Generate | 无任何参考图 | `POST /v1/images/generations` | JSON，请求 `model=image_model` |
-| Generate | 至少一张参考图 | `POST /v1/responses` | JSON/SSE，`model=responses_model`，`tools[].model=image_model` |
-| Edit | 基础图已连接 | `POST /v1/images/edits` | multipart，基础图在 Image 1，参考图依次为 Image 2… |
+**参考图引导的 Images Edit 并非真正无参考图的 Generations。** 模型可能保留原有构图；此差异不会被隐藏。初次验收建议默认 Images 路线，`n=1`，`image_complexity=auto`。
 
-**这是本 fork 选择的 API 组合，不是所有代理版本都必然支持的接口合同**。如果 References Generate 失败但纯文生图成功，首先排查 `/v1/responses` 模型、工具与 `multimedia.disable-image-generation`，不要反复修改 Images API 地址。
+OpenAI 官方 2026-11-04 发布了 Flare / Sunburst；CLIProxyAPI v8.0.57 代码识别这两个 ID，但订阅账号的访问权限需要自行实测。详见[模型兼容说明](model-support.md)。
 
 ## 3. Generate 参数表
 
@@ -50,14 +53,15 @@
 | --- | --- | --- |
 | `provider` | `GPT_IMAGE_PROVIDER` | 从上述三个 Provider 之一连接 |
 | `prompt` | 多行文本 | 图片生成指令；不能为空 |
-| `size` | `auto`、`1024x1024`、`1536x1024`、`1024x1536` | 只表示**请求尺寸**；服务可能不支持或拒绝 |
-| `quality` | `auto`、`low`、`medium`、`high` | 不同服务可能只支持一部分 |
+| `size` | `auto`、基础尺寸、2K/4K 预设、`Custom` | 按所选模型能力请求，旧型号可能拒绝 |
+| `custom_width`、`custom_height` | 可选整数，默认 1024×1024 | 仅 `size=Custom` 时有效：480–3840、16 的倍数、比例 ≤3:1、像素 655,360–8,294,400 |
+| `quality` | `auto`、`low`、`medium`、`high`、`xhigh`、`max` | 2.5/2.6 可用更高质量档位，旧型号可能拒绝 |
 | `background` | `auto`、`opaque`、`transparent` | 透明图建议配 PNG/WebP；不保证上游兑现 |
 | `output_format` | `png`、`jpeg`、`webp` | 后端返回可能受模型/路由约束；ComfyUI 的 Save Image 通常存 PNG |
 | `moderation` | `auto`、`low` | 服务端可能忽略或拒绝 |
 | `n` | 整数 1–8 | 需要多少张输出。**CLIProxyAPI 专用模式每张对应一次独立上游请求** |
 | `timeout_sec` | 整数 30–3600 | 超过后本地等待结束，未必代表上游操作已取消 |
-| `reference_1`…`reference_9` | 可选 `IMAGE` | 按顺序连接，不允许中间空洞；每个入口单张，非 IMAGE batch |
+| `reference_1`…`reference_16` | 可选 `IMAGE` | 按顺序连接，不允许中间空洞；每个入口单张，非 IMAGE batch |
 
 首次接入建议采用全部 `auto`、`png`、`n=1`、`timeout_sec=300`。只有验证了最简单请求后，才调高级选项。
 
@@ -82,10 +86,10 @@
 ```
 
 - Generate 的参考图不是待修改底图，仅作为新图上下文。
-- 前端默认显示三个入口，连接当前末尾入口会扩展下一个（至多 9 张）。
+- 前端默认显示三个入口，连接当前末尾入口会扩展下一个（至多 16 张）。
 - `reference_1`、`reference_2`…从 1 开始**连续**连接。中间有空洞会报错。
 - 每个参考图各自编码，不要求尺寸相同；不可把多个图片帧放进单个入口。
-- CLIProxyAPI 下这条工作流改走 Responses，涉及两个模型名；**它不等同于 Edit 的 multipart 路径**。
+- CLIProxyAPI 下默认走 **Images Edit multipart**：第一张参考图作为输入 Image 1，后续按 Image 2、3……有序追加，提示词明确要求“生成新图”。这与完全从零的 Generations 不完全等价。选择 `reference_mode=responses` 才会调用文本主模型 + 图片工具；两种模式要分别验收。
 
 ## 4. Edit 参数和接线
 
@@ -98,6 +102,7 @@ Edit 与 Generate 共享 `provider`、`prompt`、`size`、`quality`、`backgroun
 | `base_image（Image 1）` | **必需**。原始待编辑图片，通常接 Load Image 的 `IMAGE` |
 | `references（Image 2 开始）` | **可选**。来自 `Edit Reference List` 的参考图集合，不能直接接普通 IMAGE |
 | `mask` | **可选**。ComfyUI `MASK`，尺寸必须与基础图一致；部分代理/模型不支持 Mask |
+| `custom_width` / `custom_height` | **可选**。`size=Custom` 时指定输出宽高，需为 16 的倍数并满足官方像素/比例限制 |
 
 ```text
 [Load Image：原图] ── IMAGE ────────────────► [Edit.base_image（Image 1）]
@@ -109,7 +114,7 @@ Edit 与 Generate 共享 `provider`、`prompt`、`size`、`quality`、`backgroun
 
 - **Image 1 永远是待编辑的基础图**。
 - Image 2 是 `image_2`，Image 3 是 `image_3`，顺序严格保留到 HTTP 请求中。
-- `Edit Reference List` 有 `image_2`～`image_9` 八个接口，缺少中间接口会报错。
+- `Edit Reference List` 有 `image_2`～`image_16` 十五个接口，缺少中间接口会报错。
 - 单图编辑不需要 `Edit Reference List`，只连 Image 1。
 - 参考图的宽高可以不同。
 - Images Edit 使用 multipart；如果模型不支持指定选项会返回请求错误，避免反复提交可能产生费用的请求。

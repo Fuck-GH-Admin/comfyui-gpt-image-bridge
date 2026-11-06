@@ -83,6 +83,7 @@ def cliproxy_provider():
         base_url="http://127.0.0.1:8317/v1",
         model="gpt-image-2",
         responses_model="gpt-5.4-mini",
+        reference_generate_mode="responses",
         api_protocol="auto",
         use_custom_endpoints=False,
         use_async=False,
