@@ -2,7 +2,7 @@
 
 本文面向实际使用 ComfyUI 画布的人。**CLIProxyAPI Provider 是推荐入口**；原生 OAuth Provider、通用 API Provider 继续保留，目的是兼容原有工作流和其他供应商。先按 [本机安装与登录](setup-cli-proxy-api.md) 完成环境准备。
 
-## 1. 六个节点及其职责
+## 1. 七个节点及其职责
 
 | 画布节点名 | 实际类名 | 输入 | 输出/功能 |
 | --- | --- | --- | --- |
@@ -12,14 +12,15 @@
 | GPT Image Bridge · Generate | `GPTImageBridgeGenerate` | Provider、提示词、生成参数、至多 16 张独立参考图 | `IMAGE`、`revised_prompt`、`request_report` |
 | GPT Image Bridge · Edit | `GPTImageBridgeEdit` | Provider、基础图、提示词、生成参数、参考图列表、可选 MASK | 同上 |
 | GPT Image Bridge · Edit Reference List (Image 2–16) | `GPTImageBridgeReferenceList` | `image_2`…`image_16` | `GPT_IMAGE_REFERENCES`，只用于 Edit |
+| GPT Image Bridge · Save Image | `GPTImageBridgeSaveImage` | `IMAGE`、文件格式、质量、文件名前缀、JPEG 背景色 | 保存 PNG/JPEG/WebP 到 ComfyUI `output/`，并继续输出原 IMAGE batch |
 
-所有节点都在 `GPT Image Bridge` 分类下。需要保存输出时，**手动添加 ComfyUI 的 Save Image 节点**；本插件不是自动写文件节点。
+所有节点都在 `GPT Image Bridge` 分类下。保存生成结果可以使用本插件的 **Save Image**（PNG/JPEG/WebP），也可以继续使用 ComfyUI 原生 Save Image。
 
 ### 主要输出
 
 - `image`：真实 `IMAGE` 张量，可连 Save Image、放大、裁剪等后处理。实际转换为 ComfyUI 图像 batch；当 `n>1` 时，输出多张。
 - `revised_prompt`：上游若返回修订后的提示词则提供文本，否则为空串；**不要假定一定有值**。
-- `request_report`：字符串形式的脱敏 JSON，包括协议选择依据、请求次数、端点、响应状态与耗时等；`output.conformance` 会将请求尺寸/格式/透明背景与解码后的实际图片逐项比对，发现上游未兑现时给出 warning。它不是图片，也不是上游原始响应；见 [诊断与安全](security.md)。
+- `request_report`：字符串形式的脱敏 JSON，包括协议选择依据、请求次数、端点、响应状态与耗时等；`output.conformance` 会将请求尺寸/格式/透明背景与解码后的实际图片逐项比对，发现上游未兑现时给出 warning。被协议忽略或无法比较的字段不会被误报为 pass。它不是图片，也不是上游原始响应；见 [诊断与安全](security.md)。
 
 ## 2. CLIProxyAPI Provider 配置
 
@@ -170,6 +171,8 @@ ComfyUI Generate (n=4)
 图片输入与输出都有编码、尺寸和体积限制；高分辨率、多参考图可能增加请求体积、内存占用、延迟与上游失败概率。参数不被服务支持时应该调整模型或请求，而不是把一切问题归咎于 ROCm。
 
 若已配置其他 ComfyUI 本地后处理节点（例如自定义放大器），是否需要 GPU/ROCm 取决于那些节点，**不由本插件决定**。
+
+本插件保存节点的详细编码行为见[本地图片导出](local-image-export.md)。
 
 请求参数与真实响应的核验规则见[输出参数兑现核验](output-conformance.md)。
 
