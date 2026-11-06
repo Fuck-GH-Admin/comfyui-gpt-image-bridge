@@ -1,0 +1,224 @@
+{
+  "plugin_commit": "c7c334ad180586affaa8eba962604c3bfe762974",
+  "comfyui_commit": "6b203164749929ab2ed01c9fd4638381ba78de71",
+  "cases": [
+    {
+      "case": "edit-base",
+      "prompt_id": "54a1cc06-435a-4dfb-b34b-2376a49ec71f",
+      "status": "success",
+      "expected": "success",
+      "duration_sec": 19.18,
+      "history_key_absent": true,
+      "images": [
+        {
+          "filename": "edit-base_00001_.png",
+          "dimensions": [
+            1536,
+            1024
+          ],
+          "bytes": 938898,
+          "sha256": "275f4de2121d1c898eb9c4a51dd1bb18d431ea80e52c0f35d85d91b9f0d0b123",
+          "png_key_absent": true
+        }
+      ],
+      "protocol": "images",
+      "operation": "edit",
+      "input_roles": [
+        {
+          "batch_index": 0,
+          "encoded_bytes": 852767,
+          "height": 1024,
+          "mime_type": "image/png",
+          "role": "base",
+          "source_slot": 1,
+          "width": 1536
+        }
+      ],
+      "requests": [
+        {
+          "attempts": 1,
+          "elapsed_ms": 18150,
+          "endpoint": "/v1/images/edits",
+          "http_status": 200,
+          "index": 1,
+          "multipart_image_field": "image",
+          "phase": "sync",
+          "request_id": null
+        }
+      ]
+    },
+    {
+      "case": "reference-generate",
+      "prompt_id": "b98963ff-192f-4876-9c31-82bb338138e8",
+      "status": "error",
+      "expected": "success",
+      "duration_sec": 1.01,
+      "history_key_absent": true,
+      "error": {
+        "message": "unknown provider for model gpt-5.4-mini",
+        "http_status": 400,
+        "error_type": "invalid_request_error",
+        "error_code": "model_not_found",
+        "attempts": 1,
+        "protocol": "responses",
+        "retryable": false
+      }
+    },
+    {
+      "case": "edit-reference",
+      "prompt_id": "4ad9dede-833a-4a3c-a078-6a8d28ba2d7c",
+      "status": "success",
+      "expected": "success",
+      "duration_sec": 19.03,
+      "history_key_absent": true,
+      "images": [
+        {
+          "filename": "edit-reference_00001_.png",
+          "dimensions": [
+            1536,
+            1024
+          ],
+          "bytes": 946714,
+          "sha256": "2cfa89702d48af0dd86e7d491672e105be53fa24479f0f593e8f664fe64dcc4f",
+          "png_key_absent": true
+        }
+      ],
+      "protocol": "images",
+      "operation": "edit",
+      "input_roles": [
+        {
+          "batch_index": 0,
+          "encoded_bytes": 852767,
+          "height": 1024,
+          "mime_type": "image/png",
+          "role": "base",
+          "source_slot": 1,
+          "width": 1536
+        },
+        {
+          "batch_index": 0,
+          "encoded_bytes": 1302,
+          "height": 192,
+          "mime_type": "image/png",
+          "role": "reference",
+          "source_slot": 2,
+          "width": 256
+        }
+      ],
+      "requests": [
+        {
+          "attempts": 1,
+          "elapsed_ms": 17912,
+          "endpoint": "/v1/images/edits",
+          "http_status": 200,
+          "index": 1,
+          "multipart_image_field": "image[]",
+          "phase": "sync",
+          "request_id": null
+        }
+      ]
+    },
+    {
+      "case": "empty-key",
+      "prompt_id": "d179e70c-fb7d-4dc5-b2ee-dae077c2ace1",
+      "status": "error",
+      "expected": "error",
+      "duration_sec": 1.01,
+      "history_key_absent": true,
+      "error": {
+        "message": "API key is empty. Enter it in GPT Image Bridge · API Provider.",
+        "http_status": null,
+        "error_type": "authentication",
+        "error_code": "credential_missing",
+        "attempts": 1,
+        "protocol": null,
+        "retryable": false
+      }
+    },
+    {
+      "case": "invalid-proxy-key",
+      "prompt_id": "046a60f0-8b0c-46fc-9344-5cbbb9574986",
+      "status": "error",
+      "expected": "error",
+      "duration_sec": 1.01,
+      "history_key_absent": true,
+      "error": {
+        "message": "Invalid API key",
+        "http_status": 401,
+        "error_type": null,
+        "error_code": null,
+        "attempts": 1,
+        "protocol": "images",
+        "retryable": false
+      }
+    },
+    {
+      "case": "expired-or-unknown-handle",
+      "prompt_id": "a178a194-8a76-4703-9965-86533bcf764d",
+      "status": "error",
+      "expected": "error",
+      "duration_sec": 1.01,
+      "history_key_absent": true,
+      "error": {
+        "message": "The temporary API credential expired or is unavailable. Re-enter the API Key in GPT Image Bridge · API Provider and queue again.",
+        "http_status": null,
+        "error_type": "authentication",
+        "error_code": "session_credential_missing",
+        "attempts": 1,
+        "protocol": null,
+        "retryable": false
+      }
+    },
+    {
+      "case": "unavailable-proxy",
+      "prompt_id": "77bea7fd-0509-468f-902a-cab74a735a33",
+      "status": "error",
+      "expected": "error",
+      "duration_sec": 1.01,
+      "history_key_absent": true,
+      "error": {
+        "message": "Network transport failed: <urlopen error [Errno 111] Connection refused>",
+        "http_status": null,
+        "error_type": "network",
+        "error_code": "network_error",
+        "attempts": 1,
+        "protocol": "images",
+        "retryable": true
+      }
+    },
+    {
+      "case": "reference-generate-supported-model",
+      "prompt_id": "d91735fa-e3ab-4378-a79d-60a1fa06727f",
+      "status": "error",
+      "expected": "success",
+      "duration_sec": 1.01,
+      "history_key_absent": true,
+      "error": {
+        "message": "Post \"https://chatgpt.com/backend-api/codex/responses\": utls: dial upstream: dial tcp: lookup chatgpt.com: no such host",
+        "http_status": 500,
+        "error_type": "server_error",
+        "error_code": "internal_server_error",
+        "attempts": 1,
+        "protocol": "responses",
+        "retryable": true
+      }
+    },
+    {
+      "case": "consumed-handle-replay",
+      "prompt_id": "c590d738-f010-444c-8395-674ff8537f2b",
+      "status": "error",
+      "expected": "error",
+      "duration_sec": 0.27,
+      "history_key_absent": true,
+      "error": {
+        "message": "The temporary API credential expired or is unavailable. Re-enter the API Key in GPT Image Bridge · API Provider and queue again.",
+        "http_status": null,
+        "error_type": "authentication",
+        "error_code": "session_credential_missing",
+        "attempts": 1,
+        "protocol": null,
+        "retryable": false
+      }
+    }
+  ]
+}
