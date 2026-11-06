@@ -755,7 +755,7 @@ class GPTImageBridgeSaveImage:
 
         if not hasattr(images, "detach") or not hasattr(images, "shape"):
             raise ValueError("images must be a ComfyUI IMAGE tensor.")
-        batch = images.detach().cpu().numpy()
+        batch = images.detach().cpu().float().numpy()
         if batch.ndim != 4 or batch.shape[0] < 1:
             raise ValueError("images must have shape [batch, height, width, channels].")
         height, width, channels = batch.shape[1:]
