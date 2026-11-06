@@ -464,7 +464,13 @@ def run(root: Path):
         with REQUESTS_LOCK:
             observed = list(REQUESTS)
         assert [item["kind"] for item in observed] == [
-            "generate", "generate", "reference_image_edit", "reference", "edit"
+            "generate",
+            "generate",
+            "generate",
+            "generate",
+            "reference_image_edit",
+            "reference",
+            "edit",
         ], "Unexpected proxy requests: " + str(observed)
         assert all(item["valid"] for item in observed)
         print("[PASS] 5 proxy HTTP requests matched both reference modes", flush=True)
