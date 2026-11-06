@@ -2,7 +2,9 @@
 
 本项目严格区分**源码核对**、**单元测试**、**真实 ComfyUI 后端测试**、**CLIProxyAPI 实际进程测试**和**Codex 上游真实图片生成**。前面的测试通过不能代替后面的验收。
 
-**真实账号实机证据**：[2026-11-06 本地验收报告](local-acceptance-2026-11-06.md)和[脱敏证据 JSON](evidence/local-acceptance-2026-11-06.json)。旧型号 `gpt-image-2` 的纯文 Generate、基础 Edit、带参考图 Edit 和浏览器控件已通过；当时 Responses 参考图 Generate 失败，不能记为 PASS。**新版 2.6 两个型号及默认 Images Edit 参考图生成尚未通过真实账户验收。**
+**真实账号实机证据**：[2026-11-06 本地验收报告](local-acceptance-2026-11-06.md)和[脱敏证据 JSON](evidence/local-acceptance-2026-11-06.json)。旧型号 `gpt-image-2` 的纯文 Generate、基础 Edit、带参考图 Edit 和浏览器控件已通过；当时 Responses 参考图 Generate 失败，不能记为 PASS。新版真实结果及已发现问题见下面的 Main 0.7.0 更新报告。
+
+**更新：** [Main 0.7.0 全功能验收](main-acceptance-2026-11-06.md)已完成两个 2.6 型号及默认参考图模式的真实测试，并记录尺寸、格式、透明度和 Responses 等失败项。补测为 291 PASS + 1 XFAIL、JS 14 PASS，另有 19 项实际 HTTP 替身检查。下表保留原有 CI 基线，不能将“请求成功”理解为全部参数生效。
 
 ## 1. 当前验收矩阵（2026-11-06）
 
