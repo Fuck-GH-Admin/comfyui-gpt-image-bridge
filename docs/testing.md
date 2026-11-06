@@ -21,7 +21,7 @@
 | Mask、16 张 Generate 参考图、Edit 基础图+15张参考图 | 用户本机真实工作流 | 已执行成功；不等于复杂身份一致性或蒙版外逐像素保证 |
 | 自定义/2K/4K 尺寸、JPEG/WebP | 用户本机真实服务 | **未达标**；多个请求仍返回 PNG 1536×1024，详见实机报告 |
 | Alpha 解码与 ComfyUI 保存 | RGBA/调色板透明/混合批次单测 + 真实 ComfyUI SaveImage 集成 | **PASS**；上游返回 RGBA 时完整保留。真实 Codex `background=transparent` 请求仍返回 RGB，透明生成尚未 PASS |
-| 本地 PNG/JPEG/WebP 保存节点 | saver 单测 + ComfyUI HTTP/队列集成 | **本分支待 CI**；验证输出目录、批次命名、WebP Alpha、JPEG 背景合成 |
+| 本地 PNG/JPEG/WebP 保存节点 | saver 单测 + ComfyUI 0.44.0 CPU HTTP/队列集成 | **PASS**；验证七节点注册、输出目录、批次命名、WebP Alpha、JPEG 背景合成 |
 | Responses 参考图 | 用户本机真实请求 | **失败**；代理访问 `chatgpt.com` DNS 解析失败 |
 | Chat Completions 图片路由 | 用户本机真实请求 | **失败**；当前 CLIProxyAPI 图片型号拒绝该路由 |
 | Windows/macOS、Docker 组合及长期并发 | 本轮环境未覆盖 | **NOT_RUN** |
