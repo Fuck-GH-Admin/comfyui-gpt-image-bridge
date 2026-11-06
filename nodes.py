@@ -286,8 +286,10 @@ class GPTImageBridgeCLIProxyAPIProvider:
                         "default": "auto",
                         "label": "图像规划复杂度",
                         "tooltip": (
-                            "GPT Image 2.6 支持 low / medium / high。"
-                            "auto 不向服务器传 complexity；与渲染质量 quality 不同。"
+                            "OpenAI Images API 的 2.6 支持 low / medium / high。"
+                            "但 CLIProxyAPI 8.0.57 的 Codex Images 转换器不会转发 complexity；"
+                            "默认 Images 路径下此控件暂不生效。"
+                            "auto 不发送字段；与渲染质量 quality 不同。"
                         ),
                     },
                 ),
