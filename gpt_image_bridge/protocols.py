@@ -2523,6 +2523,106 @@ def _base_report(
     }
 
 
+
+def image_output_conformance(
+    *,
+    size: str,
+    background: str,
+    output_format: str,
+    images: list[dict[str, Any]],
+    ignored_options: tuple[str, ...] | list[str] = (),
+) -> dict[str, Any]:
+    """Compare requested image controls with properties observed in returned bytes."""
+    ignored = set(ignored_options)
+    requested = {
+        "size": size,
+        "background": background,
+        "output_format": output_format,
+    }
+    warnings: list[dict[str, Any]] = []
+
+    if size != "auto" and "size" not in ignored:
+        match = re.fullmatch(r"(\d+)x(\d+)", str(size).strip())
+        if match:
+            expected_width, expected_height = map(int, match.groups())
+            mismatches = [
+                {
+                    "index": index + 1,
+                    "requested": f"{expected_width}x{expected_height}",
+                    "actual": f"{image.get('width')}x{image.get('height')}",
+                }
+                for index, image in enumerate(images)
+                if image.get("width") != expected_width
+                or image.get("height") != expected_height
+            ]
+            if mismatches:
+                warnings.append(
+                    {
+                        "field": "size",
+                        "type": "size_mismatch",
+                        "message": "The returned image dimensions do not match the requested size.",
+                        "images": mismatches,
+                    }
+                )
+
+    expected_formats = {"png": "PNG", "jpeg": "JPEG", "webp": "WEBP"}
+    expected_format = expected_formats.get(str(output_format).lower())
+    if expected_format and "output_format" not in ignored:
+        mismatches = [
+            {
+                "index": index + 1,
+                "requested": expected_format,
+                "actual": image.get("format"),
+            }
+            for index, image in enumerate(images)
+            if str(image.get("format", "")).upper() != expected_format
+        ]
+        if mismatches:
+            warnings.append(
+                {
+                    "field": "output_format",
+                    "type": "format_mismatch",
+                    "message": "The returned image encoding does not match the requested output format.",
+                    "images": mismatches,
+                }
+            )
+
+    if background == "transparent" and "background" not in ignored:
+        mismatches = []
+        for index, image in enumerate(images):
+            alpha_extrema = image.get("alpha_extrema")
+            has_transparent_pixels = (
+                image.get("has_alpha") is True
+                and isinstance(alpha_extrema, (list, tuple))
+                and len(alpha_extrema) == 2
+                and int(alpha_extrema[0]) < 255
+            )
+            if not has_transparent_pixels:
+                mismatches.append(
+                    {
+                        "index": index + 1,
+                        "has_alpha": bool(image.get("has_alpha")),
+                        "alpha_extrema": alpha_extrema,
+                    }
+                )
+        if mismatches:
+            warnings.append(
+                {
+                    "field": "background",
+                    "type": "transparency_missing",
+                    "message": "Transparent background was requested, but the returned image contains no transparent pixels.",
+                    "images": mismatches,
+                }
+            )
+
+    return {
+        "status": "warning" if warnings else "pass",
+        "requested": requested,
+        "checked_images": len(images),
+        "warnings": warnings,
+    }
+
+
 def _execute_operation(
     *,
     provider: ProviderConfig,
@@ -2804,6 +2904,17 @@ def _execute_operation(
         "images": all_metadata,
         "revised_prompt_present": bool(revised_prompt),
     }
+    protocol_notes = report.get("protocol_notes", {})
+    ignored_options = protocol_notes.get("ignored_options", [])
+    if protocol_notes.get("size_transport") == "prompt_instruction":
+        ignored_options = [*ignored_options, "size"]
+    report["output"]["conformance"] = image_output_conformance(
+        size=size,
+        background=background,
+        output_format=output_format,
+        images=all_metadata,
+        ignored_options=ignored_options,
+    )
     report["elapsed_ms"] = round((time.monotonic() - started) * 1000)
     safe_report = sanitize(report, secrets)
     assert isinstance(safe_report, dict)
