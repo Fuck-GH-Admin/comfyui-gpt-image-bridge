@@ -18,6 +18,7 @@ else:
         GPTImageBridgeCLIProxyAPIProvider,
         GPTImageBridgeOAuthProvider,
         GPTImageBridgeReferenceList,
+        GPTImageBridgeSaveImage,
     )
 
 NODE_CLASS_MAPPINGS = {
