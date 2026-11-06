@@ -102,10 +102,10 @@ def test_png_batch_preserves_rgba_and_uses_comfyui_output_folder(tmp_path, monke
     assert all(item["subfolder"] == "bridge" and item["type"] == "output" for item in saved)
     with Image.open(tmp_path / "output/bridge/png_00001_.png") as image:
         assert image.mode == "RGBA"
-        assert list(image.getchannel("A").getdata()) == [0, 255]
+        assert [image.getchannel("A").getpixel((0, 0)), image.getchannel("A").getpixel((1, 0))] == [0, 255]
     with Image.open(tmp_path / "output/bridge/png_00002_.png") as image:
         assert image.mode == "RGBA"
-        assert list(image.getchannel("A").getdata()) == [127, 255]
+        assert [image.getchannel("A").getpixel((0, 0)), image.getchannel("A").getpixel((1, 0))] == [127, 255]
 
 
 def test_webp_lossless_keeps_alpha_and_batch_outputs(tmp_path, monkeypatch):
@@ -134,10 +134,10 @@ def test_webp_lossless_keeps_alpha_and_batch_outputs(tmp_path, monkeypatch):
     ]
     with Image.open(tmp_path / "output/bridge/webp_00001_.webp") as image:
         assert image.mode == "RGBA"
-        assert list(image.getchannel("A").getdata()) == [0, 255]
+        assert [image.getchannel("A").getpixel((0, 0)), image.getchannel("A").getpixel((1, 0))] == [0, 255]
     with Image.open(tmp_path / "output/bridge/webp_00002_.webp") as image:
         assert image.mode == "RGBA"
-        assert list(image.getchannel("A").getdata()) == [127, 255]
+        assert [image.getchannel("A").getpixel((0, 0)), image.getchannel("A").getpixel((1, 0))] == [127, 255]
 
 
 def test_jpeg_composites_alpha_over_selected_background(tmp_path, monkeypatch):
