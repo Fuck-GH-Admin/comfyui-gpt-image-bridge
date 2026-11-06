@@ -1,8 +1,10 @@
 name: ComfyUI integration smoke
 
 on:
+  push:
+    branches: [main]
   pull_request:
-    branches: [main, feat/cliproxyapi-native-provider]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
