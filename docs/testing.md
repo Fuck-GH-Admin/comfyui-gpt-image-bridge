@@ -11,7 +11,7 @@
 | 层次 | 验证方法 | 当前结论 |
 | --- | --- | --- |
 | Python 单元测试 | 合并 PR #6–#11 后，含新服务商配置的安全与路由测试 | **333 passed，无 warning** |
-| JavaScript 单元测试 | main 合并 PR #6–#9 后的 GitHub Actions | **14/14 PASS** |
+| JavaScript 单元测试 | 主线此前 14 项；新增上下文 UI 单元测试在 PR #12 中单独核验 | **14/14 历史基线；PR #12 待 CI** |
 | 真实 ComfyUI 后端 | Ubuntu Runner 启动 ComfyUI 0.44.0，HTTP/队列执行 | **PASS**；远端图片 API 是模拟服务，不是真实 CLIProxyAPI |
 | 本机 HTTP 协议矩阵 | 19/19 场景，另有凭据路由 2/2 | **PASS**；使用 HTTP 替身 |
 | 浏览器控件与工作流重载 | 本机真实浏览器，DOM/图对象检查 | **17/17 PASS**；这是人工本机验收，不是 GitHub CI |
@@ -31,6 +31,14 @@
 当前主线单测：[Python 333 passed、JavaScript 14/14](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42303210479)（PR #11）；[八节点 ComfyUI 0.44.0 CPU + fake API 集成](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42303210663)（PR #11，含 Provider Profile）。主线 push 现在也会触发真实 ComfyUI CPU 集成。PR #5 的 [294 项 Python 测试](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42220463919) 为历史基线。
 
 本轮真实服务工作流为 16 次：14 次队列执行成功、2 次失败。**队列成功不代表每个请求参数都生效**；原始矩阵中的尺寸、格式和透明背景当时未达标。PR #5 的 RGBA 集成测试使用模拟上游；后续真实透明背景复测已单独通过，证据见 Alpha 报告。新版本的 `request_report.output.conformance` 会在真实响应不符合请求时明确给出 warning；无法比较或协议明确忽略的字段返回 `not_checked`，不会自动重试，也不会把已受理的付费请求伪装成失败。
+
+### 上下文 UI（PR #12）的验收边界
+
+这轮只修改 ComfyUI 前端节点的参数呈现，不修改后端请求语义：
+- JavaScript 自动测试覆盖默认显示、`Custom` 宽高显隐、动态宽高连线、非默认高级值可见、UI 开关不进入 workflow/prompt、宽度不被重设、Edit 端图片和 MASK 插口不变，以及 Provider Profile 的 Responses 条件显示。
+- `widget.hidden` 与 `widget.options.hidden` 使用 ComfyUI 前端原生隐藏约定；**Node 单测不等同于完整浏览器绘制验收**。
+- 本机浏览器最终需检查：新建 Generate/Edit 初始显示；切换 Custom 来回后宽高值不丢；「显示高级参数」切换后工作流保存、刷新、重载保持一致；主模型字段按参考图模式显隐；连接后的插口可见；旧工作流重新打开正常。
+- 真正的 ComfyUI 0.44.0 CPU + fake API 端到端测试只证明**后端工作流仍可执行**，不宣称它模拟了浏览器上的用户点击或画布渲染。
 
 ## 2. 自动化测试如何运行
 
