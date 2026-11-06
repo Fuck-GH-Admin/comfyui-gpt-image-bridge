@@ -4,13 +4,13 @@
 
 **真实账户历史证据**：[Main 0.7.0 全功能验收报告](main-acceptance-2026-11-06.md)及[脱敏证据 JSON](evidence/main-acceptance-2026-11-06.json)。此前 PR #2 的 `gpt-image-2` 旧型号报告仍保留作历史记录；2.6 新型号和默认参考图模式的真实账户结论以 Main 0.7.0 与后续单次 Alpha 复测为准。当前主线自动化基线另见下方 CI 记录。
 
-**后续修复：** [Alpha 保留修复报告](alpha-preservation-2026-11-06.md)记录 PR #5 的 RGBA 解码修复和真实 ComfyUI SaveImage 集成验证。当前主线 Python **313 passed**、JavaScript **14/14 passed**；修复后的一次真实 Codex 透明背景复测已保存 RGBA（Alpha 0–254），仅证明该样例成功，不保证所有请求。尺寸、上游原生格式等未达标项仍按失败处理。
+**后续修复：** [Alpha 保留修复报告](alpha-preservation-2026-11-06.md)记录 PR #5 的 RGBA 解码修复和真实 ComfyUI SaveImage 集成验证。当前主线 Python **319 passed**、JavaScript **14/14 passed**；修复后的一次真实 Codex 透明背景复测已保存 RGBA（Alpha 0–254），仅证明该样例成功，不保证所有请求。尺寸、上游原生格式等未达标项仍按失败处理。
 
 ## 1. 当前验收矩阵（代码截至 2026-11-07；真实账户证据来自 2026-11-06）
 
 | 层次 | 验证方法 | 当前结论 |
 | --- | --- | --- |
-| Python 单元测试 | main 合并 PR #6–#9 后，含 Pillow 弃用测试修复 | **313 passed，无 warning** |
+| Python 单元测试 | main 合并 PR #6–#9 后，含 Pillow 弃用测试修复 | **319 passed，无 warning** |
 | JavaScript 单元测试 | main 合并 PR #6–#9 后的 GitHub Actions | **14/14 PASS** |
 | 真实 ComfyUI 后端 | Ubuntu Runner 启动 ComfyUI 0.44.0，HTTP/队列执行 | **PASS**；远端图片 API 是模拟服务，不是真实 CLIProxyAPI |
 | 本机 HTTP 协议矩阵 | 19/19 场景，另有凭据路由 2/2 | **PASS**；使用 HTTP 替身 |
@@ -27,7 +27,7 @@
 | Chat Completions 图片路由 | 用户本机真实请求 | **失败**；当前 CLIProxyAPI 图片型号拒绝该路由 |
 | Windows/macOS、Docker 组合及长期并发 | 本轮环境未覆盖 | **NOT_RUN** |
 
-当前主线单测：[Python 313 passed、JavaScript 14/14](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42265470712)（`74b9632`）；[七节点 ComfyUI 0.44.0 CPU + fake API 集成](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42264786784)（PR #7 的最终合并树）。主线 push 现在也会触发真实 ComfyUI CPU 集成。PR #5 的 [294 项 Python 测试](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42220463919) 为历史基线。
+当前主线单测：[Python 319 passed、JavaScript 14/14](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42265470712)（`74b9632`）；[七节点 ComfyUI 0.44.0 CPU + fake API 集成](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42299463584)（PR #10 全量集成）。主线 push 现在也会触发真实 ComfyUI CPU 集成。PR #5 的 [294 项 Python 测试](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42220463919) 为历史基线。
 
 本轮真实服务工作流为 16 次：14 次队列执行成功、2 次失败。**队列成功不代表每个请求参数都生效**；原始矩阵中的尺寸、格式和透明背景当时未达标。PR #5 的 RGBA 集成测试使用模拟上游；后续真实透明背景复测已单独通过，证据见 Alpha 报告。新版本的 `request_report.output.conformance` 会在真实响应不符合请求时明确给出 warning；无法比较或协议明确忽略的字段返回 `not_checked`，不会自动重试，也不会把已受理的付费请求伪装成失败。
 
