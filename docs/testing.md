@@ -88,7 +88,7 @@ python tests/integration/comfyui_server_smoke.py /abs/path/to/ComfyUI
 
 ### A. 不消耗生图额度的准备检查
 
-- [ ] 本 fork 处于 `feat/image26-images-first-reference-mode`，且 ComfyUI 节点列表中确实有 CLIProxyAPI Provider。
+- [ ] 本 fork 处于 `main`（确认 Git remote 指向本 fork），且 ComfyUI 节点列表中确实有 CLIProxyAPI Provider。
 - [ ] CLIProxyAPI 已运行，`config.yaml` 用 v8 的 `access.api-keys`，当前账号 Codex OAuth 登录成功。
 - [ ] `multimedia.disable-image-generation` 为 `false`，以覆盖 Images 和 Responses 两条路线。
 - [ ] 在与 ComfyUI 相同的网络环境中，`GET /v1/models` 能返回数据。
