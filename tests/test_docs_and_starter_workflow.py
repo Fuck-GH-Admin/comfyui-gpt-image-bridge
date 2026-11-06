@@ -55,24 +55,15 @@ def test_cliproxyapi_starter_workflow_is_connected_and_has_no_secrets():
     ]
     by_id = {node["id"]: node for node in workflow["nodes"]}
     assert len(by_id) == 3
-    assert by_id[1]["type"] == "GPTImageBridgeCLIProxyAPIProvider"
+    assert by_id[1]["type"] == "GPTImageBridgeProviderProfile"
     assert by_id[2]["type"] == "GPTImageBridgeGenerate"
     assert by_id[3]["type"] == "SaveImage"
-    assert by_id[1]["widgets_values"] == [
-        "",
-        "http://127.0.0.1:8317/v1",
-        "gpt-image-2.6-flare",
-        "",
-        "images_edit",
-        "auto",
-    ]
-    provider_schema = nodes.GPTImageBridgeCLIProxyAPIProvider.INPUT_TYPES()
-    assert [item["name"] for item in by_id[1]["inputs"][:4]] == list(
-        provider_schema["required"]
-    )
-    assert [item["name"] for item in by_id[1]["inputs"][4:]] == list(
-        provider_schema["optional"]
-    )
+    assert by_id[1]["widgets_values"] == ["local_codex", "", "profile", ""]
+    provider_schema = nodes.GPTImageBridgeProviderProfile.INPUT_TYPES()
+    assert [item["name"] for item in by_id[1]["inputs"][:1]] == list(provider_schema["required"])
+    assert [item["name"] for item in by_id[1]["inputs"][1:]] == list(provider_schema["optional"])
+    assert "api_key" not in json.dumps(by_id[1])
+    assert "base_url" not in json.dumps(by_id[1])
     assert [item["name"] for item in by_id[2]["inputs"][:9]] == list(
         nodes.GPTImageBridgeGenerate.INPUT_TYPES()["required"]
     )
@@ -85,7 +76,7 @@ def test_cliproxyapi_starter_workflow_is_connected_and_has_no_secrets():
     assert by_id[2]["outputs"][0]["links"] == [2]
     assert by_id[2]["inputs"][0]["link"] == 1
     assert by_id[3]["inputs"][0]["link"] == 2
-    assert by_id[1]["widgets_values"][0] == ""
+    assert by_id[1]["widgets_values"][0] == "local_codex"
     assert "Bearer " not in STARTER.read_text(encoding="utf-8")
     assert "access_token" not in STARTER.read_text(encoding="utf-8")
     assert "refresh_token" not in STARTER.read_text(encoding="utf-8")
