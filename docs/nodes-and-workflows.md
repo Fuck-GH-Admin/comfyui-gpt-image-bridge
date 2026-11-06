@@ -2,7 +2,7 @@
 
 本文面向实际使用 ComfyUI 画布的人。**CLIProxyAPI Provider 是推荐入口**；原生 OAuth Provider、通用 API Provider 继续保留，目的是兼容原有工作流和其他供应商。先按 [本机安装与登录](setup-cli-proxy-api.md) 完成环境准备。
 
-## 1. 六个节点及其职责
+## 1. 七个节点及其职责
 
 | 画布节点名 | 实际类名 | 输入 | 输出/功能 |
 | --- | --- | --- | --- |
@@ -12,8 +12,9 @@
 | GPT Image Bridge · Generate | `GPTImageBridgeGenerate` | Provider、提示词、生成参数、至多 16 张独立参考图 | `IMAGE`、`revised_prompt`、`request_report` |
 | GPT Image Bridge · Edit | `GPTImageBridgeEdit` | Provider、基础图、提示词、生成参数、参考图列表、可选 MASK | 同上 |
 | GPT Image Bridge · Edit Reference List (Image 2–16) | `GPTImageBridgeReferenceList` | `image_2`…`image_16` | `GPT_IMAGE_REFERENCES`，只用于 Edit |
+| GPT Image Bridge · Save Image | `GPTImageBridgeSaveImage` | `IMAGE`、文件格式、质量、文件名前缀、JPEG 背景色 | 保存 PNG/JPEG/WebP 到 ComfyUI `output/`，并继续输出原 IMAGE batch |
 
-所有节点都在 `GPT Image Bridge` 分类下。需要保存输出时，**手动添加 ComfyUI 的 Save Image 节点**；本插件不是自动写文件节点。
+所有节点都在 `GPT Image Bridge` 分类下。保存生成结果可以使用本插件的 **Save Image**（PNG/JPEG/WebP），也可以继续使用 ComfyUI 原生 Save Image。
 
 ### 主要输出
 
@@ -170,5 +171,7 @@ ComfyUI Generate (n=4)
 图片输入与输出都有编码、尺寸和体积限制；高分辨率、多参考图可能增加请求体积、内存占用、延迟与上游失败概率。参数不被服务支持时应该调整模型或请求，而不是把一切问题归咎于 ROCm。
 
 若已配置其他 ComfyUI 本地后处理节点（例如自定义放大器），是否需要 GPU/ROCm 取决于那些节点，**不由本插件决定**。
+
+本插件保存节点的详细编码行为见[本地图片导出](local-image-export.md)。
 
 继续：[故障排查](troubleshooting.md) · [协议与实现](protocol-reference.md) · [安全与凭据](security.md)。
