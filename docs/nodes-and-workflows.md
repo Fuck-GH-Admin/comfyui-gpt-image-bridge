@@ -57,7 +57,7 @@ OpenAI 官方 2026-11-04 发布了 Flare / Sunburst；CLIProxyAPI v8.0.57 代码
 | `custom_width`、`custom_height` | 可选整数，默认 1024×1024 | 仅 `size=Custom` 时有效：480–3840、16 的倍数、比例 ≤3:1、像素 655,360–8,294,400 |
 | `quality` | `auto`、`low`、`medium`、`high`、`xhigh`、`max` | 2.5/2.6 可用更高质量档位，旧型号可能拒绝 |
 | `background` | `auto`、`opaque`、`transparent` | 透明图建议配 PNG/WebP；不保证上游兑现 |
-| `output_format` | `png`、`jpeg`、`webp` | 后端返回可能受模型/路由约束；ComfyUI 的 Save Image 通常存 PNG |
+| `output_format` | `png`、`jpeg`、`webp` | 这是上游 API 响应编码请求，不是本地文件保存格式；解码成 `IMAGE` 后原始编码不保留，默认 Save Image 仍保存 PNG |
 | `moderation` | `auto`、`low` | 服务端可能忽略或拒绝 |
 | `n` | 整数 1–8 | 需要多少张输出。**CLIProxyAPI 专用模式每张对应一次独立上游请求** |
 | `timeout_sec` | 整数 30–3600 | 超过后本地等待结束，未必代表上游操作已取消 |
