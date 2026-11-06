@@ -32,11 +32,31 @@ def test_output_formats_decode_to_comfy_image(image_format):
     assert 0 <= tensor.min() <= tensor.max() <= 1
 
 
-@pytest.mark.xfail(strict=True, reason='Transparent output loses alpha in image_bytes_to_tensor; needs an explicit alpha output contract.')
 def test_transparent_image_preserves_alpha_at_comfy_boundary():
     tensor = images.image_bytes_to_tensor([encoded_image(mode='RGBA')])
-    assert tensor.shape[-1] == 4
+    assert tensor.shape == (1, 7, 9, 4)
     assert torch.all(tensor[..., 3] == 0)
+
+
+def test_palette_transparency_is_preserved_at_comfy_boundary():
+    image = Image.new('P', (9, 7), 0)
+    image.putpalette([25, 75, 125] + [0, 0, 0] * 255)
+    buffer = io.BytesIO()
+    image.save(buffer, format='PNG', transparency=0)
+
+    tensor = images.image_bytes_to_tensor([buffer.getvalue()])
+    assert tensor.shape == (1, 7, 9, 4)
+    assert torch.all(tensor[..., 3] == 0)
+
+
+def test_mixed_rgb_and_rgba_batch_uses_opaque_alpha_for_rgb_frames():
+    tensor = images.image_bytes_to_tensor([
+        encoded_image(mode='RGB'),
+        encoded_image(mode='RGBA'),
+    ])
+    assert tensor.shape == (2, 7, 9, 4)
+    assert torch.all(tensor[0, ..., 3] == 1)
+    assert torch.all(tensor[1, ..., 3] == 0)
 
 
 def test_different_dimensions_cannot_silently_form_a_batch():
