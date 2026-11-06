@@ -4,13 +4,13 @@
 
 **真实账户历史证据**：[Main 0.7.0 全功能验收报告](main-acceptance-2026-11-06.md)及[脱敏证据 JSON](evidence/main-acceptance-2026-11-06.json)。此前 PR #2 的 `gpt-image-2` 旧型号报告仍保留作历史记录；2.6 新型号和默认参考图模式的真实账户结论以 Main 0.7.0 与后续单次 Alpha 复测为准。当前主线自动化基线另见下方 CI 记录。
 
-**后续修复：** [Alpha 保留修复报告](alpha-preservation-2026-11-06.md)记录 PR #5 的 RGBA 解码修复和真实 ComfyUI SaveImage 集成验证。当前主线 Python **319 passed**、JavaScript **14/14 passed**；修复后的一次真实 Codex 透明背景复测已保存 RGBA（Alpha 0–254），仅证明该样例成功，不保证所有请求。尺寸、上游原生格式等未达标项仍按失败处理。
+**后续修复：** [Alpha 保留修复报告](alpha-preservation-2026-11-06.md)记录 PR #5 的 RGBA 解码修复和真实 ComfyUI SaveImage 集成验证。当前主线 Python **333 passed**、JavaScript **14/14 passed**；修复后的一次真实 Codex 透明背景复测已保存 RGBA（Alpha 0–254），仅证明该样例成功，不保证所有请求。尺寸、上游原生格式等未达标项仍按失败处理。
 
 ## 1. 当前验收矩阵（代码截至 2026-11-07；真实账户证据来自 2026-11-06）
 
 | 层次 | 验证方法 | 当前结论 |
 | --- | --- | --- |
-| Python 单元测试 | main 合并 PR #6–#9 后，含 Pillow 弃用测试修复 | **319 passed，无 warning** |
+| Python 单元测试 | 合并 PR #6–#11 后，含新服务商配置的安全与路由测试 | **333 passed，无 warning** |
 | JavaScript 单元测试 | main 合并 PR #6–#9 后的 GitHub Actions | **14/14 PASS** |
 | 真实 ComfyUI 后端 | Ubuntu Runner 启动 ComfyUI 0.44.0，HTTP/队列执行 | **PASS**；远端图片 API 是模拟服务，不是真实 CLIProxyAPI |
 | 本机 HTTP 协议矩阵 | 19/19 场景，另有凭据路由 2/2 | **PASS**；使用 HTTP 替身 |
@@ -21,13 +21,14 @@
 | Mask、16 张 Generate 参考图、Edit 基础图+15张参考图 | 用户本机真实工作流 | 已执行成功；不等于复杂身份一致性或蒙版外逐像素保证 |
 | 自定义/2K/4K 尺寸、JPEG/WebP | 用户本机真实服务 | **未达标**；多个请求仍返回 PNG 1536×1024，详见实机报告 |
 | Alpha 解码与 ComfyUI 保存 | RGBA/调色板透明/混合批次单测 + 真实 ComfyUI SaveImage 集成 | **PASS**；上游返回 RGBA 时完整保留。修复后的一次真实 `background=transparent` 复测已保存 RGBA，当前样例 PASS（不保证所有请求） |
-| 本地 PNG/JPEG/WebP 保存节点 | saver 单测 + ComfyUI 0.44.0 CPU HTTP/队列集成 | **PASS**；验证七节点注册、输出目录、批次命名、WebP Alpha、JPEG 背景合成 |
+| Provider Profile / 第三方 OpenAI 兼容中转站 | 本地配置读取与轮换单测 + 真实 ComfyUI 0.44.0 CPU/fake API 完整队列 | **PASS（模拟远端）**；新工作流不携带 Key/Base URL，真实第三方账号尚未实测 |
+| 本地 PNG/JPEG/WebP 保存节点 | saver 单测 + ComfyUI 0.44.0 CPU HTTP/队列集成 | **PASS**；验证八个注册节点、输出目录、批次命名、WebP Alpha、JPEG 背景合成 |
 | 请求参数兑现核验 | 图片元数据单测 + Images/Responses/Chat/OAuth 协议报告测试 | **PASS**；核对尺寸、编码格式、透明像素；被忽略或无法比较的字段返回 `not_checked`，不把 HTTP 200 等同于参数成功 |
 | Responses 参考图 | 用户本机真实请求 | **失败**；代理访问 `chatgpt.com` DNS 解析失败 |
 | Chat Completions 图片路由 | 用户本机真实请求 | **失败**；当前 CLIProxyAPI 图片型号拒绝该路由 |
 | Windows/macOS、Docker 组合及长期并发 | 本轮环境未覆盖 | **NOT_RUN** |
 
-当前主线单测：[Python 319 passed、JavaScript 14/14](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42265470712)（`74b9632`）；[七节点 ComfyUI 0.44.0 CPU + fake API 集成](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42299463584)（PR #10 全量集成）。主线 push 现在也会触发真实 ComfyUI CPU 集成。PR #5 的 [294 项 Python 测试](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42220463919) 为历史基线。
+当前主线单测：[Python 333 passed、JavaScript 14/14](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42303210479)（PR #11）；[八节点 ComfyUI 0.44.0 CPU + fake API 集成](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42303210663)（PR #11，含 Provider Profile）。主线 push 现在也会触发真实 ComfyUI CPU 集成。PR #5 的 [294 项 Python 测试](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42220463919) 为历史基线。
 
 本轮真实服务工作流为 16 次：14 次队列执行成功、2 次失败。**队列成功不代表每个请求参数都生效**；原始矩阵中的尺寸、格式和透明背景当时未达标。PR #5 的 RGBA 集成测试使用模拟上游；后续真实透明背景复测已单独通过，证据见 Alpha 报告。新版本的 `request_report.output.conformance` 会在真实响应不符合请求时明确给出 warning；无法比较或协议明确忽略的字段返回 `not_checked`，不会自动重试，也不会把已受理的付费请求伪装成失败。
 
@@ -55,15 +56,16 @@ node --experimental-default-type=module --test tests/js/*.test.mjs
 [集成脚本](../tests/integration/comfyui_server_smoke.py)会：
 
 1. 检出真实 ComfyUI 指定 SHA，安装其真实运行依赖，启动 ComfyUI 后端。
-2. 将本 fork 作为自定义节点安装，核对七个节点在 `/object_info` 中注册。
+2. 将本 fork 作为自定义节点安装，核对八个节点在 `/object_info` 中注册（其中三个旧 Provider 隐藏于正常新建菜单）。
 3. 启动**内存中的 CLIProxyAPI 兼容 HTTP 测试服务器**，它返回可解码的固定 PNG 和模拟 Responses SSE。
 4. 使用 `POST /gpt-image-bridge/session-credential` 将测试 Key 转成一次性句柄；检查原始 Key 不能越过 `/prompt` 守卫。
 5. 提交 `Generate n=2` 工作流，通过 Images 请求保存两张 PNG。
 6. 分别以本插件 Save Image 节点将生成的 RGBA 图片保存为无损 WebP、JPEG，验证 Alpha 和 JPEG 指定底色合成。
 7. 再提交 Load Image → 参考图 Generate（默认 Images Edit、可选 Responses）及 Edit Reference List → Edit → 原生 SaveImage 工作流，验证参考图顺序与 multipart 请求。
-8. 检查七次 HTTP 请求的端点、模型角色、Bearer 客户端 Key 和关键字段。
+8. 检查八次 HTTP 请求的端点、模型角色、Bearer 客户端 Key 和关键字段。
 9. 检查原生 SaveImage 的 PNG 输出，以及插件保存节点的 WebP/JPEG 文件、32×24 尺寸、Alpha/背景合成和输出目录路径。
-10. 关闭测试进程并输出 `COMFYUI_SMOKE_PASS`。
+10. 通过新 Provider Profile 的本地配置再执行一次文生图（无画布 API Key 输入），检查旧 Provider 已标记隐藏/弃用。
+11. 关闭测试进程并输出 `COMFYUI_SMOKE_PASS`。
 
 **注意：用户已通过 [PR #2](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/pull/2) 上传旧型号真实 CLIProxyAPI + Codex 实机报告。该报告确认 `gpt-image-2` 的纯文生成、基础 Edit 和带参考图 Edit，但没有验证 2.6 Flare/Sunburst，也未确认新版默认的参考图 Generate（Images Edit 模式）。请勿将报告覆盖范围扩大。**
 
