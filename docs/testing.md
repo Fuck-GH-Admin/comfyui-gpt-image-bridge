@@ -21,6 +21,7 @@
 | Mask、16 张 Generate 参考图、Edit 基础图+15张参考图 | 用户本机真实工作流 | 已执行成功；不等于复杂身份一致性或蒙版外逐像素保证 |
 | 自定义/2K/4K 尺寸、JPEG/WebP | 用户本机真实服务 | **未达标**；多个请求仍返回 PNG 1536×1024，详见实机报告 |
 | Alpha 解码与 ComfyUI 保存 | RGBA/调色板透明/混合批次单测 + 真实 ComfyUI SaveImage 集成 | **PASS**；上游返回 RGBA 时完整保留。真实 Codex `background=transparent` 请求仍返回 RGB，透明生成尚未 PASS |
+| 本地 PNG/JPEG/WebP 保存节点 | saver 单测 + ComfyUI HTTP/队列集成 | **本分支待 CI**；验证输出目录、批次命名、WebP Alpha、JPEG 背景合成 |
 | Responses 参考图 | 用户本机真实请求 | **失败**；代理访问 `chatgpt.com` DNS 解析失败 |
 | Chat Completions 图片路由 | 用户本机真实请求 | **失败**；当前 CLIProxyAPI 图片型号拒绝该路由 |
 | Windows/macOS、Docker 组合及长期并发 | 本轮环境未覆盖 | **NOT_RUN** |
@@ -53,19 +54,19 @@ node --experimental-default-type=module --test tests/js/*.test.mjs
 [集成脚本](../tests/integration/comfyui_server_smoke.py)会：
 
 1. 检出真实 ComfyUI 指定 SHA，安装其真实运行依赖，启动 ComfyUI 后端。
-2. 将本 fork 作为自定义节点安装，核对六个节点在 `/object_info` 中注册。
+2. 将本 fork 作为自定义节点安装，核对七个节点在 `/object_info` 中注册。
 3. 启动**内存中的 CLIProxyAPI 兼容 HTTP 测试服务器**，它返回可解码的固定 PNG 和模拟 Responses SSE。
 4. 使用 `POST /gpt-image-bridge/session-credential` 将测试 Key 转成一次性句柄；检查原始 Key 不能越过 `/prompt` 守卫。
 5. 提交 `Generate n=2` 工作流，通过 Images 请求保存两张 PNG。
 6. 提交 Load Image → 参考图 Generate → Save Image 工作流，分别以默认 Images Edit 和手动 Responses 两种模式请求并保存 PNG。
 7. 另行提交可选 Responses 模式的参考图 Generate 工作流，验证文本主模型与图片模型分离；再提交 Load Image → Edit Reference List → Edit → Save Image 工作流，验证 multipart 中基础图和参考图顺序。
 8. 检查五次 HTTP 请求的端点、模型角色、Bearer 客户端 Key 和关键字段。
-9. 检查输出目录里有真正的 PNG 文件，能读取、尺寸为 32×24、图片元数据没有测试 Key。
+9. 检查原生 SaveImage 的 PNG 输出，以及插件保存节点的 WebP/JPEG 文件、32×24 尺寸、Alpha/背景合成和输出目录路径。
 10. 关闭测试进程并输出 `COMFYUI_SMOKE_PASS`。
 
 **注意：用户已通过 [PR #2](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/pull/2) 上传旧型号真实 CLIProxyAPI + Codex 实机报告。该报告确认 `gpt-image-2` 的纯文生成、基础 Edit 和带参考图 Edit，但没有验证 2.6 Flare/Sunburst，也未确认新版默认的参考图 Generate（Images Edit 模式）。请勿将报告覆盖范围扩大。**
 
-**ComfyUI 是真的，图片服务是模拟的。** 因此这种测试能发现节点加载、后端执行、数据类型、工作流保存等错误，却不能证明 CLIProxyAPI 真实 OAuth 登录、上游配额及模型可用。
+**ComfyUI 是真的，图片服务是模拟的。** 因此这种测试能发现节点加载、后端执行、数据类型、PNG/JPEG/WebP 文件编码与 Alpha 保存等错误，却不能证明 CLIProxyAPI 真实 OAuth 登录、上游配额及模型可用。
 
 ### 在自己的隔离 ComfyUI 上重现
 
