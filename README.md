@@ -74,9 +74,9 @@ Provider：
 | `image_model` | `gpt-image-2.6-flare`（速度优先）；可填 `gpt-image-2.6-sunburst`（细节/编辑优先），或你账号实际可用的旧型号 |
 | `responses_model` | 默认空，仅手动选择 Responses 模式时填写可用的文本主模型 |
 | `reference_mode` | `images_edit`（默认，参考图引导新图）；`responses`（可选） |
-| `image_complexity` | `auto`（不传复杂度），也可选 `low`、`medium`、`high`（2.6） |
+| `image_complexity` | 推荐 `auto`；`low/medium/high` 目前不会被 CLIProxyAPI v8.0.57 默认 Images 路径透传 |
 
-第一次用 Generate：设置一句提示词，`n=1`，其余先保持 `auto`、`output_format=png`，点击 Queue。
+第一次用 Generate：设置一句提示词，`n=1`，其余先保持 `auto`、`output_format=png`，点击 Queue。`image_complexity` 控件暂为兼容保留，不代表 v8.0.57 的 Codex Images 路径实际执行了复杂度设置。
 
 - **参考图生成**：`Load Image.IMAGE` → `Generate.reference_1`，依次可连更多参考图。
 - **编辑图片**：`Load Image.IMAGE` → `Edit.base_image（Image 1）`；可选将更多参考图接到 `Edit Reference List`，再接 Edit 的参考图入口。
