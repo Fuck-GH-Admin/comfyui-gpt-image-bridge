@@ -66,6 +66,7 @@ test("keeps the current layout and unknown future layouts unchanged", () => {
 test("migrates a workflow copy without mutating its input", () => {
     const input = {
         id: 7,
+        type: "GPTImageBridgeAPIProvider",
         widgets_values: ["", "", "", "auto", "", ""],
     };
     const migrated = migrateLegacyWorkflowData(input);
