@@ -1,0 +1,114 @@
+{
+  "case": "transparent_png",
+  "options": {
+    "background": "transparent",
+    "quality": "low",
+    "prompt": "A single simple orange circle icon. Completely transparent background, no shadow or surrounding objects."
+  },
+  "prompt_id": "32123eac-4c04-4fa7-a281-cf97bb89348f",
+  "queue_status": "success",
+  "elapsed_seconds": 30.05,
+  "history_key_absent": true,
+  "request_report": {
+    "async": {
+      "attempted": false,
+      "effective_mode": "sync",
+      "requested": false,
+      "skipped_reason": "Disabled by the API Provider switch."
+    },
+    "elapsed_ms": 28904,
+    "input": {
+      "mask": {
+        "encoded_bytes": 0,
+        "present": false
+      },
+      "prompt": {
+        "characters": 104,
+        "sha256": "1b8d80c799d228cada70eb71cce870365fd8fb1983c56e2cae6d3900dbcf97c6",
+        "type": "input_text"
+      },
+      "roles": []
+    },
+    "ok": true,
+    "operation": "generate",
+    "output": {
+      "count": 1,
+      "images": [
+        {
+          "bytes": 1227454,
+          "format": "PNG",
+          "height": 1024,
+          "mime_type": null,
+          "width": 1536
+        }
+      ],
+      "revised_prompt_present": false
+    },
+    "protocol_notes": {
+      "n_transport": "one synchronous Images API request per requested output"
+    },
+    "protocol_selection_basis": "auto: plain text-to-image uses /images/generations",
+    "provider": {
+      "api_key_configured": true,
+      "api_protocol": "auto",
+      "async_edit_endpoint": "",
+      "async_generate_endpoint": "",
+      "async_mapping": {
+        "configured": false,
+        "keys": []
+      },
+      "async_poll_endpoint_template": "",
+      "auth_mode": "api_key",
+      "base_url": "http://127.0.0.1:8317/v1",
+      "edit_endpoint": "",
+      "generate_endpoint": "",
+      "model": "gpt-image-2.6-flare",
+      "reference_generate_mode": "images_edit",
+      "use_async": false,
+      "use_custom_endpoints": false
+    },
+    "requested_protocol": "auto",
+    "requests": [
+      {
+        "attempts": 1,
+        "elapsed_ms": 28897,
+        "endpoint": "http://127.0.0.1:8317/v1/images/generations",
+        "http_status": 200,
+        "index": 1,
+        "phase": "sync",
+        "request_id": null
+      }
+    ],
+    "selected_protocol": "images"
+  },
+  "images": [
+    {
+      "filename": "transparent_png_00002_.png",
+      "format": "PNG",
+      "mode": "RGBA",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "bytes": 1295002,
+      "sha256": "630d3f1d288623934def60e5bbd5a507a237f01d3a3bb3586970c7bc2e5d3f96",
+      "alpha_extrema": [
+        0,
+        254
+      ]
+    }
+  ],
+  "checks": {
+    "count_matches_n": true,
+    "output_decodes": true,
+    "key_absent": true,
+    "alpha_preserved": true
+  },
+  "code_commit": "abfacd3",
+  "environment": {
+    "comfyui": "0.44.0",
+    "pytorch": "2.15.0+cpu",
+    "cliproxyapi": "8.0.57"
+  },
+  "scope": "One real request after PR #5; not a guarantee for other prompts, models or accounts."
+}

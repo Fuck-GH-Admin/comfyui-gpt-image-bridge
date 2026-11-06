@@ -84,7 +84,7 @@ Provider：
 
 **默认所有生图/编辑均走 Images API**：纯文本生成用 `/images/generations`，有参考图的 Generate 使用 `/images/edits` 作参考图引导生成（不是严格意义的从零生图），Edit 同样使用 `/images/edits`。需要多轮文本模型协调时，手动将 `reference_mode` 改成 `responses` 并填写可用的 `responses_model`。`n>1` 会发出多次独立请求，可能分别消耗额度。
 
-**OpenAI 已正式发布 GPT Image 2.6 Flare / Sunburst**；本仓库的 [Main 0.7.0 实机报告](docs/main-acceptance-2026-11-06.md)已在一套真实账户上验证两者生成和默认参考图链路。插件侧 RGBA 保留已修复，但真实 Codex 透明背景请求仍返回 RGB；自定义尺寸和 JPEG/WebP 上游响应也仍有未达标记录。参见[模型兼容与版本边界](docs/model-support.md)。
+**OpenAI 已正式发布 GPT Image 2.6 Flare / Sunburst**；本仓库的 [Main 0.7.0 实机报告](docs/main-acceptance-2026-11-06.md)已在一套真实账户上验证两者生成和默认参考图链路。插件侧 RGBA 保留已修复，修复后的一次真实透明背景复测已保存 RGBA（不保证所有请求）；自定义尺寸和 JPEG/WebP 上游响应也仍有未达标记录。参见[模型兼容与版本边界](docs/model-support.md)。
 
 ### 高级画质与参考图
 

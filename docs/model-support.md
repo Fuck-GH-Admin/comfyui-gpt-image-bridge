@@ -2,7 +2,7 @@
 
 更新时间：2026-11-06。本文对 **OpenAI 正式公告**、**CLIProxyAPI v8.0.57 的源代码实现**以及**本仓库测试证据**分层说明，避免把任意代理别名写成官方模型。
 
-**本机更新验收：** [Main 0.7.0 报告](main-acceptance-2026-11-06.md)已对两个 2.6 型号完成真实生成与默认参考图请求。后续 [PR #5 Alpha 保留修复](alpha-preservation-2026-11-06.md)已修复插件本地 RGBA 解码，但真实透明背景请求仍返回 RGB；尺寸/格式和 Responses 网络问题仍未解决。
+**本机更新验收：** [Main 0.7.0 报告](main-acceptance-2026-11-06.md)已对两个 2.6 型号完成真实生成与默认参考图请求。后续 [PR #5 Alpha 保留修复](alpha-preservation-2026-11-06.md)已修复插件本地 RGBA 解码，且修复后的一次真实透明背景复测已保存 RGBA（不保证所有请求）；尺寸/格式和 Responses 网络问题仍未解决。
 
 ## 1. OpenAI 官方确认的最新图片模型
 
@@ -111,5 +111,5 @@ OpenAI 官方还介绍了 2.6 的 SVG 输出、GIF 动画和 markup-guided editi
 | CLIProxyAPI v8.0.57 识别两个型号及 Images 端点 | 指定发布标签源码 |
 | ComfyUI 可通过插件传递 2.6 型号及 complexity | 本 fork 请求形态单元测试（Mock HTTP） |
 | 参考图默认 Images Edit，Responses 可手动选择 | 本 fork 源码、单元和真实 ComfyUI + 假代理集成测试 |
-| 2.6 Flare / Sunburst 在本次真实账户的生图与默认参考图链路 | **已实机通过**；自定义尺寸/格式未达标；插件 Alpha 解码已修复，但真实透明背景请求仍返回 RGB；Responses 另受 DNS 阻塞；其他账户需自行验证 |
+| 2.6 Flare / Sunburst 在本次真实账户的生图与默认参考图链路 | **已实机通过**；自定义尺寸/格式未达标；插件 Alpha 解码已修复，且修复后的一次真实透明背景复测已保存 RGBA（不保证所有请求）；Responses 另受 DNS 阻塞；其他账户需自行验证 |
 | SVG、GIF、markup-guided 编辑在当前 ComfyUI 节点可用 | **未实现/未验证** |
