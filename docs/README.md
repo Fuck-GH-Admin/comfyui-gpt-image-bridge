@@ -1,13 +1,15 @@
 # GPT Image Bridge：文档目录
 
-本目录面向使用者、部署者、维护者，**所有操作以本 fork 的 `feat/cliproxyapi-native-provider` 分支为准**。目前 [PR #1](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/pull/1) 尚未合并到 `main`；ComfyUI Registry 仍提供原作者版本，**安装 Registry 版本不会得到 CLIProxyAPI Provider**。
+本目录面向使用者、部署者、维护者，**所有操作以本 fork 的 `feat/image26-images-first-reference-mode` 分支为准**。目前 [PR #3](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/pull/3) 尚未合并到 `main`；ComfyUI Registry 仍提供原作者版本，**安装 Registry 版本不会得到 CLIProxyAPI Provider**。
 
 ## 文档导航
 
 | 文档 | 面向 | 内容 |
 | --- | --- | --- |
 | [CLIProxyAPI 安装与登录](setup-cli-proxy-api.md) | 初次本机部署 | v8 配置、客户端 Key、Codex 登录、进程启动、连通性检查、Docker/网络差异 |
-| [节点及工作流手册](nodes-and-workflows.md) | 使用者 | 六种节点、全部重要参数、生成/编辑/参考图、保存、请求数量及输出 |
+| [节点及工作流手册](nodes-and-workflows.md) | 使用者 | 六种节点、2.6 参数、Images Edit 默认参考图、Responses 可选、输出 |
+| [官方节点自由度对照](official-node-comparison.md) | 使用者/开发者 | 官方 OpenAI/Gemini/Ideogram 对照，自定义尺寸、参考图、seed 与能力边界 |
+| [GPT Image 模型与版本兼容](model-support.md) | 使用者/开发者 | OpenAI 2.6 官方发布、v8.0.57 代理支持、复杂度与未实现格式 |
 | [协议与实现](protocol-reference.md) | 调试/开发 | Images/Responses 路由、模型角色、请求字段、响应解析、错误与兼容范围 |
 | [兼容 API 与异步任务](compatibility-and-async.md) | 非 CLIProxyAPI 用户 | 原通用 API Provider、异步任务协议、JSON 映射、自定义端点、回退 |
 | [凭据与安全](security.md) | 部署/分享工作流 | 授权边界、一次性队列句柄、本地工作流明文、网络暴露、错误脱敏 |

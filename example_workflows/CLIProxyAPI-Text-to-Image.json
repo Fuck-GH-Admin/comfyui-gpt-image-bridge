@@ -50,6 +50,22 @@
           "widget": {
             "name": "responses_model"
           }
+        },
+        {
+          "name": "reference_mode",
+          "type": "COMBO",
+          "link": null,
+          "widget": {
+            "name": "reference_mode"
+          }
+        },
+        {
+          "name": "image_complexity",
+          "type": "COMBO",
+          "link": null,
+          "widget": {
+            "name": "image_complexity"
+          }
         }
       ],
       "outputs": [
@@ -65,8 +81,10 @@
       "widgets_values": [
         "",
         "http://127.0.0.1:8317/v1",
-        "gpt-image-2",
-        "gpt-5.4-mini"
+        "gpt-image-2.6-flare",
+        "",
+        "images_edit",
+        "auto"
       ]
     },
     {

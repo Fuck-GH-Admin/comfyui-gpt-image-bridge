@@ -44,9 +44,9 @@ Codex/图片服务（远端，订阅额度与模型能力由服务端决定）
 
 CLIProxyAPI 参考：[Codex Images 执行器](https://github.com/router-for-me/CLIProxyAPI/blob/main/internal/runtime/executor/codex_openai_images.go)、[OpenAI Images 处理器](https://github.com/router-for-me/CLIProxyAPI/blob/main/sdk/api/handlers/openai/openai_images_handlers.go)、[v8 配置样例](https://github.com/router-for-me/CLIProxyAPI/blob/main/config.example.yaml)。
 
-## 2. 三条主要路由
+## 2. 图片优先：默认 Images，Responses 可选
 
-### A. 无参考图的 Generate：Images JSON
+### A. 无参考图 Generate → Images JSON
 
 ```http
 POST /v1/images/generations
@@ -54,122 +54,56 @@ Authorization: Bearer <CLIProxyAPI-client-key>
 Content-Type: application/json
 ```
 
-请求主要字段：
+示例请求：`{"model":"gpt-image-2.6-flare","prompt":"a ceramic cup","size":"auto","n":1}`。当 `image_complexity` 为 `low`、`medium`、`high` 时增加对应 `complexity` 字段；`auto` 不发送该字段。
 
-```json
-{
-  "model": "gpt-image-2",
-  "prompt": "a blue ceramic cup on a wooden table",
-  "size": "auto",
-  "quality": "auto",
-  "n": 1
-}
-```
+### B. 有参考图 Generate，默认 Images Edit
 
-实际请求体由 `protocols.py::_images_request` 构造，可能包含其他用户所选的兼容字段；上面是**字段说明示例**，不是所有代理和模型都逐项支持的万能请求。图片响应通常是：
-
-```json
-{
-  "data": [
-    {
-      "b64_json": "<base64 encoded image>"
-    }
-  ]
-}
-```
-
-协议层可以解析 Base64 结果或受限的图片 URL 结果。URL 下载的响应数据随后也会经过图片格式及尺寸校验。
-
-### B. 有参考图的 Generate：Responses + 图片工具
-
-这条路线不是单纯把输入图片附加到 `/images/generations`；它调用 `/v1/responses`：
-
-```http
-POST /v1/responses
-Authorization: Bearer <CLIProxyAPI-client-key>
-Content-Type: application/json
-Accept: text/event-stream, application/json
-```
-
-关键字段的简化示例：
-
-```json
-{
-  "model": "gpt-5.4-mini",
-  "input": [
-    {"role": "developer", "content": "Generate a new image rather than editing any reference."},
-    {
-      "role": "user",
-      "content": [
-        {"type": "input_text", "text": "Reference 1: use its lighting; create a new image"},
-        {"type": "input_image", "image_url": "data:image/png;base64,<reference-image>"}
-      ]
-    }
-  ],
-  "tools": [
-    {
-      "type": "image_generation",
-      "model": "gpt-image-2",
-      "action": "generate"
-    }
-  ],
-  "tool_choice": {"type": "image_generation"},
-  "stream": true
-}
-```
-
-真实实现还会给 `image_generation` 工具传递尺寸、质量、背景、格式和审核等字段，设置明确的开发者指令，并按连接顺序给参考图编号。
-
-**两个模型的角色不得混淆：**
-
-- 顶层 `model` = `responses_model`，普通 Codex Responses 主模型。
-- `tools[0].model` = `image_model`，希望调用的图片工具模型。
-- 用户可在节点 UI 分别改这两个名字；是否被服务端接受须真实账号验证。
-
-返回既可能是普通 JSON，也可能是 SSE 数据流。插件只在解析到实际 `image_generation_call` 图片结果时才认为有图片；普通文字回复或拒绝不能当成成功的生图。
-
-简化 SSE 结束事件示例：
-
-```text
-data: {"type":"response.completed","response":{"output":[{"type":"image_generation_call","result":"<base64-image>"}]}}
-```
-
-### C. Edit：Images multipart
+`reference_mode=images_edit` 时：
 
 ```http
 POST /v1/images/edits
-Authorization: Bearer <CLIProxyAPI-client-key>
-Content-Type: multipart/form-data; boundary=<generated-boundary>
+Content-Type: multipart/form-data
 ```
 
-主要部分：
+Generate 的 `reference_1` 作为 Image 1 输入，后续参考图依次作为 Image 2、3……上传。单图使用 multipart 的 `image` 字段，多图使用有序 `image[]`。提示词前缀明确说“Create a NEW image guided by the supplied reference images. Image 1 is a visual reference, not a canvas to preserve or minimally edit.”
 
-```text
-model         = gpt-image-2
-prompt        = edit Image 1; use Image 2 as reference
-image[]       = image-1-base.png
-image[]       = image-2-reference.png
-image[]       = image-3-reference.png
-...           = 可选 mask/尺寸等表单字段
+这里的 Images Edit 只是**参考图引导式新图生成**：和无图的 Images Generations 语义不同，可能保留参考图布局。插件报告里仍保留用户的 `operation=generate`，但通过 `reference_generation.mode=images_edit`、`transport_operation=edit` 明确披露请求真实路径。**不会隐式调用文本/Agent 主模型**。
+
+### C. 有参考图 Generate，手动选 Responses
+
+`reference_mode=responses` 时，向 `POST /v1/responses` 发送：
+
+```json
+{
+  "model": "your-available-text-model",
+  "input": [
+    {"role":"developer","content":"Generate a new image."},
+    {"role":"user","content":[
+      {"type":"input_image","image_url":"data:image/png;base64,<reference>"},
+      {"type":"input_text","text":"Create a new illustration using the reference"}
+    ]}
+  ],
+  "tools":[{"type":"image_generation","model":"gpt-image-2.6-flare","action":"generate"}],
+  "tool_choice":{"type":"image_generation"},
+  "stream":true
+}
 ```
 
-Image 1 必须是待编辑的基础图，所有参考图在其后面，且保持顺序。这里的 `image[]` 来自真实测试的 multipart 约定，**不是把多个 IMAGE 帧塞进一个 ComfyUI 插口**。
+顶部 `model` 为用户手动设置的 `responses_model`（文本主模型），`tools[0].model` 为 `image_model`（真正生成图片的模型）。不填写 `responses_model` 则在请求前拒绝；不会默认使用之前实际报过 `model_not_found` 的 `gpt-5.4-mini`。配置非 `auto` 的 `image_complexity` 时它进入图片工具字段。
 
-Mask 能否生效由代理与模型决定；没有真实后端支持时不能把它当作一定可用。
+返回可以是 JSON 或 SSE 的 `image_generation_call` 结果；并非所有文本模型都具备图片工具权限。
 
-## 3. 自动选择与不可用路径
+### D. Edit 节点 → Images Edit
 
-`GPTImageBridgeCLIProxyAPIProvider.build()` 调用 `ProviderConfig.from_api_inputs()`，把 `api_protocol` 固定为 `auto`，把 `use_async` 固定为 `False`，并设置独立的 `responses_model`。因此实际路由选择：
+Edit 节点继续通过 `POST /v1/images/edits` multipart 请求：Image 1 是**待修改的基础图**，Image 2～9 是有序参考图，允许附加 Mask（实际模型可能不支持）。`image_complexity` 选择非 `auto` 时进入 multipart `complexity` 字段。
 
-| Operation | References | Protocol | Endpoint |
-| --- | --- | --- | --- |
-| Generate | 0 | images | `/v1/images/generations` |
-| Generate | 1–9 | responses | `/v1/responses` |
-| Edit | 0–8 + 必需的基础图 | images | `/v1/images/edits` |
+## 3. 兼容与支持边界
 
-该专用 Provider **不会尝试** `/images/generations/async`、`/images/edits/async`、`/images/tasks/{task_id}`。对于其他兼容服务的异步任务，改用通用 API Provider；详见 [兼容 API 与异步任务](compatibility-and-async.md)。
-
-如果服务因网络问题、429 或 5xx 失败，代码不会擅自从 Images 切到 Responses，也不会自动重放一个可能已创建付费图片的 POST。这样做是为避免重复生成，不是保证上游一定没有完成请求。
+- 新的 `reference_mode` 仅对 CLIProxyAPI Provider 生效，通用 API Provider 和旧 Codex OAuth Provider 原有自动选路不变。
+- 该 Provider 关闭异步 Images 探测；不因上游断线自动无条件重发 POST，以免重复使用额度。
+- 用户可以填写 `gpt-image-2.6-flare`、`gpt-image-2.6-sunburst` 或仍受支持的旧型号；**模型能否真正访问取决于实际代理与账号权限**。
+- 2.6 官方还有 GIF、SVG、markup-guided 编辑，但当前 ComfyUI 插件的 `IMAGE` 仅按 PNG/JPEG/WebP 位图通道工作，不能宣称支持所有 2.6 输出格式。
+- 查看[官方版本与型号兼容](model-support.md)，以及旧的[通用 API / 异步任务接口](compatibility-and-async.md)。
 
 ## 4. `n` 的明确语义
 

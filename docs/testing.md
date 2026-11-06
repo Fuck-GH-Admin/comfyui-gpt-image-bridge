@@ -7,19 +7,19 @@
 | 层次 | 验证方法 | 当前结论 |
 | --- | --- | --- |
 | 源码与协议 | 代码审查 | 已有 CLIProxyAPI Provider、Images/Responses 适配和凭据守卫 |
-| Python 单元测试 | GitHub Actions pytest | **222 PASS** |
-| JavaScript 单元测试 | Node.js Test Runner | **12 PASS** |
+| Python 单元测试 | GitHub Actions pytest | **235 PASS（当前新版分支测试记录）** |
+| JavaScript 单元测试 | Node.js Test Runner | **13 PASS（当前新版分支测试记录）** |
 | 实际 ComfyUI 后端 | Ubuntu + CPU，真正安装 ComfyUI 0.44.0 | **PASS** |
 | ComfyUI 节点注册与任务执行 | HTTP `/object_info`、`/prompt`、`/history` | **PASS** |
 | 生成/参考图/编辑请求 | 本机假 CLIProxyAPI HTTP 服务器 | **PASS（协议替身）** |
-| Save Image 文件 | 检查真正写出的四张 32×24 PNG 及元数据 | **PASS** |
+| Save Image 文件 | 检查真正写出的五张 32×24 PNG 及元数据 | **PASS** |
 | CLIProxyAPI 真实进程 | 当前 CI 未启动此进程 | **NOT_RUN** |
-| 真实 Codex OAuth、账户额度 | 不在 CI 导入个人凭据 | **NOT_RUN** |
-| 上游真实生图、编辑 | 需要本人授权并使用实际额度 | **NOT_RUN** |
+| 真实 Codex OAuth、账户额度 | CI 不导入个人凭据 | **CI NOT_RUN；已有 PR #2 的用户实机登录证据** |
+| 上游真实生图、编辑 | 用户 PR #2 验证旧模型 `gpt-image-2` 的纯文 Generate 和 Edit；**2.6 两个变体未验证** | **旧模型实机 PASS；2.6 NOT_RUN** |
 | 浏览器中的密码控件人工点击 | CI 只运行后端与前端逻辑单元测试 | **NOT_RUN** |
 | Windows、macOS、Docker 长期运行 | Linux CI 无法覆盖 | **NOT_RUN** |
 
-**证据链接**：[Python + JavaScript CI](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42189936189)；[真实 ComfyUI 运行 CI](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42189936247)。
+**证据链接**：[新版 Python + JavaScript CI](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42208174584)；[新版真实 ComfyUI 运行 CI](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42208174647)。
 
 真实 ComfyUI 固定基线：`Comfy-Org/ComfyUI@63e5bf594339f676b4b15e072529873e3448409e`，运行报告版本 `0.44.0`，Ubuntu Runner、Python 3.11、CPU PyTorch，不需要 GPU 也没有本地模型权重。
 
@@ -51,11 +51,13 @@ node --experimental-default-type=module --test tests/js/*.test.mjs
 3. 启动**内存中的 CLIProxyAPI 兼容 HTTP 测试服务器**，它返回可解码的固定 PNG 和模拟 Responses SSE。
 4. 使用 `POST /gpt-image-bridge/session-credential` 将测试 Key 转成一次性句柄；检查原始 Key 不能越过 `/prompt` 守卫。
 5. 提交 `Generate n=2` 工作流，通过 Images 请求保存两张 PNG。
-6. 提交 Load Image → 参考图 Generate → Save Image 工作流，实际调用 Responses 形态并保存 PNG。
-7. 提交 Load Image → Edit Reference List → Edit → Save Image 工作流，验证 multipart 中基础图和参考图顺序。
-8. 检查四次 HTTP 请求的端点、模型角色、Bearer 客户端 Key 和关键字段。
+6. 提交 Load Image → 参考图 Generate → Save Image 工作流，分别以默认 Images Edit 和手动 Responses 两种模式请求并保存 PNG。
+7. 另行提交可选 Responses 模式的参考图 Generate 工作流，验证文本主模型与图片模型分离；再提交 Load Image → Edit Reference List → Edit → Save Image 工作流，验证 multipart 中基础图和参考图顺序。
+8. 检查五次 HTTP 请求的端点、模型角色、Bearer 客户端 Key 和关键字段。
 9. 检查输出目录里有真正的 PNG 文件，能读取、尺寸为 32×24、图片元数据没有测试 Key。
 10. 关闭测试进程并输出 `COMFYUI_SMOKE_PASS`。
+
+**注意：用户已通过 [PR #2](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/pull/2) 上传旧型号真实 CLIProxyAPI + Codex 实机报告。该报告确认 `gpt-image-2` 的纯文生成、基础 Edit 和带参考图 Edit，但没有验证 2.6 Flare/Sunburst，也未确认新版默认的参考图 Generate（Images Edit 模式）。请勿将报告覆盖范围扩大。**
 
 **ComfyUI 是真的，图片服务是模拟的。** 因此这种测试能发现节点加载、后端执行、数据类型、工作流保存等错误，却不能证明 CLIProxyAPI 真实 OAuth 登录、上游配额及模型可用。
 
@@ -72,13 +74,21 @@ python tests/integration/comfyui_server_smoke.py /abs/path/to/ComfyUI
 
 **副作用**：它会在 ComfyUI 的 `input/bridge_reference.png` 写入固定测试素材，在 `output/` 中写入 `CI-Text*`、`CI-Reference*`、`CI-Edit*` PNG，并在系统临时目录写 `comfyui-cliproxy-smoke.log`。生产环境先备份或使用独立测试目录。
 
+### 更新版额外验证
+
+- [ ] `gpt-image-2.6-flare` 的 `n=1` 图片生成：PASS / FAIL / NOT_RUN
+- [ ] `gpt-image-2.6-sunburst` 的 `n=1` 图片生成：PASS / FAIL / NOT_RUN
+- [ ] 有参考图 Generate 默认 `reference_mode=images_edit`，确认真实代理以 Images Edit 生成新图：PASS / FAIL / NOT_RUN
+- [ ] 仅在需要时选 `reference_mode=responses` 并输入实际可用的文本主模型（PR #2 记录过 model_not_found/DNS 问题，不能假设成功）
+- [ ] `quality=xhigh/max`、`size=Custom`、`image_complexity=low/medium/high`：按真实账户和模型逐项验证，避免连续消耗额度
+
 ## 4. 本机真实生图验收顺序
 
 只有接入你自己的 CLIProxyAPI 服务并完成 Codex 登录，才能把以下真实服务项目标记为 PASS。**无需向维护者分享 Token、Key 或图片。**
 
 ### A. 不消耗生图额度的准备检查
 
-- [ ] 本 fork 处于 `feat/cliproxyapi-native-provider`，且 ComfyUI 节点列表中确实有 CLIProxyAPI Provider。
+- [ ] 本 fork 处于 `feat/image26-images-first-reference-mode`，且 ComfyUI 节点列表中确实有 CLIProxyAPI Provider。
 - [ ] CLIProxyAPI 已运行，`config.yaml` 用 v8 的 `access.api-keys`，当前账号 Codex OAuth 登录成功。
 - [ ] `multimedia.disable-image-generation` 为 `false`，以覆盖 Images 和 Responses 两条路线。
 - [ ] 在与 ComfyUI 相同的网络环境中，`GET /v1/models` 能返回数据。

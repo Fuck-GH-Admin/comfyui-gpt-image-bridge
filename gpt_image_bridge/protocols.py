@@ -27,7 +27,7 @@ from .oauth import oauth_request_context
 from .transport import HttpClient, HttpResponse
 
 
-CLIENT_HEADER = "comfyui-gpt-image-bridge/0.6.0"
+CLIENT_HEADER = "comfyui-gpt-image-bridge/0.7.0"
 ASYNC_POLL_INTERVAL_SECONDS = 3.0
 ASYNC_TASK_ID_MAX_LENGTH = 512
 _ASYNC_ERROR_MESSAGE_MAX_CHARS = 2048
@@ -237,6 +237,8 @@ def select_protocol(
         return "responses", "auto: native Codex OAuth generation route uses /responses"
     if operation == "edit":
         return "images", "auto: explicit base-image semantics use /images/edits"
+    if has_references and provider.reference_generate_mode == "images_edit":
+        return "images", "auto: reference-guided new image via /images/edits"
     if has_references:
         return "responses", "auto: generation references require ordered input_image roles"
     return "images", "auto: plain text-to-image uses /images/generations"
@@ -888,6 +890,7 @@ def _build_edit_multipart(
     background: str,
     output_format: str,
     n: int,
+    reference_guided: bool = False,
 ) -> tuple[bytes, str, str]:
     boundary = f"----ComfyUIGPTImageBridge{uuid.uuid4().hex}"
     image_field = (
@@ -895,21 +898,36 @@ def _build_edit_multipart(
         if provider.auth_mode == "codex_oauth" or not references
         else "image[]"
     )
-    role_prompt = (
-        "Image 1 is the base image to edit. "
-        + (
-            f"Images 2 through {len(references) + 1} are ordered reference images only. "
-            if references
-            else ""
+    if reference_guided:
+        role_prompt = (
+            "Create a NEW image guided by the supplied reference images. "
+            "Image 1 is a visual reference, not a canvas to preserve or minimally edit. "
+            + (
+                f"Images 2 through {len(references) + 1} are additional ordered visual references. "
+                if references
+                else ""
+            )
+            + "Use the references as context; follow this new-image instruction: "
+            + prompt
         )
-        + prompt
-    )
+    else:
+        role_prompt = (
+            "Image 1 is the base image to edit. "
+            + (
+                f"Images 2 through {len(references) + 1} are ordered reference images only. "
+                if references
+                else ""
+            )
+            + prompt
+        )
     parts = [
         _multipart_field(boundary, "model", provider.model),
         _multipart_field(boundary, "prompt", role_prompt),
         _multipart_field(boundary, "size", size),
         _multipart_field(boundary, "quality", quality),
     ]
+    if provider.image_complexity != "auto":
+        parts.append(_multipart_field(boundary, "complexity", provider.image_complexity))
     if provider.auth_mode == "codex_oauth":
         parts.append(_multipart_field(boundary, "response_format", "b64_json"))
     else:
@@ -1061,6 +1079,8 @@ def _responses_payload(
     responses_model = provider.responses_model or provider.model
     if provider.responses_model:
         image_tool["model"] = provider.model
+    if provider.image_complexity != "auto":
+        image_tool["complexity"] = provider.image_complexity
 
     payload = {
         "model": responses_model,
@@ -1165,6 +1185,7 @@ def _images_request(
     background: str,
     output_format: str,
     n: int,
+    reference_guided: bool = False,
 ) -> tuple[str, bytes, dict[str, str], str | None]:
     if operation == "generate":
         url = configured_endpoint_url(
@@ -1182,6 +1203,8 @@ def _images_request(
         }
         if provider.auth_mode != "codex_oauth":
             payload["output_format"] = output_format
+        if provider.image_complexity != "auto":
+            payload["complexity"] = provider.image_complexity
         return (
             url,
             json.dumps(payload, separators=(",", ":")).encode("utf-8"),
@@ -1230,6 +1253,7 @@ def _images_request(
         background=background,
         output_format=output_format,
         n=int(n),
+        reference_guided=reference_guided,
     )
     return (
         configured_endpoint_url(
@@ -2549,9 +2573,28 @@ def _execute_operation(
     all_metadata: list[dict[str, Any]] = []
     revised_prompt = ""
     request_evidence: list[dict[str, Any]] = []
-    endpoint_override = (
-        provider.generate_endpoint if operation == "generate" else provider.edit_endpoint
+    reference_guided_images = (
+        operation == "generate"
+        and bool(references)
+        and protocol == "images"
+        and provider.reference_generate_mode == "images_edit"
     )
+    endpoint_override = (
+        provider.edit_endpoint
+        if reference_guided_images
+        else (provider.generate_endpoint if operation == "generate" else provider.edit_endpoint)
+    )
+    if reference_guided_images:
+        report["reference_generation"] = {
+            "mode": "images_edit",
+            "requested_operation": "generate",
+            "transport_operation": "edit",
+            "semantics": (
+                "Images Edit uses Reference 1 as the source image and remaining "
+                "references in order; this is guided generation, not pure "
+                "text-to-image or strict identity-preserving editing."
+            ),
+        }
 
     if protocol == "responses":
         url = configured_endpoint_url(base_url, endpoint_override, "responses")
@@ -2668,21 +2711,28 @@ def _execute_operation(
         # CLIProxyAPI's Codex image_generation tool does not expose the Images
         # API's n field. Send one synchronous request per requested output
         # rather than silently asking the proxy to generate only one image.
-        requests_per_output = bool(provider.responses_model)
+        requests_per_output = (
+            provider.reference_generate_mode != "legacy" or bool(provider.responses_model)
+        )
         request_count = int(n) if requests_per_output else 1
         images_per_request = 1 if requests_per_output else int(n)
         async_report: dict[str, Any] = {}
         for request_index in range(request_count):
             url, body, image_headers, image_field = _images_request(
                 provider=provider,
-                operation=operation,
+                operation="edit" if reference_guided_images else operation,
                 base_url=base_url,
                 endpoint_override=endpoint_override,
                 auth_headers=auth_headers,
                 prompt=prompt,
-                base_image=base_image,
-                references=references,
+                base_image=references[0] if reference_guided_images else base_image,
+                references=(
+                    renumber_references(references[1:], start_slot=2)
+                    if reference_guided_images
+                    else references
+                ),
                 mask_png=mask_png,
+                reference_guided=reference_guided_images,
                 size=size,
                 quality=quality,
                 background=background,
@@ -2698,7 +2748,7 @@ def _execute_operation(
             ) = _execute_images_request(
                 provider=provider,
                 client=client,
-                operation=operation,
+                operation="edit" if reference_guided_images else operation,
                 sync_url=url,
                 body=body,
                 headers=image_headers,
@@ -2719,6 +2769,8 @@ def _execute_operation(
             report["protocol_notes"] = {
                 "n_transport": "one synchronous Images API request per requested output"
             }
+            if reference_guided_images:
+                report["protocol_notes"]["reference_mode"] = "images_edit"
         if provider.auth_mode == "codex_oauth":
             report["protocol_notes"] = {
                 "effective_response_format": "b64_json",

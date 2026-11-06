@@ -1,6 +1,6 @@
 export const GENERATE_REFERENCE_PREFIX = "reference_";
 export const MIN_GENERATE_REFERENCE_INPUTS = 3;
-export const MAX_GENERATE_REFERENCE_INPUTS = 9;
+export const MAX_GENERATE_REFERENCE_INPUTS = 16;
 export const LEGACY_GENERATE_REFERENCE_INPUT_NAMES = new Set([
     "references",
     "references（Reference 1 开始）",
@@ -14,7 +14,7 @@ const LEGACY_REFERENCE_NODE_TYPES = new Set([
 ]);
 
 export function referenceNumber(input) {
-    const match = /^reference_([1-9])$/.exec(String(input?.name ?? ""));
+    const match = /^reference_([1-9]|1[0-6])$/.exec(String(input?.name ?? ""));
     return match ? Number(match[1]) : null;
 }
 
@@ -47,7 +47,7 @@ function graphLink(graph, linkId) {
 }
 
 function numberedSourceInput(input) {
-    const match = /^(?:image|reference)_([1-9])$/.exec(
+    const match = /^(?:image|reference)_([1-9]|1[0-6])$/.exec(
         String(input?.name ?? ""),
     );
     return match ? Number(match[1]) : null;

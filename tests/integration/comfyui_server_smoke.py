@@ -71,7 +71,7 @@ class FakeCLIProxyAPI(BaseHTTPRequestHandler):
             try:
                 request = json.loads(body)
                 valid = (
-                    request.get("model") == "gpt-image-2"
+                    request.get("model") == "gpt-image-2.6-flare"
                     and bool(request.get("prompt"))
                     and request.get("n") == 1
                 )
@@ -80,14 +80,24 @@ class FakeCLIProxyAPI(BaseHTTPRequestHandler):
             kind = "generate"
 
         elif self.path == "/v1/images/edits":
-            valid = (
-                b'name="model"' in body
-                and b"gpt-image-2" in body
-                and b'name="image[]"; filename="image-1-base.png"' in body
-                and b'name="image[]"; filename="image-2-reference.png"' in body
-                and body.index(b"image-1-base.png") < body.index(b"image-2-reference.png")
-            )
-            kind = "edit"
+            guided_generation = b"Create a NEW image guided by" in body
+            if guided_generation:
+                valid = (
+                    b'name="model"' in body
+                    and b"gpt-image-2.6-flare" in body
+                    and b'name="image"; filename="image-1-base.png"' in body
+                    and b"not a canvas to preserve or minimally edit" in body
+                )
+                kind = "reference_image_edit"
+            else:
+                valid = (
+                    b'name="model"' in body
+                    and b"gpt-image-2.6-flare" in body
+                    and b'name="image[]"; filename="image-1-base.png"' in body
+                    and b'name="image[]"; filename="image-2-reference.png"' in body
+                    and body.index(b"image-1-base.png") < body.index(b"image-2-reference.png")
+                )
+                kind = "edit"
 
         elif self.path == "/v1/responses":
             try:
@@ -95,9 +105,9 @@ class FakeCLIProxyAPI(BaseHTTPRequestHandler):
                 tools = request.get("tools") or []
                 content = request["input"][1]["content"]
                 valid = (
-                    request.get("model") == "gpt-5.4-mini"
+                    request.get("model") == "gpt-6.1-sol"
                     and tools[0]["type"] == "image_generation"
-                    and tools[0]["model"] == "gpt-image-2"
+                    and tools[0]["model"] == "gpt-image-2.6-flare"
                     and tools[0]["action"] == "generate"
                     and any(part.get("type") == "input_image" for part in content)
                 )
@@ -146,12 +156,14 @@ def unused_port():
         return sock.getsockname()[1]
 
 
-def provider_inputs(api_key: str, proxy_url: str):
+def provider_inputs(api_key: str, proxy_url: str, mode: str = "images_edit"):
     return {
         "api_key": api_key,
         "base_url": proxy_url + "/v1",
-        "image_model": "gpt-image-2",
-        "responses_model": "gpt-5.4-mini",
+        "image_model": "gpt-image-2.6-flare",
+        "responses_model": "gpt-6.1-sol" if mode == "responses" else "",
+        "reference_mode": mode,
+        "image_complexity": "auto",
     }
 
 
@@ -184,7 +196,17 @@ def wait_for_history(base: str, prompt_id: str, log_path: Path, timeout: int = 9
     raise AssertionError("ComfyUI workflow did not finish; server log tail:\n" + tail)
 
 
-def queue_workflow(base: str, proxy_url: str, graph: dict, output_node: str, expected_count: int, log_path: Path, output_dir: Path):
+def queue_workflow(
+    base: str,
+    proxy_url: str,
+    graph: dict,
+    output_node: str,
+    expected_count: int,
+    log_path: Path,
+    output_dir: Path,
+    *,
+    reference_mode: str = "images_edit",
+):
     credential, headers = http_json(
         base, "/gpt-image-bridge/session-credential", {"api_key": CLIENT_KEY}
     )
@@ -192,7 +214,7 @@ def queue_workflow(base: str, proxy_url: str, graph: dict, output_node: str, exp
     handle = credential["credential_handle"]
     assert handle.startswith("gpt-image-bridge-session:")
     assert CLIENT_KEY not in handle
-    graph["1"]["inputs"] = provider_inputs(handle, proxy_url)
+    graph["1"]["inputs"] = provider_inputs(handle, proxy_url, reference_mode)
 
     workflow = {
         "nodes": [
@@ -201,8 +223,10 @@ def queue_workflow(base: str, proxy_url: str, graph: dict, output_node: str, exp
                 "widgets_values": [
                     CLIENT_KEY,
                     proxy_url + "/v1",
-                    "gpt-image-2",
-                    "gpt-5.4-mini",
+                    "gpt-image-2.6-flare",
+                    "gpt-6.1-sol" if reference_mode == "responses" else "",
+                    reference_mode,
+                    "auto",
                 ],
             }
         ]
@@ -333,7 +357,20 @@ def run(root: Path):
             "6": {"class_type": "SaveImage", "inputs": {"images": ["5", 0], "filename_prefix": "CI-Reference"}},
         }
         queue_workflow(comfy_url, proxy_url, graph, "6", 1, log_path, root / "output")
-        print("[PASS] Reference generation -> actual PNG file via LoadImage/Responses/SaveImage", flush=True)
+        print("[PASS] Default reference generation -> Images Edit -> actual PNG", flush=True)
+
+        # Opt-in Responses mode retains a separate mainline model and image tool.
+        graph = {
+            "1": {"class_type": "GPTImageBridgeCLIProxyAPIProvider", "inputs": {}},
+            "4": {"class_type": "LoadImage", "inputs": {"image": "bridge_reference.png"}},
+            "10": {"class_type": "GPTImageBridgeGenerate", "inputs": {**generate_inputs("1"), "reference_1": ["4", 0]}},
+            "11": {"class_type": "SaveImage", "inputs": {"images": ["10", 0], "filename_prefix": "CI-Reference-Responses"}},
+        }
+        queue_workflow(
+            comfy_url, proxy_url, graph, "11", 1, log_path, root / "output",
+            reference_mode="responses",
+        )
+        print("[PASS] Opt-in Responses reference generation -> actual PNG", flush=True)
 
         # Edit: actual reference-list node, base IMAGE, multipart upload and save.
         graph = {
@@ -356,10 +393,10 @@ def run(root: Path):
         with REQUESTS_LOCK:
             observed = list(REQUESTS)
         assert [item["kind"] for item in observed] == [
-            "generate", "generate", "reference", "edit"
+            "generate", "generate", "reference_image_edit", "reference", "edit"
         ], "Unexpected proxy requests: " + str(observed)
         assert all(item["valid"] for item in observed)
-        print("[PASS] 4 proxy HTTP requests matched expected contracts", flush=True)
+        print("[PASS] 5 proxy HTTP requests matched both reference modes", flush=True)
         print("COMFYUI_SMOKE_PASS", flush=True)
 
     except Exception:

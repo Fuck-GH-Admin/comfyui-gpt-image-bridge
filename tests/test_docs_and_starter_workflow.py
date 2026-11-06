@@ -39,7 +39,7 @@ def test_all_local_markdown_links_exist_and_fences_are_balanced():
 def test_readme_is_a_short_usage_guide():
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     assert len(readme.splitlines()) <= 130
-    assert "feat/cliproxyapi-native-provider" in readme
+    assert "feat/image26-images-first-reference-mode" in readme
     assert "docs/README.md" in readme
     assert "CLIProxyAPI-Text-to-Image.json" in readme
 
@@ -61,11 +61,17 @@ def test_cliproxyapi_starter_workflow_is_connected_and_has_no_secrets():
     assert by_id[1]["widgets_values"] == [
         "",
         "http://127.0.0.1:8317/v1",
-        "gpt-image-2",
-        "gpt-5.4-mini",
+        "gpt-image-2.6-flare",
+        "",
+        "images_edit",
+        "auto",
     ]
-    assert [item["name"] for item in by_id[1]["inputs"]] == list(
-        nodes.GPTImageBridgeCLIProxyAPIProvider.INPUT_TYPES()["required"]
+    provider_schema = nodes.GPTImageBridgeCLIProxyAPIProvider.INPUT_TYPES()
+    assert [item["name"] for item in by_id[1]["inputs"][:4]] == list(
+        provider_schema["required"]
+    )
+    assert [item["name"] for item in by_id[1]["inputs"][4:]] == list(
+        provider_schema["optional"]
     )
     assert [item["name"] for item in by_id[2]["inputs"][:9]] == list(
         nodes.GPTImageBridgeGenerate.INPUT_TYPES()["required"]

@@ -58,9 +58,10 @@ def test_comfyui_registration_and_provider_responsibilities_are_separate():
         "images",
         "chat_completions",
     )
-    cliproxy_inputs = module.NODE_CLASS_MAPPINGS[
+    cliproxy_node_types = module.NODE_CLASS_MAPPINGS[
         "GPTImageBridgeCLIProxyAPIProvider"
-    ].INPUT_TYPES()["required"]
+    ].INPUT_TYPES()
+    cliproxy_inputs = cliproxy_node_types["required"]
     assert list(cliproxy_inputs) == [
         "api_key",
         "base_url",
@@ -69,20 +70,29 @@ def test_comfyui_registration_and_provider_responsibilities_are_separate():
     ]
     assert cliproxy_inputs["api_key"][1]["socketless"] is True
     assert cliproxy_inputs["base_url"][1]["default"] == "http://127.0.0.1:8317/v1"
-    assert cliproxy_inputs["image_model"][1]["default"] == "gpt-image-2"
-    assert cliproxy_inputs["responses_model"][1]["default"] == "gpt-5.4-mini"
+    assert cliproxy_inputs["image_model"][1]["default"] == "gpt-image-2.6-flare"
+    assert cliproxy_inputs["responses_model"][1]["default"] == ""
+    assert cliproxy_node_types["optional"]["reference_mode"][0] == (
+        "images_edit", "responses"
+    )
+    assert cliproxy_node_types["optional"]["reference_mode"][1]["default"] == "images_edit"
+    assert cliproxy_node_types["optional"]["image_complexity"][0] == (
+        "auto", "low", "medium", "high"
+    )
     cliproxy_config = module.NODE_CLASS_MAPPINGS[
         "GPTImageBridgeCLIProxyAPIProvider"
     ]().build(
         api_key="",
         base_url="http://127.0.0.1:8317/v1",
-        image_model="gpt-image-2",
-        responses_model="gpt-5.4-mini",
+        image_model="gpt-image-2.6-flare",
+        responses_model="",
     )[0]
     assert cliproxy_config.api_protocol == "auto"
     assert cliproxy_config.use_async is False
-    assert cliproxy_config.model == "gpt-image-2"
-    assert cliproxy_config.responses_model == "gpt-5.4-mini"
+    assert cliproxy_config.model == "gpt-image-2.6-flare"
+    assert cliproxy_config.responses_model == ""
+    assert cliproxy_config.reference_generate_mode == "images_edit"
+    assert cliproxy_config.image_complexity == "auto"
 
     api_optional = module.NODE_CLASS_MAPPINGS[
         "GPTImageBridgeAPIProvider"
@@ -168,18 +178,9 @@ def test_comfyui_registration_and_provider_responsibilities_are_separate():
     reference_inputs = module.NODE_CLASS_MAPPINGS[
         "GPTImageBridgeReferenceList"
     ].INPUT_TYPES()["optional"]
-    assert list(reference_inputs) == [
-        "image_2",
-        "image_3",
-        "image_4",
-        "image_5",
-        "image_6",
-        "image_7",
-        "image_8",
-        "image_9",
-    ]
+    assert list(reference_inputs) == [f"image_{i}" for i in range(2, 17)]
     assert module.NODE_DISPLAY_NAME_MAPPINGS["GPTImageBridgeReferenceList"] == (
-        "GPT Image Bridge · Edit Reference List (Image 2–9)"
+        "GPT Image Bridge · Edit Reference List (Image 2–16)"
     )
 
     edit_types = module.NODE_CLASS_MAPPINGS[
@@ -193,8 +194,13 @@ def test_comfyui_registration_and_provider_responsibilities_are_separate():
         "GPTImageBridgeGenerate"
     ].INPUT_TYPES()
     assert list(generate_types["optional"]) == [
-        *(f"reference_{index}" for index in range(1, 10)),
+        *(f"reference_{index}" for index in range(1, 17)),
+        "custom_width", "custom_height",
     ]
+    assert "Custom" in generate_types["required"]["size"][0]
+    assert "max" in generate_types["required"]["quality"][0]
+    assert "custom_width" in edit_types["optional"]
+    assert "custom_height" in edit_types["optional"]
     assert "references" not in generate_types["optional"]
 
 
@@ -384,7 +390,7 @@ def test_generate_direct_references_reject_gaps_and_batches(monkeypatch):
         generate(**common, reference_1=batch)
 
 
-def test_generate_accepts_nine_direct_references_in_order(monkeypatch):
+def test_generate_accepts_sixteen_direct_references_in_order(monkeypatch):
     module = import_comfy_package()
     node_module = sys.modules[f"{module.__name__}.nodes"]
     captured = {}
@@ -402,8 +408,8 @@ def test_generate_accepts_nine_direct_references_in_order(monkeypatch):
         api_key="session-handle",
     )
     direct_references = {
-        f"reference_{index}": image_tensor(index + 3, index + 4, index / 10)
-        for index in range(1, 10)
+        f"reference_{index}": image_tensor(index + 3, index + 4, index / 20)
+        for index in range(1, 17)
     }
     result = module.NODE_CLASS_MAPPINGS["GPTImageBridgeGenerate"]().generate(
         provider=provider,
@@ -424,5 +430,5 @@ def test_generate_accepts_nine_direct_references_in_order(monkeypatch):
         for item in captured["references"]
     ] == [
         (index, index + 3, index + 4)
-        for index in range(1, 10)
+        for index in range(1, 17)
     ]
