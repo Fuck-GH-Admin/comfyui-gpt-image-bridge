@@ -71,7 +71,7 @@ Save Image
 
 也可以直接[下载无密钥的 ComfyUI 文生图示例工作流](example_workflows/CLIProxyAPI-Text-to-Image.json)，拖入画布后选择已经在本机配置好的服务商。
 
-Provider Profile 不含 Key 和 `base_url`。`profile` 选择服务商，`image_model` 留空时使用配置的默认模型，`reference_mode` 默认跟随服务商配置。第一次用 Generate：填写提示词、`n=1`，其他项保持 `auto`、`output_format=png`，然后点击 Queue。旧版 Provider 参数已转移到[旧工作流手册](docs/nodes-and-workflows.md)。
+Provider Profile 不含 Key 和 `base_url`。`profile` 选择服务商，`image_model` 留空时使用配置的默认模型，`reference_mode` 默认跟随服务商配置。第一次用 Generate：填写提示词、`n=1`，其他项保持 `auto`、`output_format=png`，然后点击 Queue。**日常界面默认隐藏审核强度和超时等低频设置；节点上的「显示高级参数」可以随时展开，`size=Custom` 时自动显示宽高。** 后端参数没有删减，旧工作流仍可加载。旧版 Provider 参数已转移到[旧工作流手册](docs/nodes-and-workflows.md)。
 
 - **参考图生成**：`Load Image.IMAGE` → `Generate.reference_1`，依次可连更多参考图。
 - **编辑图片**：`Load Image.IMAGE` → `Edit.base_image（Image 1）`；可选将更多参考图接到 `Edit Reference List`，再接 Edit 的参考图入口。
