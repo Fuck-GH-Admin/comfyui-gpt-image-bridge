@@ -23,7 +23,7 @@ import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageDraw
 
 CLIENT_KEY = "ci-cliproxy-client-key-not-an-oauth-token"
 EXPECTED_NODES = {
@@ -38,13 +38,23 @@ REQUESTS = []
 REQUESTS_LOCK = threading.Lock()
 
 
-def png_data(width: int = 32, height: int = 24) -> bytes:
+def png_data(width: int = 32, height: int = 24, *, alpha: bool = False) -> bytes:
     output = io.BytesIO()
-    Image.new("RGB", (width, height), (70, 125, 210)).save(output, "PNG")
+    if alpha:
+        image = Image.new("RGBA", (width, height), (70, 125, 210, 255))
+        ImageDraw.Draw(image).rectangle(
+            (0, 0, max(0, width // 2 - 1), height - 1),
+            fill=(70, 125, 210, 0),
+        )
+    else:
+        image = Image.new("RGB", (width, height), (70, 125, 210))
+    image.save(output, "PNG")
     return output.getvalue()
 
 
-PNG_B64 = base64.b64encode(png_data()).decode("ascii")
+# The fake upstream deliberately returns RGBA so this smoke test exercises
+# decoding, ComfyUI IMAGE transport, and the built-in SaveImage node end to end.
+PNG_B64 = base64.b64encode(png_data(alpha=True)).decode("ascii")
 
 
 class FakeCLIProxyAPI(BaseHTTPRequestHandler):
@@ -258,6 +268,8 @@ def queue_workflow(
         with Image.open(full_path) as loaded:
             assert loaded.format == "PNG"
             assert loaded.size == (32, 24), "Image file dimensions differ from proxy output"
+            assert loaded.mode == "RGBA", "ComfyUI SaveImage dropped the upstream alpha channel"
+            assert loaded.getchannel("A").getextrema() == (0, 255), "ComfyUI SaveImage changed alpha samples"
             metadata = json.dumps(loaded.info, ensure_ascii=False)
             assert CLIENT_KEY not in metadata, "A raw client key leaked to PNG metadata"
     return images
