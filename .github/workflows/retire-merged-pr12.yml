@@ -1,0 +1,33 @@
+name: Retire merged PR 12 source branch once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/retire-merged-pr12.yml
+
+permissions:
+  contents: write
+
+jobs:
+  retire:
+    if: github.repository == 'Fuck-GH-Admin/comfyui-gpt-image-bridge'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify PR merged and exact old source SHA
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          branch=feat/contextual-node-controls-20261107
+          expected=6bcdc0c7ec7d074df03788933387c78e08888e29
+          merged="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/12" --jq '.merged')"
+          test "$merged" = true
+          actual="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/${branch}" --jq '.object.sha')"
+          if [[ "$actual" != "$expected" ]]; then
+            echo "Source branch moved; refusing to delete it." >&2
+            exit 1
+          fi
+          gh api -X DELETE "repos/${GITHUB_REPOSITORY}/git/refs/heads/${branch}"
+          echo "Retired PR #12 source branch."
