@@ -368,6 +368,9 @@ class ProviderConfig:
     async_edit_endpoint: str = ""
     async_poll_endpoint_template: str = ""
     async_mapping_json: str = field(default="", repr=False)
+    responses_model: str = ""
+    reference_generate_mode: str = "legacy"
+    image_complexity: str = "auto"
     async_mapping: AsyncResponseMapping | None = field(
         default=None,
         init=False,
@@ -386,6 +389,13 @@ class ProviderConfig:
         if not self.model.strip():
             raise ValueError("model cannot be empty.")
         object.__setattr__(self, "model", self.model.strip())
+        object.__setattr__(self, "responses_model", str(self.responses_model or "").strip())
+        if self.reference_generate_mode not in {"legacy", "images_edit", "responses"}:
+            raise ValueError("reference_generate_mode must be legacy, images_edit or responses.")
+        if self.reference_generate_mode == "responses" and not self.responses_model:
+            raise ValueError("Responses reference generation requires responses_model.")
+        if self.image_complexity not in {"auto", "low", "medium", "high"}:
+            raise ValueError("image_complexity must be auto, low, medium or high.")
         object.__setattr__(self, "api_key", self.api_key.strip())
         if self.api_key and any(
             ord(character) < 0x21 or ord(character) > 0x7E
@@ -484,6 +494,9 @@ class ProviderConfig:
         base_url: str,
         model: str,
         api_protocol: str,
+        responses_model: str = "",
+        reference_generate_mode: str = "legacy",
+        image_complexity: str = "auto",
         generate_endpoint: str = "",
         edit_endpoint: str = "",
         use_custom_endpoints: bool | None = None,
@@ -514,6 +527,9 @@ class ProviderConfig:
             base_url=base_url,
             model=model,
             api_protocol=api_protocol,
+            responses_model=responses_model,
+            reference_generate_mode=reference_generate_mode,
+            image_complexity=image_complexity,
             use_custom_endpoints=use_custom_endpoints,
             use_async=use_async,
             generate_endpoint=generate_endpoint,
@@ -548,6 +564,12 @@ class ProviderConfig:
             "model": self.model,
             "api_protocol": self.api_protocol,
         }
+        if self.responses_model:
+            result["responses_model"] = self.responses_model
+        if self.reference_generate_mode != "legacy":
+            result["reference_generate_mode"] = self.reference_generate_mode
+        if self.image_complexity != "auto":
+            result["image_complexity"] = self.image_complexity
         if self.auth_mode == AUTH_MODE_API:
             result["api_key_configured"] = bool(self.api_key)
             result["use_custom_endpoints"] = bool(self.use_custom_endpoints)
@@ -577,7 +599,7 @@ def resolve_api_credential(provider: ProviderConfig) -> str:
     if provider.api_key:
         return provider.api_key
     raise BridgeError(
-        "API key is empty. Enter it in GPT Image Bridge · API Provider.",
+        "API key is empty. Enter it in the selected GPT Image Bridge Provider.",
         error_type="authentication",
         error_code="credential_missing",
     )

@@ -37,16 +37,29 @@ else:
 
 
 CATEGORY = "GPT Image Bridge"
-SIZE_VALUES = ("auto", "1024x1024", "1536x1024", "1024x1536")
-QUALITY_VALUES = ("auto", "low", "medium", "high")
+SIZE_VALUES = (
+    "auto",
+    "1024x1024",
+    "1536x1024",
+    "1024x1536",
+    "2048x2048",
+    "2048x1152",
+    "1152x2048",
+    "3840x2160",
+    "2160x3840",
+    "Custom",
+)
+QUALITY_VALUES = ("auto", "low", "medium", "high", "xhigh", "max")
 BACKGROUND_VALUES = ("auto", "opaque", "transparent")
 OUTPUT_FORMAT_VALUES = ("png", "jpeg", "webp")
 MODERATION_VALUES = ("auto", "low")
+COMPLEXITY_VALUES = ("auto", "low", "medium", "high")
+REFERENCE_GENERATE_MODES = ("images_edit", "responses")
 BASE_IMAGE_INPUT_NAME = "base_image（Image 1）"
 EDIT_REFERENCES_INPUT_NAME = "references（Image 2 开始）"
-REFERENCE_IMAGE_INPUT_NAMES = tuple(f"image_{index}" for index in range(2, 10))
+REFERENCE_IMAGE_INPUT_NAMES = tuple(f"image_{index}" for index in range(2, 17))
 GENERATE_REFERENCE_INPUT_NAMES = tuple(
-    f"reference_{index}" for index in range(1, 10)
+    f"reference_{index}" for index in range(1, 17)
 )
 
 
@@ -201,6 +214,115 @@ class GPTImageBridgeAPIProvider:
         return (provider,)
 
 
+class GPTImageBridgeCLIProxyAPIProvider:
+    """Provider preset for a local or remote CLIProxyAPI OpenAI-compatible server."""
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "api_key": (
+                    "STRING",
+                    {
+                        "default": "",
+                        "multiline": False,
+                        "socketless": True,
+                        "tooltip": (
+                            "CLIProxyAPI config.yaml 中 access.api-keys 的客户端密钥；"
+                            "不是上游 Codex OAuth Token。"
+                        ),
+                    },
+                ),
+                "base_url": (
+                    "STRING",
+                    {
+                        "default": "http://127.0.0.1:8317/v1",
+                        "multiline": False,
+                        "label": "CLIProxyAPI Base URL",
+                    },
+                ),
+                "image_model": (
+                    "STRING",
+                    {
+                        "default": "gpt-image-2.6-flare",
+                        "multiline": False,
+                        "label": "图像模型",
+                        "tooltip": (
+                            "OpenAI 正式型号: gpt-image-2.6-flare (快速) / "
+                            "gpt-image-2.6-sunburst (精细)。"
+                            "模型须在当前 CLIProxyAPI 账号上可用；旧 gpt-image-2 仍可填写。"
+                        ),
+                    },
+                ),
+                "responses_model": (
+                    "STRING",
+                    {
+                        "default": "",
+                        "multiline": False,
+                        "label": "Responses 主模型",
+                        "tooltip": (
+                            "仅在参考图模式选择 responses 时填写真实可用的文本主模型。"
+                            "否则无需填写，不参与 Images 生图。"
+                        ),
+                    },
+                ),
+            },
+            "optional": {
+                "reference_mode": (
+                    REFERENCE_GENERATE_MODES,
+                    {
+                        "default": "images_edit",
+                        "label": "参考图生成模式",
+                        "tooltip": (
+                            "images_edit（默认）：用首张参考图作为 Images Edit 输入，"
+                            "生成新图；不是从零无参生图。"
+                            "responses：调用文本主模型的 image_generation 工具。"
+                        ),
+                    },
+                ),
+                "image_complexity": (
+                    COMPLEXITY_VALUES,
+                    {
+                        "default": "auto",
+                        "label": "图像规划复杂度",
+                        "tooltip": (
+                            "GPT Image 2.6 支持 low / medium / high。"
+                            "auto 不向服务器传 complexity；与渲染质量 quality 不同。"
+                        ),
+                    },
+                ),
+            },
+        }
+
+    RETURN_TYPES = ("GPT_IMAGE_PROVIDER",)
+    RETURN_NAMES = ("provider",)
+    FUNCTION = "build"
+    CATEGORY = CATEGORY
+
+    def build(
+        self,
+        api_key,
+        base_url,
+        image_model,
+        responses_model,
+        reference_mode="images_edit",
+        image_complexity="auto",
+    ):
+        provider = ProviderConfig.from_api_inputs(
+            api_key=api_key,
+            base_url=base_url,
+            model=image_model,
+            responses_model=responses_model,
+            reference_generate_mode=reference_mode,
+            image_complexity=image_complexity,
+            api_protocol="auto",
+            use_custom_endpoints=False,
+            use_async=False,
+            require_session_handle=True,
+        )
+        return (provider,)
+
+
 class GPTImageBridgeOAuthProvider:
     @classmethod
     def INPUT_TYPES(cls):
@@ -222,6 +344,27 @@ class GPTImageBridgeOAuthProvider:
             api_protocol=api_protocol,
         )
         return (provider,)
+
+
+def _effective_image_size(size: str, custom_width: int, custom_height: int) -> str:
+    """Resolve UI Custom dimensions without restricting free-form model aliases.
+
+    ComfyUI's official GPT Image 2.6 node accepts dimensions in multiples of
+    16, bounded by size, aspect ratio and total pixel count. Apply the same
+    checks before requests so invalid dimensions do not consume remote quota.
+    """
+    if size != "Custom":
+        return size
+    width, height = int(custom_width), int(custom_height)
+    if not 480 <= width <= 3840 or not 480 <= height <= 3840:
+        raise ValueError("Custom width and height must be between 480 and 3840.")
+    if width % 16 or height % 16:
+        raise ValueError("Custom width and height must be multiples of 16.")
+    if max(width, height) / min(width, height) > 3:
+        raise ValueError("Custom aspect ratio must be no greater than 3:1.")
+    if not 655_360 <= width * height <= 8_294_400:
+        raise ValueError("Custom image must be between 655,360 and 8,294,400 pixels.")
+    return f"{width}x{height}"
 
 
 def _ordered_single_image_slots(
@@ -324,8 +467,9 @@ class GPTImageBridgeGenerate:
                 "timeout_sec": ("INT", {"default": 300, "min": 30, "max": 3600}),
             },
             "optional": {
-                name: ("IMAGE",)
-                for name in GENERATE_REFERENCE_INPUT_NAMES
+                **{name: ("IMAGE",) for name in GENERATE_REFERENCE_INPUT_NAMES},
+                "custom_width": ("INT", {"default": 1024, "min": 480, "max": 3840, "step": 16, "tooltip": "Used only for size=Custom."}),
+                "custom_height": ("INT", {"default": 1024, "min": 480, "max": 3840, "step": 16, "tooltip": "Used only for size=Custom."}),
             },
         }
 
@@ -354,6 +498,15 @@ class GPTImageBridgeGenerate:
         reference_7=None,
         reference_8=None,
         reference_9=None,
+        reference_10=None,
+        reference_11=None,
+        reference_12=None,
+        reference_13=None,
+        reference_14=None,
+        reference_15=None,
+        reference_16=None,
+        custom_width=1024,
+        custom_height=1024,
     ):
         if not isinstance(provider, ProviderConfig):
             raise ValueError("provider must come from GPT Image Bridge · Provider.")
@@ -368,6 +521,13 @@ class GPTImageBridgeGenerate:
                 "reference_7": reference_7,
                 "reference_8": reference_8,
                 "reference_9": reference_9,
+                "reference_10": reference_10,
+                "reference_11": reference_11,
+                "reference_12": reference_12,
+                "reference_13": reference_13,
+                "reference_14": reference_14,
+                "reference_15": reference_15,
+                "reference_16": reference_16,
             },
             GENERATE_REFERENCE_INPUT_NAMES,
             queue_name="GPT Image Generate",
@@ -381,7 +541,7 @@ class GPTImageBridgeGenerate:
             operation="generate",
             prompt=prompt,
             references=encoded_references,
-            size=size,
+            size=_effective_image_size(size, custom_width, custom_height),
             quality=quality,
             background=background,
             output_format=output_format,
@@ -410,6 +570,8 @@ class GPTImageBridgeEdit:
             "optional": {
                 EDIT_REFERENCES_INPUT_NAME: ("GPT_IMAGE_REFERENCES",),
                 "mask": ("MASK",),
+                "custom_width": ("INT", {"default": 1024, "min": 480, "max": 3840, "step": 16, "tooltip": "Used only for size=Custom."}),
+                "custom_height": ("INT", {"default": 1024, "min": 480, "max": 3840, "step": 16, "tooltip": "Used only for size=Custom."}),
             },
         }
 
@@ -431,6 +593,8 @@ class GPTImageBridgeEdit:
         timeout_sec,
         references=None,
         mask=None,
+        custom_width=1024,
+        custom_height=1024,
         **kwargs,
     ):
         labeled_base_image = kwargs.pop(BASE_IMAGE_INPUT_NAME, None)
@@ -476,7 +640,7 @@ class GPTImageBridgeEdit:
                 queue_name="Edit Reference List (Image 2–9)",
             ),
             mask_png=encoded_mask,
-            size=size,
+            size=_effective_image_size(size, custom_width, custom_height),
             quality=quality,
             background=background,
             output_format=output_format,

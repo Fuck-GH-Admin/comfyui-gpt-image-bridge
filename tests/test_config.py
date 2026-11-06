@@ -134,6 +134,18 @@ def test_missing_node_api_key_is_clear_and_does_not_leak():
     assert "Bearer" not in str(captured.value)
 
 
+def test_provider_config_keeps_legacy_positional_api_key_argument():
+    provider = ProviderConfig(
+        "api_key",
+        "https://example.test/v1",
+        "gpt-image-test",
+        "images",
+        "legacy-positional-key",
+    )
+    assert provider.api_key == "legacy-positional-key"
+    assert provider.responses_model == ""
+
+
 def test_api_key_is_used_but_never_serialized_or_represented():
     secret = "test-node-api-key-never-report"
     provider = ProviderConfig.from_api_inputs(

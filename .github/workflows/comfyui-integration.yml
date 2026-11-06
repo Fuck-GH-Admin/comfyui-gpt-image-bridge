@@ -1,0 +1,52 @@
+name: ComfyUI integration smoke
+
+on:
+  pull_request:
+    branches: [main, feat/cliproxyapi-native-provider]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  comfyui-cpu-smoke:
+    name: Real ComfyUI server (CPU) + fake CLIProxyAPI
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      COMFYUI_SHA: 63e5bf594339f676b4b15e072529873e3448409e
+      COMFYUI_ROOT: /tmp/comfyui-integration
+    steps:
+      - name: Checkout bridge under test
+        uses: actions/checkout@v5
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Fetch pinned real ComfyUI
+        run: |
+          set -euxo pipefail
+          mkdir -p "$COMFYUI_ROOT"
+          git -C "$COMFYUI_ROOT" init
+          git -C "$COMFYUI_ROOT" remote add origin https://github.com/Comfy-Org/ComfyUI.git
+          git -C "$COMFYUI_ROOT" fetch --depth 1 origin "$COMFYUI_SHA"
+          git -C "$COMFYUI_ROOT" checkout --detach FETCH_HEAD
+          test "$(git -C "$COMFYUI_ROOT" rev-parse HEAD)" = "$COMFYUI_SHA"
+          mkdir -p "$COMFYUI_ROOT/custom_nodes"
+          ln -s "$GITHUB_WORKSPACE" "$COMFYUI_ROOT/custom_nodes/comfyui-gpt-image-bridge"
+
+      - name: Install CPU-only ComfyUI environment
+        run: |
+          set -euxo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install -r "$COMFYUI_ROOT/requirements.txt"
+          python -m pip install -r requirements.txt
+          python -c "import torch; print('PyTorch',torch.__version__); assert not torch.cuda.is_available()"
+
+      - name: Boot actual ComfyUI and execute generated/editing graphs
+        run: |
+          python tests/integration/comfyui_server_smoke.py "$COMFYUI_ROOT"

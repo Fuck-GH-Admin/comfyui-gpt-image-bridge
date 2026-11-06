@@ -77,6 +77,20 @@ def api_provider():
 
 
 @pytest.fixture
+def cliproxy_provider():
+    return ProviderConfig.from_api_inputs(
+        api_key="cliproxy-client-key-for-test",
+        base_url="http://127.0.0.1:8317/v1",
+        model="gpt-image-2",
+        responses_model="gpt-5.4-mini",
+        reference_generate_mode="responses",
+        api_protocol="auto",
+        use_custom_endpoints=False,
+        use_async=False,
+    )
+
+
+@pytest.fixture
 def image_json():
     return json.dumps(
         {"data": [{"b64_json": png_b64(), "revised_prompt": "revised"}]}

@@ -9,7 +9,7 @@ import numpy as np
 from PIL import Image
 
 
-MAX_INPUT_IMAGES = 9
+MAX_INPUT_IMAGES = 16
 MAX_IMAGE_BYTES = 50 * 1024 * 1024
 MAX_IMAGE_PIXELS = 64_000_000
 
