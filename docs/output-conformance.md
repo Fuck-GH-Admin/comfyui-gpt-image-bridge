@@ -39,6 +39,7 @@ GPT Image 请求成功返回图片，不代表所有请求选项都被上游执�
         "background": "transparent",
         "output_format": "webp"
       },
+      "checked_fields": ["size", "output_format", "background"],
       "checked_images": 1,
       "warnings": [
         {
@@ -68,7 +69,7 @@ GPT Image 请求成功返回图片，不代表所有请求选项都被上游执�
 
 字段含义：
 
-- `status=pass`：至少有一个可核验字段，且所有已检查字段与返回图片一致。
+- `status=pass`：至少有一个可核验字段，且所有已检查字段与返回图片字节属性一致；不代表质量、语义或模型内部选项已被证实执行。
 - `status=warning`：至少一个可核验字段与实际输出不一致。
 - `status=not_checked`：没有返回图片，或当前协议没有可比较的请求字段；不能将其理解为通过。
 - `checked_fields`：实际进行比对的字段列表。
