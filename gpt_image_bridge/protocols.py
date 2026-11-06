@@ -2540,10 +2540,12 @@ def image_output_conformance(
         "output_format": output_format,
     }
     warnings: list[dict[str, Any]] = []
+    checked_fields: list[str] = []
 
     if size != "auto" and "size" not in ignored:
         match = re.fullmatch(r"(\d+)x(\d+)", str(size).strip())
         if match:
+            checked_fields.append("size")
             expected_width, expected_height = map(int, match.groups())
             mismatches = [
                 {
@@ -2568,6 +2570,7 @@ def image_output_conformance(
     expected_formats = {"png": "PNG", "jpeg": "JPEG", "webp": "WEBP"}
     expected_format = expected_formats.get(str(output_format).lower())
     if expected_format and "output_format" not in ignored:
+        checked_fields.append("output_format")
         mismatches = [
             {
                 "index": index + 1,
@@ -2588,6 +2591,7 @@ def image_output_conformance(
             )
 
     if background == "transparent" and "background" not in ignored:
+        checked_fields.append("background")
         mismatches = []
         for index, image in enumerate(images):
             alpha_extrema = image.get("alpha_extrema")
@@ -2615,11 +2619,22 @@ def image_output_conformance(
                 }
             )
 
+    status = (
+        "not_checked"
+        if not images or not checked_fields
+        else ("warning" if warnings else "pass")
+    )
     return {
-        "status": "warning" if warnings else "pass",
+        "status": status,
         "requested": requested,
+        "checked_fields": checked_fields,
         "checked_images": len(images),
         "warnings": warnings,
+        "reason": (
+            "No returned images or no comparable requested fields were available."
+            if status == "not_checked"
+            else None
+        ),
     }
 
 
