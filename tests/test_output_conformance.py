@@ -5,13 +5,11 @@ import json
 
 from PIL import Image
 
-from gpt_image_bridge.images import validate_image_bytes
-from gpt_image_bridge.protocols import image_output_conformance
-
 from conftest import FakeResponse, QueueOpener, png_b64
 from gpt_image_bridge.config import with_protocol
+from gpt_image_bridge.images import validate_image_bytes
+from gpt_image_bridge.protocols import execute_operation, image_output_conformance
 from gpt_image_bridge.transport import HttpClient
-from gpt_image_bridge.protocols import execute_operation
 
 
 def image_bytes(mode: str) -> bytes:
