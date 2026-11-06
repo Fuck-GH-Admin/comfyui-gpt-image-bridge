@@ -201,6 +201,76 @@ class GPTImageBridgeAPIProvider:
         return (provider,)
 
 
+class GPTImageBridgeCLIProxyAPIProvider:
+    """Provider preset for a local or remote CLIProxyAPI OpenAI-compatible server."""
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "api_key": (
+                    "STRING",
+                    {
+                        "default": "",
+                        "multiline": False,
+                        "socketless": True,
+                        "tooltip": (
+                            "CLIProxyAPI config.yaml 中 access.api-keys 的客户端密钥；"
+                            "不是上游 Codex OAuth Token。"
+                        ),
+                    },
+                ),
+                "base_url": (
+                    "STRING",
+                    {
+                        "default": "http://127.0.0.1:8317/v1",
+                        "multiline": False,
+                        "label": "CLIProxyAPI Base URL",
+                    },
+                ),
+                "image_model": (
+                    "STRING",
+                    {
+                        "default": "gpt-image-2",
+                        "multiline": False,
+                        "label": "图像模型",
+                    },
+                ),
+                "responses_model": (
+                    "STRING",
+                    {
+                        "default": "gpt-5.4-mini",
+                        "multiline": False,
+                        "label": "Responses 主模型",
+                        "tooltip": (
+                            "仅在 Generate 连接参考图时使用；图像模型仍由 image_generation 工具指定。"
+                        ),
+                    },
+                ),
+            }
+        }
+
+    RETURN_TYPES = ("GPT_IMAGE_PROVIDER",)
+    RETURN_NAMES = ("provider",)
+    FUNCTION = "build"
+    CATEGORY = CATEGORY
+
+    def build(self, api_key, base_url, image_model, responses_model):
+        if not str(responses_model or "").strip():
+            raise ValueError("CLIProxyAPI 的 Responses 主模型不能为空。")
+        provider = ProviderConfig.from_api_inputs(
+            api_key=api_key,
+            base_url=base_url,
+            model=image_model,
+            responses_model=responses_model,
+            api_protocol="auto",
+            use_custom_endpoints=False,
+            use_async=False,
+            require_session_handle=True,
+        )
+        return (provider,)
+
+
 class GPTImageBridgeOAuthProvider:
     @classmethod
     def INPUT_TYPES(cls):

@@ -27,7 +27,7 @@ from .oauth import oauth_request_context
 from .transport import HttpClient, HttpResponse
 
 
-CLIENT_HEADER = "comfyui-gpt-image-bridge/0.5.2"
+CLIENT_HEADER = "comfyui-gpt-image-bridge/0.6.0"
 ASYNC_POLL_INTERVAL_SECONDS = 3.0
 ASYNC_TASK_ID_MAX_LENGTH = 512
 _ASYNC_ERROR_MESSAGE_MAX_CHARS = 2048
@@ -1046,8 +1046,24 @@ def _responses_payload(
         ]
     else:
         user_content = role_text + prompt
+    image_tool = {
+        "type": "image_generation",
+        "action": operation,
+        "size": size,
+        "quality": quality,
+        "background": background,
+        "output_format": output_format,
+        "moderation": moderation,
+    }
+    # CLIProxyAPI's Codex Responses route uses a regular Codex model as the
+    # request model and selects the image model on the image_generation tool.
+    # Generic Responses providers retain the original single-model behavior.
+    responses_model = provider.responses_model or provider.model
+    if provider.responses_model:
+        image_tool["model"] = provider.model
+
     payload = {
-        "model": provider.model,
+        "model": responses_model,
         "input": [
             {
                 "role": "developer",
@@ -1057,17 +1073,7 @@ def _responses_payload(
             },
             {"role": "user", "content": user_content},
         ],
-        "tools": [
-            {
-                "type": "image_generation",
-                "action": operation,
-                "size": size,
-                "quality": quality,
-                "background": background,
-                "output_format": output_format,
-                "moderation": moderation,
-            }
-        ],
+        "tools": [image_tool],
         "tool_choice": {"type": "image_generation"},
         "stream": True,
     }
@@ -2659,40 +2665,60 @@ def _execute_operation(
             "n_transport": "one request per requested image",
         }
     else:
-        url, body, image_headers, image_field = _images_request(
-            provider=provider,
-            operation=operation,
-            base_url=base_url,
-            endpoint_override=endpoint_override,
-            auth_headers=auth_headers,
-            prompt=prompt,
-            base_image=base_image,
-            references=references,
-            mask_png=mask_png,
-            size=size,
-            quality=quality,
-            background=background,
-            output_format=output_format,
-            n=int(n),
-        )
-        (
-            all_images,
-            revised_prompt,
-            all_metadata,
-            request_evidence,
-            async_report,
-        ) = _execute_images_request(
-            provider=provider,
-            client=client,
-            operation=operation,
-            sync_url=url,
-            body=body,
-            headers=image_headers,
-            image_field=image_field,
-            timeout=timeout,
-            secrets=secrets,
-        )
+        # CLIProxyAPI's Codex image_generation tool does not expose the Images
+        # API's n field. Send one synchronous request per requested output
+        # rather than silently asking the proxy to generate only one image.
+        requests_per_output = bool(provider.responses_model)
+        request_count = int(n) if requests_per_output else 1
+        images_per_request = 1 if requests_per_output else int(n)
+        async_report: dict[str, Any] = {}
+        for request_index in range(request_count):
+            url, body, image_headers, image_field = _images_request(
+                provider=provider,
+                operation=operation,
+                base_url=base_url,
+                endpoint_override=endpoint_override,
+                auth_headers=auth_headers,
+                prompt=prompt,
+                base_image=base_image,
+                references=references,
+                mask_png=mask_png,
+                size=size,
+                quality=quality,
+                background=background,
+                output_format=output_format,
+                n=images_per_request,
+            )
+            (
+                current_images,
+                current_revised_prompt,
+                current_metadata,
+                current_evidence,
+                async_report,
+            ) = _execute_images_request(
+                provider=provider,
+                client=client,
+                operation=operation,
+                sync_url=url,
+                body=body,
+                headers=image_headers,
+                image_field=image_field,
+                timeout=timeout,
+                secrets=secrets,
+            )
+            all_images.extend(current_images)
+            all_metadata.extend(current_metadata)
+            revised_prompt = revised_prompt or current_revised_prompt
+            for evidence in current_evidence:
+                evidence = dict(evidence)
+                if requests_per_output:
+                    evidence["index"] = request_index + 1
+                request_evidence.append(evidence)
         report["async"] = async_report
+        if requests_per_output:
+            report["protocol_notes"] = {
+                "n_transport": "one synchronous Images API request per requested output"
+            }
         if provider.auth_mode == "codex_oauth":
             report["protocol_notes"] = {
                 "effective_response_format": "b64_json",

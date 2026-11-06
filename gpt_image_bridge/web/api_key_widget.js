@@ -5,7 +5,10 @@ import {
     resolvePasswordWidgetWidth,
 } from "./provider_widget_migration.js";
 
-const NODE_TYPE = "GPTImageBridgeAPIProvider";
+const NODE_TYPES = new Set([
+    "GPTImageBridgeAPIProvider",
+    "GPTImageBridgeCLIProxyAPIProvider",
+]);
 const ROUTE = "/gpt-image-bridge/session-credential";
 const PASSWORD_WIDGET_TYPE = "gpt_image_bridge_password";
 const PASSWORD_MASK = "••••••••••••";
@@ -18,6 +21,8 @@ const WIDGET_LABELS = {
     async_edit_endpoint: "自定义异步编辑提交端点",
     async_poll_endpoint_template: "自定义异步查询端点模板",
     async_mapping_json: "自定义异步 JSON 映射",
+    image_model: "图像模型",
+    responses_model: "Responses 主模型",
 };
 
 function widgetByName(node, name) {
@@ -41,8 +46,8 @@ function applyProviderWidgetLabels(node) {
 
 function applyProviderPresentation(node) {
     if (
-        node?.type !== NODE_TYPE
-        && node?.comfyClass !== NODE_TYPE
+        !NODE_TYPES.has(node?.type)
+        && !NODE_TYPES.has(node?.comfyClass)
     ) {
         return;
     }
@@ -251,7 +256,7 @@ app.registerExtension({
         }
     },
     async beforeRegisterNodeDef(nodeType, nodeData) {
-        if (nodeData.name !== NODE_TYPE) {
+        if (!NODE_TYPES.has(nodeData.name)) {
             return;
         }
 

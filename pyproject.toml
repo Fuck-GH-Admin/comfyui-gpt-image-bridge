@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "comfyui-gpt-image-bridge"
-version = "0.5.2"
+version = "0.6.0"
 description = "Multi-provider GPT image generation and editing bridge for ComfyUI."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -25,8 +25,8 @@ classifiers = [
 ]
 
 [project.urls]
-Repository = "https://github.com/Liu-Bot24/comfyui-gpt-image-bridge"
-Documentation = "https://github.com/Liu-Bot24/comfyui-gpt-image-bridge#readme"
+Repository = "https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge"
+Documentation = "https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge#readme"
 
 [tool.comfy]
 PublisherId = "lq36821"

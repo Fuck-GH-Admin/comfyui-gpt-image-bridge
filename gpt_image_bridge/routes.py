@@ -8,6 +8,9 @@ from .session_credentials import is_session_handle, issue_session_credential
 ROUTE_PATH = "/gpt-image-bridge/session-credential"
 MAX_REQUEST_BYTES = 20 * 1024
 API_PROVIDER_CLASS = "GPTImageBridgeAPIProvider"
+API_PROVIDER_CLASSES = frozenset(
+    {API_PROVIDER_CLASS, "GPTImageBridgeCLIProxyAPIProvider"}
+)
 
 
 def credential_response(payload: Any) -> dict[str, str]:
@@ -39,7 +42,7 @@ def _redact_exact_string(value: Any, secret: str) -> None:
 def _scrub_serialized_workflow_keys(value: Any) -> None:
     """Clear API Key widget slots in any workflow metadata attached to /prompt."""
     if isinstance(value, dict):
-        if value.get("type") == API_PROVIDER_CLASS:
+        if value.get("type") in API_PROVIDER_CLASSES:
             widgets = value.get("widgets_values")
             if isinstance(widgets, list) and widgets:
                 widgets[0] = ""
@@ -58,7 +61,7 @@ def guard_prompt_payload(json_data: Any) -> Any:
     reject_request = False
     if isinstance(prompt, dict):
         for node in prompt.values():
-            if not isinstance(node, dict) or node.get("class_type") != API_PROVIDER_CLASS:
+            if not isinstance(node, dict) or node.get("class_type") not in API_PROVIDER_CLASSES:
                 continue
             inputs = node.get("inputs")
             if not isinstance(inputs, dict):

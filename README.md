@@ -4,6 +4,7 @@
 
 - Codex / ChatGPT OAuth
 - OpenAI 官方 API
+- CLIProxyAPI（通过 OpenAI 兼容 Images / Responses 接口使用 Codex 订阅）
 - 使用 OpenAI 图片协议或 Chat Completions 图片协议的兼容 API
 - 纯文生图、单图编辑和多参考图编辑
 - 不同尺寸的参考图，并严格保持连接顺序
@@ -12,13 +13,15 @@
 - 支持可配置的 Images API 异步任务提交、轮询和有限的安全回退
 - 脱敏、可诊断的请求报告
 
-OAuth 与 API Key 是两套独立的认证方式。OAuth 自动读取标准 Codex 登录状态；API 模式则由用户在节点中填写 Key、Base URL 和模型。
+OAuth 与 API Key 是两套独立的认证方式。Codex OAuth Provider 保留用于兼容旧工作流；新工作流建议通过 CLIProxyAPI Provider 统一管理 Codex 登录、账户和上游请求。通用 API Provider 仍可连接其他 OpenAI 兼容服务。
 
 ## 安装
 
-### 使用 ComfyUI Manager（推荐）
+### 使用 ComfyUI Manager（上游 Registry 版本）
 
-本节点已发布到 [ComfyUI Registry](https://registry.comfy.org/publishers/lq36821/nodes/comfyui-gpt-image-bridge)，可以任选以下一种方式安装。
+上游版本已发布到 [ComfyUI Registry](https://registry.comfy.org/publishers/lq36821/nodes/comfyui-gpt-image-bridge)，可以任选以下一种方式安装。
+
+**注意：本 fork 新增的 CLIProxyAPI Provider 尚未发布到 Registry。若要使用本 fork 的新节点，请使用下方 Git 克隆方式。**
 
 **通过示例工作流安装缺失节点**
 
@@ -33,15 +36,17 @@ OAuth 与 API Key 是两套独立的认证方式。OAuth 自动读取标准 Code
 1. 打开 ComfyUI Manager，搜索 `GPT Image Bridge` 或 `comfyui-gpt-image-bridge`。
 2. 点击安装，安装完成后重启 ComfyUI。
 
-### 使用 Comfy CLI
+### 使用 Comfy CLI（上游 Registry 版本）
 
 ```powershell
 comfy node install comfyui-gpt-image-bridge
 ```
 
-### 使用 Release 直装包
+该命令安装上游 Registry 版本，不包含本 fork 尚未发布的 CLIProxyAPI Provider。
 
-在 [GitHub Releases](https://github.com/Liu-Bot24/comfyui-gpt-image-bridge/releases/latest) 下载名称包含 `direct-install.zip` 的附件。不要下载 GitHub 自动生成的 `Source code` 压缩包。
+### 使用 Release 直装包（上游版本）
+
+在 [上游 GitHub Releases](https://github.com/Liu-Bot24/comfyui-gpt-image-bridge/releases/latest) 下载名称包含 `direct-install.zip` 的附件。该直装包不包含本 fork 的 CLIProxyAPI Provider。不要下载 GitHub 自动生成的 `Source code` 压缩包。
 
 1. 关闭 ComfyUI。
 2. 将直装包直接解压到 ComfyUI 的 `custom_nodes` 目录。
@@ -53,10 +58,10 @@ comfy node install comfyui-gpt-image-bridge
 
 ### 使用 Git 克隆
 
-也可以手动将仓库克隆到 ComfyUI 的 `custom_nodes` 目录：
+也可以手动将本 fork 克隆到 ComfyUI 的 `custom_nodes` 目录：
 
 ```powershell
-git clone https://github.com/Liu-Bot24/comfyui-gpt-image-bridge.git ComfyUI-GPT-Image-Bridge
+git clone https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge.git ComfyUI-GPT-Image-Bridge
 ```
 
 进入节点目录并安装依赖：
@@ -73,7 +78,8 @@ python -m pip install -r requirements.txt
 | 节点 | 用途 |
 |---|---|
 | `GPT Image Bridge · Codex OAuth Provider` | 自动复用标准 Codex 登录状态 |
-| `GPT Image Bridge · API Provider` | 填写 API Key、Base URL、模型和协议；内置自定义端点与异步开关 |
+| `GPT Image Bridge · API Provider` | 填写通用 OpenAI 兼容 API 的 Key、Base URL、模型和协议 |
+| `GPT Image Bridge · CLIProxyAPI Provider` | 连接 CLIProxyAPI；默认本机地址，自动区分图片模型与 Responses 主模型 |
 | `GPT Image Bridge · Edit Reference List (Image 2–9)` | 为 Edit 按 `image_2` 到 `image_9` 收集参考图 |
 | `GPT Image Bridge · Generate` | 纯文生图，或直接连接最多 9 张参考图生成 |
 | `GPT Image Bridge · Edit` | 编辑基础图，可附加参考图和 mask |
@@ -116,7 +122,59 @@ API Provider 的配置会随本地工作流正常保存，包括 API Key、Base 
 
 Base URL 可以填写服务根地址或带 `/v1` 的地址。节点会规范化尾部斜杠，并避免拼出重复的 `/v1/v1`。
 
-### API Provider 内置开关
+## 使用 CLIProxyAPI（推荐）
+
+本 fork 提供专用的 `GPT Image Bridge · CLIProxyAPI Provider`。它不读取 ComfyUI 主机上的 Codex 登录文件，也不自行刷新 Codex OAuth；认证、Codex 账户轮询和上游请求由独立运行的 CLIProxyAPI 负责。
+
+### 1. 配置 CLIProxyAPI
+
+在 CLIProxyAPI 的 `config.yaml` 中配置客户端 API Key，并建议仅监听本机：
+
+```yaml
+server:
+  host: "127.0.0.1"
+  port: 8317
+
+access:
+  api-keys:
+    - "replace-with-a-long-local-client-key"
+```
+
+随后按 [CLIProxyAPI 项目文档](https://github.com/router-for-me/CLIProxyAPI) 完成 Codex OAuth 登录，并启动服务。这里的 `access.api-keys` 是 ComfyUI 访问代理服务时使用的**客户端密钥**，不是 Codex OAuth Token，也不是 OpenAI 上游 API Key。
+
+如果 ComfyUI 与 CLIProxyAPI 不在同一网络命名空间（例如 ComfyUI 在 Docker 容器中），`127.0.0.1` 指向的是 ComfyUI 容器自身。此时应填写容器可达的服务名或宿主机地址，并只向可信网络开放 CLIProxyAPI。
+
+### 2. 配置 ComfyUI 节点
+
+添加 `GPT Image Bridge · CLIProxyAPI Provider`，默认值如下：
+
+| 输入 | 默认值 | 用途 |
+|---|---|---|
+| CLIProxyAPI Base URL | `http://127.0.0.1:8317/v1` | CLIProxyAPI 的 OpenAI 兼容 API 地址 |
+| 图像模型 | `gpt-image-2` | Images API 和 image_generation 工具使用的模型 |
+| Responses 主模型 | `gpt-5.4-mini` | 仅用于带参考图的 Generate 请求 |
+| API Key | 空 | 填写 CLIProxyAPI 的 `access.api-keys` |
+
+该节点自动选择协议：
+
+- 纯文生图：`POST /v1/images/generations`。
+- 带参考图生成：`POST /v1/responses`，将 Responses 主模型与图片工具模型分开传递。
+- 图片编辑：`POST /v1/images/edits`，支持基础图和有序参考图。
+
+CLIProxyAPI 的 Images 路径是同步请求，因此专用节点关闭异步任务探测，避免先请求不存在的异步端点再回退。通用 API Provider 的异步功能不受影响。
+
+CLIProxyAPI 的 Codex 图片工具不支持在一次工具调用中可靠表达 `n`。因此该节点会按请求数量发起多次同步请求，每次请求一张图片；设置 `n=4` 就会产生四次独立的上游生成调用，请按实际额度和计费预期使用。
+
+CLIProxyAPI 的图片模型列表会随其版本变化；请使用代理当前支持的模型名称。若使用 Responses 参考图生成，请确认 CLIProxyAPI 未通过 `disable-image-generation` 禁用非 Images 路径上的图片工具。
+
+### 3. 安全边界
+
+- API Key 通过已有的密码控件编辑，队列只收到一次性内存句柄。
+- 队列/历史保护同时覆盖通用 API Provider 和 CLIProxyAPI Provider。
+- 工作流本地保存的 API Key 仍然是明文配置；分享工作流前必须清空。
+- 建议 CLIProxyAPI 只监听本机；需要远程访问时应自行配置 TLS、可信网络边界和足够强的客户端 Key。
+
+## API Provider 内置开关
 
 - “使用自定义端点”默认关闭。关闭时，所有自定义同步端点、异步端点和响应映射都不会参与执行；已经填写的文本仍会保存在本地工作流中。
 - “使用异步”默认开启。它只适用于最终选择为 `images` 的 API 请求。

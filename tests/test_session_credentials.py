@@ -62,12 +62,90 @@ def test_frontend_contract_persists_local_workflow_key_but_queues_a_handle():
     assert 'input.type = "password"' in source
     assert "widget.type = PASSWORD_WIDGET_TYPE" in source
     assert "/gpt-image-bridge/session-credential" in source
+    assert "GPTImageBridgeCLIProxyAPIProvider" in source
     assert "credential_handle" in source
     assert "node.onSerialize" not in source
     assert 'widget.value = ""' not in source
     assert "localStorage" not in source
     assert "sessionStorage" not in source
     assert "widget.serialize = false" not in source
+
+
+
+def test_prompt_guard_preserves_cliproxyapi_handle_and_scrubs_workflow_slot():
+    handle = issue_session_credential("cliproxy-temporary-secret")
+    payload = {
+        "prompt": {
+            "1": {
+                "class_type": "GPTImageBridgeCLIProxyAPIProvider",
+                "inputs": {"api_key": handle},
+            }
+        },
+        "extra_data": {
+            "extra_pnginfo": {
+                "workflow": {
+                    "nodes": [
+                        {
+                            "type": "GPTImageBridgeCLIProxyAPIProvider",
+                            "widgets_values": [
+                                "stale-cliproxy-client-key",
+                                "http://127.0.0.1:8317/v1",
+                                "gpt-image-2",
+                                "gpt-5.4-mini",
+                            ],
+                        }
+                    ]
+                }
+            }
+        },
+    }
+
+    result = guard_prompt_payload(payload)
+
+    assert result["prompt"]["1"]["inputs"]["api_key"] == handle
+    widgets = result["extra_data"]["extra_pnginfo"]["workflow"]["nodes"][0][
+        "widgets_values"
+    ]
+    assert widgets == [
+        "",
+        "http://127.0.0.1:8317/v1",
+        "gpt-image-2",
+        "gpt-5.4-mini",
+    ]
+
+
+def test_prompt_guard_rejects_raw_cliproxyapi_key_before_queue_validation():
+    secret = "raw-cliproxy-client-key"
+    payload = {
+        "prompt": {
+            "1": {
+                "class_type": "GPTImageBridgeCLIProxyAPIProvider",
+                "inputs": {"api_key": secret},
+            }
+        },
+        "extra_data": {
+            "extra_pnginfo": {
+                "workflow": {
+                    "nodes": [
+                        {
+                            "type": "GPTImageBridgeCLIProxyAPIProvider",
+                            "widgets_values": [
+                                secret,
+                                "http://127.0.0.1:8317/v1",
+                                "gpt-image-2",
+                                "gpt-5.4-mini",
+                            ],
+                        }
+                    ]
+                }
+            }
+        },
+    }
+
+    result = guard_prompt_payload(payload)
+
+    assert result == {}
+    assert secret not in str(result)
 
 
 def test_concurrent_handles_do_not_cross_credentials():

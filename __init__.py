@@ -4,6 +4,7 @@ if __package__:
         GPTImageBridgeEdit,
         GPTImageBridgeGenerate,
         GPTImageBridgeAPIProvider,
+        GPTImageBridgeCLIProxyAPIProvider,
         GPTImageBridgeOAuthProvider,
         GPTImageBridgeReferenceList,
     )
@@ -13,12 +14,14 @@ else:
         GPTImageBridgeEdit,
         GPTImageBridgeGenerate,
         GPTImageBridgeAPIProvider,
+        GPTImageBridgeCLIProxyAPIProvider,
         GPTImageBridgeOAuthProvider,
         GPTImageBridgeReferenceList,
     )
 
 NODE_CLASS_MAPPINGS = {
     "GPTImageBridgeAPIProvider": GPTImageBridgeAPIProvider,
+    "GPTImageBridgeCLIProxyAPIProvider": GPTImageBridgeCLIProxyAPIProvider,
     "GPTImageBridgeOAuthProvider": GPTImageBridgeOAuthProvider,
     "GPTImageBridgeReferenceList": GPTImageBridgeReferenceList,
     "GPTImageBridgeGenerate": GPTImageBridgeGenerate,
@@ -27,6 +30,7 @@ NODE_CLASS_MAPPINGS = {
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "GPTImageBridgeAPIProvider": "GPT Image Bridge · API Provider",
+    "GPTImageBridgeCLIProxyAPIProvider": "GPT Image Bridge · CLIProxyAPI Provider",
     "GPTImageBridgeOAuthProvider": "GPT Image Bridge · Codex OAuth Provider",
     "GPTImageBridgeReferenceList": (
         "GPT Image Bridge · Edit Reference List (Image 2–9)"

@@ -368,6 +368,7 @@ class ProviderConfig:
     async_edit_endpoint: str = ""
     async_poll_endpoint_template: str = ""
     async_mapping_json: str = field(default="", repr=False)
+    responses_model: str = ""
     async_mapping: AsyncResponseMapping | None = field(
         default=None,
         init=False,
@@ -386,6 +387,7 @@ class ProviderConfig:
         if not self.model.strip():
             raise ValueError("model cannot be empty.")
         object.__setattr__(self, "model", self.model.strip())
+        object.__setattr__(self, "responses_model", str(self.responses_model or "").strip())
         object.__setattr__(self, "api_key", self.api_key.strip())
         if self.api_key and any(
             ord(character) < 0x21 or ord(character) > 0x7E
@@ -484,6 +486,7 @@ class ProviderConfig:
         base_url: str,
         model: str,
         api_protocol: str,
+        responses_model: str = "",
         generate_endpoint: str = "",
         edit_endpoint: str = "",
         use_custom_endpoints: bool | None = None,
@@ -514,6 +517,7 @@ class ProviderConfig:
             base_url=base_url,
             model=model,
             api_protocol=api_protocol,
+            responses_model=responses_model,
             use_custom_endpoints=use_custom_endpoints,
             use_async=use_async,
             generate_endpoint=generate_endpoint,
@@ -548,6 +552,8 @@ class ProviderConfig:
             "model": self.model,
             "api_protocol": self.api_protocol,
         }
+        if self.responses_model:
+            result["responses_model"] = self.responses_model
         if self.auth_mode == AUTH_MODE_API:
             result["api_key_configured"] = bool(self.api_key)
             result["use_custom_endpoints"] = bool(self.use_custom_endpoints)

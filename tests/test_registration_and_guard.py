@@ -30,6 +30,7 @@ def test_comfyui_registration_and_provider_responsibilities_are_separate():
     module = import_comfy_package()
     expected = {
         "GPTImageBridgeAPIProvider",
+        "GPTImageBridgeCLIProxyAPIProvider",
         "GPTImageBridgeOAuthProvider",
         "GPTImageBridgeReferenceList",
         "GPTImageBridgeGenerate",
@@ -57,6 +58,32 @@ def test_comfyui_registration_and_provider_responsibilities_are_separate():
         "images",
         "chat_completions",
     )
+    cliproxy_inputs = module.NODE_CLASS_MAPPINGS[
+        "GPTImageBridgeCLIProxyAPIProvider"
+    ].INPUT_TYPES()["required"]
+    assert list(cliproxy_inputs) == [
+        "api_key",
+        "base_url",
+        "image_model",
+        "responses_model",
+    ]
+    assert cliproxy_inputs["api_key"][1]["socketless"] is True
+    assert cliproxy_inputs["base_url"][1]["default"] == "http://127.0.0.1:8317/v1"
+    assert cliproxy_inputs["image_model"][1]["default"] == "gpt-image-2"
+    assert cliproxy_inputs["responses_model"][1]["default"] == "gpt-5.4-mini"
+    cliproxy_config = module.NODE_CLASS_MAPPINGS[
+        "GPTImageBridgeCLIProxyAPIProvider"
+    ]().build(
+        api_key="",
+        base_url="http://127.0.0.1:8317/v1",
+        image_model="gpt-image-2",
+        responses_model="gpt-5.4-mini",
+    )[0]
+    assert cliproxy_config.api_protocol == "auto"
+    assert cliproxy_config.use_async is False
+    assert cliproxy_config.model == "gpt-image-2"
+    assert cliproxy_config.responses_model == "gpt-5.4-mini"
+
     api_optional = module.NODE_CLASS_MAPPINGS[
         "GPTImageBridgeAPIProvider"
     ].INPUT_TYPES()["optional"]
@@ -108,6 +135,7 @@ def test_comfyui_registration_and_provider_responsibilities_are_separate():
     assert 'input.type = "password"' in widget_source
     assert "widget.type = PASSWORD_WIDGET_TYPE" in widget_source
     assert 'const PASSWORD_MASK = "••••••••••••"' in widget_source
+    assert "GPTImageBridgeCLIProxyAPIProvider" in widget_source
     assert "widget.inputEl" not in widget_source
     for name, label in {
         "use_custom_endpoints": "使用自定义端点",

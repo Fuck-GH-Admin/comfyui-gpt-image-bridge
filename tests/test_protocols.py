@@ -399,6 +399,133 @@ def test_plain_text_generation_images_json(api_provider, image_json):
     assert len(result.images) == 1
 
 
+
+def test_cliproxyapi_plain_generation_uses_direct_images_endpoint(
+    cliproxy_provider,
+    image_json,
+):
+    opener = QueueOpener(FakeResponse(image_json))
+    result = execute_operation(
+        provider=cliproxy_provider,
+        operation="generate",
+        prompt="a small red fox",
+        client=HttpClient(opener=opener, sleeper=lambda _: None),
+    )
+
+    request = opener.requests[0][0]
+    payload = json.loads(request.data)
+    assert request.full_url == "http://127.0.0.1:8317/v1/images/generations"
+    assert request.headers["Authorization"] == "Bearer cliproxy-client-key-for-test"
+    assert payload["model"] == "gpt-image-2"
+    assert payload["prompt"] == "a small red fox"
+    assert len(opener.requests) == 1
+    assert result.report["selected_protocol"] == "images"
+
+
+def test_cliproxyapi_n_uses_one_images_request_per_output(
+    cliproxy_provider,
+    image_json,
+):
+    opener = QueueOpener(
+        FakeResponse(image_json),
+        FakeResponse(image_json),
+    )
+    result = execute_operation(
+        provider=cliproxy_provider,
+        operation="generate",
+        prompt="two distinct variations",
+        n=2,
+        client=HttpClient(opener=opener, sleeper=lambda _: None),
+    )
+
+    assert len(opener.requests) == 2
+    assert len(result.images) == 2
+    assert all(
+        request.full_url == "http://127.0.0.1:8317/v1/images/generations"
+        for request, _timeout in opener.requests
+    )
+    assert [
+        json.loads(request.data)["n"]
+        for request, _timeout in opener.requests
+    ] == [1, 1]
+    assert result.report["protocol_notes"]["n_transport"] == (
+        "one synchronous Images API request per requested output"
+    )
+
+
+def test_cliproxyapi_reference_generation_separates_host_and_image_models(
+    cliproxy_provider,
+):
+    completed = {
+        "type": "response.completed",
+        "response": {
+            "output": [
+                {
+                    "type": "image_generation_call",
+                    "result": png_b64(10, 12),
+                }
+            ]
+        },
+    }
+    opener = QueueOpener(
+        FakeResponse(
+            f"data: {json.dumps(completed)}\n\n".encode(),
+            headers={"content-type": "text/event-stream"},
+        )
+    )
+    reference = encode_reference_slots(image_tensor(7, 9, 0.4))[0]
+    result = execute_operation(
+        provider=cliproxy_provider,
+        operation="generate",
+        prompt="use the reference for color and mood",
+        references=(reference,),
+        client=HttpClient(opener=opener, sleeper=lambda _: None),
+    )
+
+    request = opener.requests[0][0]
+    payload = json.loads(request.data)
+    assert request.full_url == "http://127.0.0.1:8317/v1/responses"
+    assert payload["model"] == "gpt-5.4-mini"
+    assert payload["tools"][0]["type"] == "image_generation"
+    assert payload["tools"][0]["model"] == "gpt-image-2"
+    assert payload["tools"][0]["action"] == "generate"
+    user_content = payload["input"][1]["content"]
+    assert any(
+        part.get("type") == "input_image"
+        and part.get("image_url") == reference.data_url
+        for part in user_content
+    )
+    assert result.report["selected_protocol"] == "responses"
+    assert len(result.images) == 1
+
+
+def test_cliproxyapi_edit_uses_images_edits_with_ordered_image_array(
+    cliproxy_provider,
+    image_json,
+):
+    base = tensor_to_png(image_tensor(9, 7, 0.2), source_slot=1, role="base")
+    references = encode_reference_slots(image_tensor(6, 8, 0.8))
+    opener = QueueOpener(FakeResponse(image_json))
+    result = execute_operation(
+        provider=cliproxy_provider,
+        operation="edit",
+        prompt="edit the base image using the reference",
+        base_image=base,
+        references=references,
+        client=HttpClient(opener=opener, sleeper=lambda _: None),
+    )
+
+    request = opener.requests[0][0]
+    body = request.data
+    assert request.full_url == "http://127.0.0.1:8317/v1/images/edits"
+    assert request.headers["Authorization"] == "Bearer cliproxy-client-key-for-test"
+    assert b'name="image[]"; filename="image-1-base.png"' in body
+    assert b'name="image[]"; filename="image-2-reference.png"' in body
+    assert body.index(b"image-1-base.png") < body.index(b"image-2-reference.png")
+    assert len(opener.requests) == 1
+    assert result.report["selected_protocol"] == "images"
+
+
 def test_single_image_edit_without_references(api_provider, image_json):
     base = tensor_to_png(image_tensor(9, 7), role="base")
     opener = QueueOpener(FakeResponse(image_json))
