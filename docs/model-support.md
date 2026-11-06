@@ -86,7 +86,7 @@ OpenAI 官方还介绍了 2.6 的 SVG 输出、GIF 动画和 markup-guided editi
 - `output_format` 仅支持 `png`、`jpeg`、`webp`。
 - ComfyUI 的 `IMAGE` 输出是图片张量，不能未经处理就把 SVG 源文件或完整 GIF 动画当成同一张 `IMAGE` 返回。
 - 未暴露 GIF 帧数/帧间隔、markup-guided edit 相关输入语法，也没有实测它们在 CLIProxyAPI 的订阅路由下的支持情况。
-- 新增的 `complexity` 目前有 Mock 请求形态测试，真实 2.6 的上游结果仍需本人账号测试。
+- `complexity` 的合法值有请求形态测试，Main 0.7.0 实机工作流也使用过 low/medium/high；但没有隔离变量的 A/B 对照，不能据此断言复杂度对质量、延迟或费用的实际影响。
 
 这些限制不是 OpenAI 2.6 不支持，而是**本插件还没有实现或验证完整的新媒体输出通道**。不要把「可选择 2.6 生图模型」写成「2.6 全部能力都已支持」。
 
