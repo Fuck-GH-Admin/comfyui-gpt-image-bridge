@@ -17,8 +17,8 @@ D. Codex 上游层 → OAuth 是否有效？服务端模型是否可用？额度
 
 | 症状/提示 | 优先检查 | 处理 |
 | --- | --- | --- |
-| ComfyUI 搜不到 `CLIProxyAPI Provider` | clone 到了 `main`/Registry 原版、错误的 `custom_nodes` 目录、没重启后端 | `git branch --show-current` 应是 `feat/image26-images-first-reference-mode`；检查 `__init__.py` 存在且后端启动日志没有 import error |
-| 只看到 API Provider 或 Codex OAuth Provider | 安装了原作者版或另一个 ComfyUI 实例 | 禁用重复包，使用 fork 当前开发分支 |
+| ComfyUI 搜不到 `CLIProxyAPI Provider` | 安装了原作者的 Registry 版本、错误的 `custom_nodes` 目录、没重启后端 | 确认 remote 指向 `Fuck-GH-Admin/comfyui-gpt-image-bridge` 且分支是 `main`；检查后端日志的 import error |
+| 只看到 API Provider 或 Codex OAuth Provider | 安装了原作者版或另一个 ComfyUI 实例 | 禁用重复包，使用 fork 当前 `main` |
 | ComfyUI 节点是红色/报 missing node | Python 环境依赖、目录嵌套、节点包导入失败 | 用启动 ComfyUI 的**相同 Python**安装 `requirements.txt`；检查日志 |
 | Queue 立即返回 400 或 Key 守卫拒绝 | 前端 JS 未正确加载，明文 Key 进入 `/prompt` | 完全重启 ComfyUI，浏览器强制刷新，重新输入 Key；不要通过普通 STRING 节点传明文 |
 | `session_credential_required` | 没有使用受保护的密码控件提交 | 确认插件前端扩展加载成功；重新输入 Key 再 Queue |
@@ -48,7 +48,7 @@ git branch --show-current
 git log -1 --format='%H %s'
 ```
 
-当前开发分支应是 `feat/image26-images-first-reference-mode`，并且在实际 ComfyUI 的 `custom_nodes` 里。若仍为 `main`，这份 fork 的 CLIProxyAPI Provider 很可能根本没安装进去。
+当前应该安装 **本 fork 的 `main`**，位于实际 ComfyUI 的 `custom_nodes` 中。原作者的 `main` 或 Registry 版本可能没有 CLIProxyAPI Provider；先核对 `git remote -v`，不要只看分支名称。
 
 完全停止 ComfyUI，再启动。需要看控制台中是否出现加载该包的成功记录以及 Python 报错。**浏览器重新打开画布不会自动重载服务器端 Python 插件**。
 
