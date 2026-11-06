@@ -12,6 +12,7 @@ import base64
 import io
 import json
 import os
+import shutil
 import socket
 import subprocess
 import sys
@@ -28,6 +29,7 @@ from PIL import Image, ImageDraw
 CLIENT_KEY = "ci-cliproxy-client-key-not-an-oauth-token"
 EXPECTED_NODES = {
     "GPTImageBridgeAPIProvider",
+    "GPTImageBridgeProviderProfile",
     "GPTImageBridgeCLIProxyAPIProvider",
     "GPTImageBridgeOAuthProvider",
     "GPTImageBridgeReferenceList",
@@ -219,30 +221,39 @@ def queue_workflow(
     reference_mode: str = "images_edit",
     expected_format: str = "png",
 ):
-    credential, headers = http_json(
-        base, "/gpt-image-bridge/session-credential", {"api_key": CLIENT_KEY}
-    )
-    assert "no-store" in headers.get("Cache-Control", "").lower()
-    handle = credential["credential_handle"]
-    assert handle.startswith("gpt-image-bridge-session:")
-    assert CLIENT_KEY not in handle
-    graph["1"]["inputs"] = provider_inputs(handle, proxy_url, reference_mode)
+    is_profile = graph["1"]["class_type"] == "GPTImageBridgeProviderProfile"
+    if not is_profile:
+        credential, headers = http_json(
+            base, "/gpt-image-bridge/session-credential", {"api_key": CLIENT_KEY}
+        )
+    if is_profile:
+        graph["1"]["inputs"] = {
+            "profile": "ci_gateway", "image_model": "",
+            "reference_mode": "profile", "responses_model": "",
+        }
+    else:
+        assert "no-store" in headers.get("Cache-Control", "").lower()
+        handle = credential["credential_handle"]
+        assert handle.startswith("gpt-image-bridge-session:")
+        assert CLIENT_KEY not in handle
+        graph["1"]["inputs"] = provider_inputs(handle, proxy_url, reference_mode)
 
     workflow = {
-        "nodes": [
-            {
-                "type": "GPTImageBridgeCLIProxyAPIProvider",
-                "widgets_values": [
-                    CLIENT_KEY,
-                    proxy_url + "/v1",
-                    "gpt-image-2.6-flare",
+        "nodes": [{
+            "type": "GPTImageBridgeProviderProfile" if is_profile else "GPTImageBridgeCLIProxyAPIProvider",
+            "widgets_values": (
+                ["ci_gateway", "", "profile", ""]
+                if is_profile else [
+                    CLIENT_KEY, proxy_url + "/v1", "gpt-image-2.6-flare",
                     "gpt-6.1-sol" if reference_mode == "responses" else "",
-                    reference_mode,
-                    "auto",
-                ],
-            }
-        ]
+                    reference_mode, "auto",
+                ]
+            ),
+        }]
     }
+    if is_profile:
+        assert CLIENT_KEY not in json.dumps(workflow)
+        assert "api_key" not in json.dumps(workflow)
     queued, _ = http_json(
         base,
         "/prompt",
@@ -297,6 +308,14 @@ def run(root: Path):
     proxy_url = "http://127.0.0.1:" + str(fake.server_address[1])
     comfy_url = "http://127.0.0.1:" + str(unused_port())
     log_path = Path(tempfile.gettempdir()) / "comfyui-cliproxy-smoke.log"
+    profile_dir = Path(tempfile.mkdtemp(prefix="bridge-ci-profiles-"))
+    profile_path = profile_dir / "providers.local.json"
+    profile_path.write_text(json.dumps({"profiles": {"ci_gateway": {
+        "base_url": proxy_url + "/v1", "api_key": CLIENT_KEY,
+        "model": "gpt-image-2.6-flare", "api_protocol": "auto",
+        "reference_mode": "images_edit", "use_async": False,
+    }}}), encoding="utf-8")
+    os.chmod(profile_path, 0o600)
 
     command = [
         sys.executable,
@@ -316,7 +335,7 @@ def run(root: Path):
                 cwd=root,
                 stdout=log,
                 stderr=subprocess.STDOUT,
-                env={**os.environ, "HF_HUB_OFFLINE": "1"},
+                env={**os.environ, "HF_HUB_OFFLINE": "1", "GPT_IMAGE_BRIDGE_PROVIDERS_FILE": str(profile_path)},
             )
         started = time.monotonic()
         while time.monotonic() - started < 240:
@@ -341,7 +360,7 @@ def run(root: Path):
         info, _ = http_json(comfy_url, "/system_stats")
         version = info.get("system", {}).get("comfyui_version")
         print("[PASS] Real ComfyUI server started. Version:", version, flush=True)
-        print("[PASS] All 7 GPT Image Bridge custom nodes registered", flush=True)
+        print("[PASS] All 8 GPT Image Bridge custom nodes registered", flush=True)
 
         # Fail closed on raw API keys: the ComfyUI queue must never persist them.
         raw_graph = {
@@ -461,6 +480,15 @@ def run(root: Path):
         queue_workflow(comfy_url, proxy_url, graph, "9", 1, log_path, root / "output")
         print("[PASS] Editing -> actual PNG file via IMAGE/reference list/multipart/SaveImage", flush=True)
 
+        # Profile provider: server-side Key only, never a workflow widget or queue field.
+        graph = {
+            "1": {"class_type": "GPTImageBridgeProviderProfile", "inputs": {}},
+            "2": {"class_type": "GPTImageBridgeGenerate", "inputs": generate_inputs("1")},
+            "3": {"class_type": "SaveImage", "inputs": {"images": ["2", 0], "filename_prefix": "CI-Profile"}},
+        }
+        queue_workflow(comfy_url, proxy_url, graph, "3", 1, log_path, root / "output")
+        print("[PASS] Local third-party-style profile generated via actual ComfyUI without Key widget", flush=True)
+
         with REQUESTS_LOCK:
             observed = list(REQUESTS)
         assert [item["kind"] for item in observed] == [
@@ -471,9 +499,10 @@ def run(root: Path):
             "reference_image_edit",
             "reference",
             "edit",
+            "generate",
         ], "Unexpected proxy requests: " + str(observed)
         assert all(item["valid"] for item in observed)
-        print("[PASS] 7 proxy HTTP requests matched both reference modes and local saver paths", flush=True)
+        print("[PASS] 8 proxy HTTP requests matched both reference modes, profile and local saver paths", flush=True)
         print("COMFYUI_SMOKE_PASS", flush=True)
 
     except Exception:
@@ -489,6 +518,7 @@ def run(root: Path):
             except subprocess.TimeoutExpired:
                 process.kill()
                 process.wait()
+        shutil.rmtree(profile_dir, ignore_errors=True)
         fake.shutdown()
         fake.server_close()
         fake_thread.join(timeout=5)
