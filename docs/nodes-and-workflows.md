@@ -51,11 +51,22 @@
 
 OpenAI 官方 2026-11-04 发布了 Flare / Sunburst；CLIProxyAPI v8.0.57 代码识别这两个 ID。本仓库的 Main 0.7.0 报告已在一套真实账户上验证两者生成；其他订阅账号仍需自行实测。详见[模型兼容说明](model-support.md)。
 
-## 3. Generate 参数表
+## 3. Generate 参数与画布分层
+
+**画布界面简化，功能和参数没有删减。** 新增的前端扩展仅改变显示状态，不修改 Generate / Edit 的 `INPUT_TYPES`、参数名、执行值或原有请求校验。日常使用时，提示词、`size`、`quality`、背景、输出格式和 `n` 直接可见。
+
+- `size=Custom` 时，显示宽度和高度；选择其他尺寸时收起。**宽和高已经决定宽高比，不需要独立比例参数**。宽、高历史值会保留，切回 Custom 可继续使用。
+- `size` 来自动态输入连线时，宽高不会因为显示值不是 Custom 而被隐藏。
+- `moderation`、`timeout_sec` 默认收起，在节点上打开 **「显示高级参数」** 即可编辑；高级参数处于非默认值或已连接时，不会被无声隐藏。
+- 这个展开开关是**纯前端控件**：展开状态存放在工作流节点的 `properties` 中，但开关不会成为新的 API 请求参数，也不会改变旧工作流按位置保存的原有 widget 列表。
+- Provider Profile 只有在显式选择 `responses`、填写过主模型覆盖值，或主模型字段有输入连线时，才显示 `responses_model`。留空仍使用本机 Profile 的默认值。
+- Generate 的参考图插口仍是原来的自动伸缩，Edit 的基础图/参考图/Mask 接口完全保留。某些旧版/定制 ComfyUI 前端可能采用不同的布局机制，请按[浏览器端验收](testing.md)核实。
+
+### Generate 全部请求参数（含隐藏在高级设置内的参数）
 
 | 输入 | 类型/范围 | 用途与提醒 |
 | --- | --- | --- |
-| `provider` | `GPT_IMAGE_PROVIDER` | 从上述三个 Provider 之一连接 |
+| `provider` | `GPT_IMAGE_PROVIDER` | 从 Provider Profile（推荐）或兼容旧 Provider 连接 |
 | `prompt` | 多行文本 | 图片生成指令；不能为空 |
 | `size` | `auto`、基础尺寸、2K/4K 预设、`Custom` | 按所选模型能力请求，旧型号可能拒绝 |
 | `custom_width`、`custom_height` | 可选整数，默认 1024×1024 | 仅 `size=Custom` 时有效：480–3840、16 的倍数、比例 ≤3:1、像素 655,360–8,294,400 |
@@ -71,21 +82,21 @@ OpenAI 官方 2026-11-04 发布了 Flare / Sunburst；CLIProxyAPI v8.0.57 代码
 
 ### 文生图连线
 
-可从[无密钥的 CLIProxyAPI 文生图示例](../example_workflows/CLIProxyAPI-Text-to-Image.json)开始，直接拖入 ComfyUI 画布后填客户端 Key。示例工作流无需 Checkpoint、VAE 或 GPU 推理。
+可从[无密钥的 CLIProxyAPI 文生图示例](../example_workflows/CLIProxyAPI-Text-to-Image.json)开始，直接拖入 ComfyUI 画布后选用本机 Provider Profile（Key 在本机配置中）。示例工作流无需 Checkpoint、VAE 或 GPU 推理。
 
 ```text
-[CLIProxyAPI Provider] ── provider ──► [Generate] ── image ──► [Save Image]
+[Provider Profile] ───── provider ──► [Generate] ── image ──► [Save Image]
                                         │
                                       prompt
 ```
 
-启动两个后端（CLIProxyAPI、ComfyUI），填写 Key 和提示词，Queue。若 Save Image 有输出，证明当前账号实际可访问生图服务；若只有 `request_report` 而无图片，请检查是否存在任务执行错误与日志。
+配置好 Provider Profile 后启动 ComfyUI（本机 Codex 路径还需启动 CLIProxyAPI），填写提示词并 Queue。若 Save Image 有输出，证明当前账号实际可访问生图服务；若只有 `request_report` 而无图片，请检查是否存在任务执行错误与日志。
 
 ### 参考图生成
 
 ```text
 [Load Image] ── IMAGE ────────────────► [Generate.reference_1]
-[CLIProxyAPI Provider] ── provider ──► [Generate.provider]
+[Provider Profile] ───── provider ──► [Generate.provider]
 [Generate.image] ────────────────────► [Save Image]
 ```
 
@@ -112,7 +123,7 @@ Edit 与 Generate 共享 `provider`、`prompt`、`size`、`quality`、`backgroun
 [Load Image：原图] ── IMAGE ────────────────► [Edit.base_image（Image 1）]
 [Load Image：参考图] ── IMAGE ─► [Edit Reference List.image_2]
 [Edit Reference List.references] ─────────► [Edit.references（Image 2 开始）]
-[CLIProxyAPI Provider.provider] ──────────► [Edit.provider]
+[Provider Profile.provider] ────────────────► [Edit.provider]
 [Edit.image] ─────────────────────────────► [Save Image]
 ```
 
