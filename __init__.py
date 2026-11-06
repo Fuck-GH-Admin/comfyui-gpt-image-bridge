@@ -7,6 +7,7 @@ if __package__:
         GPTImageBridgeCLIProxyAPIProvider,
         GPTImageBridgeOAuthProvider,
         GPTImageBridgeReferenceList,
+        GPTImageBridgeSaveImage,
     )
 else:
     from gpt_image_bridge.routes import register_routes
@@ -17,6 +18,7 @@ else:
         GPTImageBridgeCLIProxyAPIProvider,
         GPTImageBridgeOAuthProvider,
         GPTImageBridgeReferenceList,
+        GPTImageBridgeSaveImage,
     )
 
 NODE_CLASS_MAPPINGS = {
@@ -26,6 +28,7 @@ NODE_CLASS_MAPPINGS = {
     "GPTImageBridgeReferenceList": GPTImageBridgeReferenceList,
     "GPTImageBridgeGenerate": GPTImageBridgeGenerate,
     "GPTImageBridgeEdit": GPTImageBridgeEdit,
+    "GPTImageBridgeSaveImage": GPTImageBridgeSaveImage,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -37,6 +40,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     ),
     "GPTImageBridgeGenerate": "GPT Image Bridge · Generate",
     "GPTImageBridgeEdit": "GPT Image Bridge · Edit",
+    "GPTImageBridgeSaveImage": "GPT Image Bridge · Save Image",
 }
 
 WEB_DIRECTORY = "./gpt_image_bridge/web"

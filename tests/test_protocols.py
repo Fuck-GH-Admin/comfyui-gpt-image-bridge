@@ -144,6 +144,10 @@ def test_chat_completions_edit_preserves_base_then_reference_order(api_provider)
     assert "Requested output size: 1024x1024" in content[0]["text"]
     assert result.report["selected_protocol"] == "chat_completions"
     assert result.report["protocol_notes"]["size_transport"] == "prompt_instruction"
+    conformance = result.report["output"]["conformance"]
+    assert conformance["status"] == "not_checked"
+    assert conformance["checked_fields"] == []
+    assert conformance["warnings"] == []
     assert [item["source_slot"] for item in result.report["input"]["roles"]] == [
         1,
         2,
@@ -497,6 +501,8 @@ def test_cliproxyapi_reference_generation_separates_host_and_image_models(
     )
     assert result.report["selected_protocol"] == "responses"
     assert len(result.images) == 1
+    assert result.report["output"]["conformance"]["status"] == "pass"
+    assert result.report["output"]["conformance"]["checked_fields"] == ["output_format"]
 
 
 def test_cliproxyapi_edit_uses_images_edits_with_ordered_image_array(
@@ -601,6 +607,8 @@ def test_oauth_edit_uses_native_json_transport_and_ordered_images(monkeypatch):
         "background",
         "output_format",
     ]
+    assert result.report["output"]["conformance"]["status"] == "not_checked"
+    assert result.report["output"]["conformance"]["checked_fields"] == []
 
 
 def test_oauth_generate_responses_applies_codex_image_invariants(monkeypatch):
