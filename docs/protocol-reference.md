@@ -54,7 +54,7 @@ Authorization: Bearer <CLIProxyAPI-client-key>
 Content-Type: application/json
 ```
 
-示例请求：`{"model":"gpt-image-2.6-flare","prompt":"a ceramic cup","size":"auto","n":1}`。当 `image_complexity` 为 `low`、`medium`、`high` 时增加对应 `complexity` 字段；`auto` 不发送该字段。
+示例请求：`{"model":"gpt-image-2.6-flare","prompt":"a ceramic cup","size":"auto","n":1}`。当 `image_complexity` 为 `low`、`medium`、`high` 时，**插件向 CLIProxyAPI 提交的 JSON** 会增加对应 `complexity` 字段；`auto` 不发送。但 CLIProxyAPI **v8.0.57** 构建 Codex Images 工具请求时使用固定 allowlist，不会继续转发该字段，因此不能认为复杂度已生效。
 
 ### B. 有参考图 Generate，默认 Images Edit
 
@@ -89,13 +89,13 @@ Generate 的 `reference_1` 作为 Image 1 输入，后续参考图依次作为 I
 }
 ```
 
-顶部 `model` 为用户手动设置的 `responses_model`（文本主模型），`tools[0].model` 为 `image_model`（真正生成图片的模型）。不填写 `responses_model` 则在请求前拒绝；不会默认使用之前实际报过 `model_not_found` 的 `gpt-5.4-mini`。配置非 `auto` 的 `image_complexity` 时它进入图片工具字段。
+顶部 `model` 为用户手动设置的 `responses_model`（文本主模型），`tools[0].model` 为 `image_model`（真正生成图片的模型）。不填写 `responses_model` 则在请求前拒绝；不会默认使用之前实际报过 `model_not_found` 的 `gpt-5.4-mini`。配置非 `auto` 的 `image_complexity` 时它进入**插件提交给代理的**图片工具字段；当前 Responses 实机调用曾受 DNS 问题阻断，尚不能断言代理继续透传或模型执行。
 
 返回可以是 JSON 或 SSE 的 `image_generation_call` 结果；并非所有文本模型都具备图片工具权限。
 
 ### D. Edit 节点 → Images Edit
 
-Edit 节点继续通过 `POST /v1/images/edits` multipart 请求：Image 1 是**待修改的基础图**，Image 2～9 是有序参考图，允许附加 Mask（实际模型可能不支持）。`image_complexity` 选择非 `auto` 时进入 multipart `complexity` 字段。
+Edit 节点继续通过 `POST /v1/images/edits` multipart 请求：Image 1 是**待修改的基础图**，Image 2～16 是有序参考图，允许附加 Mask（实际模型可能不支持）。`image_complexity` 选择非 `auto` 时进入插件提交的 multipart `complexity` 字段，但 CLIProxyAPI v8.0.57 的 Codex Images 转换层会丢弃该字段。
 
 ## 3. 兼容与支持边界
 
