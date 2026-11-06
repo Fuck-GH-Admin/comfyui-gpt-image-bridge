@@ -84,7 +84,7 @@ Provider：
 
 **默认所有生图/编辑均走 Images API**：纯文本生成用 `/images/generations`，有参考图的 Generate 使用 `/images/edits` 作参考图引导生成（不是严格意义的从零生图），Edit 同样使用 `/images/edits`。需要多轮文本模型协调时，手动将 `reference_mode` 改成 `responses` 并填写可用的 `responses_model`。`n>1` 会发出多次独立请求，可能分别消耗额度。
 
-**OpenAI 已正式发布 GPT Image 2.6 Flare / Sunburst**；CLIProxyAPI v8.0.57 源码也识别这两个模型，但你的账户能否调用仍需要实测。参见[模型兼容与版本边界](docs/model-support.md)。
+**OpenAI 已正式发布 GPT Image 2.6 Flare / Sunburst**；本仓库的 [Main 0.7.0 实机报告](docs/main-acceptance-2026-11-06.md)已在一套真实账户上验证两者生成和默认参考图链路。其他账户/代理环境仍需自行验收，且自定义尺寸、格式和透明输出目前存在已记录的未达标项。参见[模型兼容与版本边界](docs/model-support.md)。
 
 ### 高级画质与参考图
 
@@ -104,6 +104,7 @@ Provider：
 - [协议与代码实现](docs/protocol-reference.md)
 - [通用 API Provider 与异步任务](docs/compatibility-and-async.md)
 - [测试证据与本机验收清单](docs/testing.md)
+- [Main 0.7.0 全功能实机验收报告](docs/main-acceptance-2026-11-06.md)
 
 **安全提醒**：画布上的 Key 是掩码，但本地保存的工作流 JSON 中仍可能包含客户端 Key。分享前清空 Key。初次使用建议 CLIProxyAPI 只监听本机地址。
 
