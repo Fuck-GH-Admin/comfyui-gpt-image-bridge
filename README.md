@@ -2,7 +2,7 @@
 
 在 ComfyUI 中通过 **CLIProxyAPI 或 OpenAI 兼容第三方中转站** 调用图片生成与编辑接口，支持纯文生图、参考图生成和已有图片编辑。也保留通用 API Provider 与旧的 Codex OAuth Provider。
 
-> 本 fork 的 **`main` 已包含 CLIProxyAPI Provider、GPT Image 2.6 和参考图模式**。ComfyUI Registry 若仍指向上游原作者发布版本，则不包含本 fork 的新功能；请从此仓库安装。
+> 本 fork 包含 **Provider Profile、CLIProxyAPI 支持、第三方 OpenAI 兼容接口、GPT Image 2.6 和参考图模式**。ComfyUI Registry 若仍指向上游原作者发布版本，则不包含本 fork 的新功能；请从此仓库安装。
 
 ## 1. 安装插件
 
@@ -51,11 +51,11 @@ multimedia:
 /path/to/CLIProxyAPI -config /path/to/config.yaml
 ```
 
-第二条命令启动服务，生图时应保持运行。Codex OAuth Token 留在 CLIProxyAPI；**ComfyUI 只填写配置中 `access.api-keys` 的客户端 Key**。
+第二条命令启动服务，生图时应保持运行。Codex OAuth Token 留在 CLIProxyAPI；**将 CLIProxyAPI `access.api-keys` 的客户端 Key 填入本机 `providers.local.json` 的相应 profile**。
 
 详细步骤、Ubuntu/CPU/ROCm、Docker 网络与版本说明：[安装与登录](docs/setup-cli-proxy-api.md)。
 
-## 3. 在 ComfyUI 中使用
+## 4. 在 ComfyUI 中使用
 
 推荐添加并连接（Profile 节点）：
 
@@ -69,26 +69,15 @@ GPT Image Bridge · Generate
 Save Image
 ```
 
-也可以直接[下载无密钥的 ComfyUI 文生图示例工作流](example_workflows/CLIProxyAPI-Text-to-Image.json)，拖入画布后填写客户端 Key。
+也可以直接[下载无密钥的 ComfyUI 文生图示例工作流](example_workflows/CLIProxyAPI-Text-to-Image.json)，拖入画布后选择已经在本机配置好的服务商。
 
-旧 CLIProxyAPI Provider（仅旧工作流兼容）：
-
-| 输入 | 初始值 |
-| --- | --- |
-| `api_key` | CLIProxyAPI `access.api-keys` 里的客户端 Key |
-| `base_url` | `http://127.0.0.1:8317/v1` |
-| `image_model` | `gpt-image-2.6-flare`（速度优先）；可填 `gpt-image-2.6-sunburst`（细节/编辑优先），或你账号实际可用的旧型号 |
-| `responses_model` | 默认空，仅手动选择 Responses 模式时填写可用的文本主模型 |
-| `reference_mode` | `images_edit`（默认，参考图引导新图）；`responses`（可选） |
-| `image_complexity` | 推荐 `auto`；`low/medium/high` 目前不会被 CLIProxyAPI v8.0.57 默认 Images 路径透传 |
-
-第一次用 Generate：设置一句提示词，`n=1`，其余先保持 `auto`、`output_format=png`，点击 Queue。`image_complexity` 控件暂为兼容保留，不代表 v8.0.57 的 Codex Images 路径实际执行了复杂度设置。
+Provider Profile 不含 Key 和 `base_url`。`profile` 选择服务商，`image_model` 留空时使用配置的默认模型，`reference_mode` 默认跟随服务商配置。第一次用 Generate：填写提示词、`n=1`，其他项保持 `auto`、`output_format=png`，然后点击 Queue。旧版 Provider 参数已转移到[旧工作流手册](docs/nodes-and-workflows.md)。
 
 - **参考图生成**：`Load Image.IMAGE` → `Generate.reference_1`，依次可连更多参考图。
 - **编辑图片**：`Load Image.IMAGE` → `Edit.base_image（Image 1）`；可选将更多参考图接到 `Edit Reference List`，再接 Edit 的参考图入口。
 - **保存图片**：Generate 或 Edit 的 `image` → 本插件 `GPT Image Bridge · Save Image`，可选择 PNG/JPEG/WebP；也可以继续使用 ComfyUI 原生 `Save Image`。
 
-**默认所有生图/编辑均走 Images API**：纯文本生成用 `/images/generations`，有参考图的 Generate 使用 `/images/edits` 作参考图引导生成（不是严格意义的从零生图），Edit 同样使用 `/images/edits`。需要多轮文本模型协调时，手动将 `reference_mode` 改成 `responses` 并填写可用的 `responses_model`。`n>1` 会发出多次独立请求，可能分别消耗额度。
+**推荐本地 Codex 配置默认走 Images API**：纯文本生成用 `/images/generations`，有参考图的 Generate 使用 `/images/edits` 作参考图引导生成（不是严格意义的从零生图），Edit 同样使用 `/images/edits`。需要多轮文本模型协调时，手动将 `reference_mode` 改成 `responses` 并填写可用的 `responses_model`。`n>1` 会发出多次独立请求，可能分别消耗额度。
 
 **OpenAI 已正式发布 GPT Image 2.6 Flare / Sunburst**；本仓库的 [Main 0.7.0 实机报告](docs/main-acceptance-2026-11-06.md)已在一套真实账户上验证两者生成和默认参考图链路。插件侧 RGBA 保留已修复，修复后的一次真实透明背景复测已保存 RGBA（不保证所有请求）；自定义尺寸和 JPEG/WebP 上游响应也仍有未达标记录。参见[模型兼容与版本边界](docs/model-support.md)。
 
@@ -114,6 +103,6 @@ Save Image
 - [测试证据与本机验收清单](docs/testing.md)
 - [Main 0.7.0 全功能实机验收报告](docs/main-acceptance-2026-11-06.md)
 
-**安全提醒**：画布上的 Key 是掩码，但本地保存的工作流 JSON 中仍可能包含客户端 Key。分享前清空 Key。初次使用建议 CLIProxyAPI 只监听本机地址。
+**安全提醒**：新的 Provider Profile 不在画布/工作流中保存 Key；`providers.local.json` 是机密文件，不要分享。旧 Provider 工作流可能含 Key，分享前必须清除。CLIProxyAPI 首次使用请仅监听本机地址。
 
 [LICENSE](LICENSE) · [上游插件](https://github.com/Liu-Bot24/comfyui-gpt-image-bridge) · [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
