@@ -9,7 +9,7 @@ ROUTE_PATH = "/gpt-image-bridge/session-credential"
 MAX_REQUEST_BYTES = 20 * 1024
 API_PROVIDER_CLASS = "GPTImageBridgeAPIProvider"
 API_PROVIDER_CLASSES = frozenset(
-    {API_PROVIDER_CLASS, "GPTImageBridgeCLIProxyAPIProvider"}
+    {API_PROVIDER_CLASS, "GPTImageBridgeCLIProxyAPIProvider", "GPTImageBridgeProviderProfile"}
 )
 
 
