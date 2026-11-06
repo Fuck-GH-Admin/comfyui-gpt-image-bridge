@@ -60,7 +60,7 @@ node --experimental-default-type=module --test tests/js/*.test.mjs
 5. 提交 `Generate n=2` 工作流，通过 Images 请求保存两张 PNG。
 6. 提交 Load Image → 参考图 Generate → Save Image 工作流，分别以默认 Images Edit 和手动 Responses 两种模式请求并保存 PNG。
 7. 另行提交可选 Responses 模式的参考图 Generate 工作流，验证文本主模型与图片模型分离；再提交 Load Image → Edit Reference List → Edit → Save Image 工作流，验证 multipart 中基础图和参考图顺序。
-8. 检查五次 HTTP 请求的端点、模型角色、Bearer 客户端 Key 和关键字段。
+8. 检查七次 HTTP 请求的端点、模型角色、Bearer 客户端 Key 和关键字段。
 9. 检查原生 SaveImage 的 PNG 输出，以及插件保存节点的 WebP/JPEG 文件、32×24 尺寸、Alpha/背景合成和输出目录路径。
 10. 关闭测试进程并输出 `COMFYUI_SMOKE_PASS`。
 
