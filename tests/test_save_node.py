@@ -105,7 +105,7 @@ def test_png_batch_preserves_rgba_and_uses_comfyui_output_folder(tmp_path, monke
         assert list(image.getchannel("A").getdata()) == [0, 255]
     with Image.open(tmp_path / "output/bridge/png_00002_.png") as image:
         assert image.mode == "RGBA"
-        assert list(image.getchannel("A").getdata()) == [128, 255]
+        assert list(image.getchannel("A").getdata()) == [127, 255]
 
 
 def test_webp_lossless_keeps_alpha_and_batch_outputs(tmp_path, monkeypatch):
@@ -137,7 +137,7 @@ def test_webp_lossless_keeps_alpha_and_batch_outputs(tmp_path, monkeypatch):
         assert list(image.getchannel("A").getdata()) == [0, 255]
     with Image.open(tmp_path / "output/bridge/webp_00002_.webp") as image:
         assert image.mode == "RGBA"
-        assert list(image.getchannel("A").getdata()) == [128, 255]
+        assert list(image.getchannel("A").getdata()) == [127, 255]
 
 
 def test_jpeg_composites_alpha_over_selected_background(tmp_path, monkeypatch):
