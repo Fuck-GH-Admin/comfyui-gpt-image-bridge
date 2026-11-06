@@ -361,6 +361,15 @@ def run(root: Path):
         version = info.get("system", {}).get("comfyui_version")
         print("[PASS] Real ComfyUI server started. Version:", version, flush=True)
         print("[PASS] All 8 GPT Image Bridge custom nodes registered", flush=True)
+        for legacy_name in (
+            "GPTImageBridgeAPIProvider",
+            "GPTImageBridgeCLIProxyAPIProvider",
+            "GPTImageBridgeOAuthProvider",
+        ):
+            legacy_info, _ = http_json(comfy_url, "/object_info/" + legacy_name)
+            assert legacy_info[legacy_name].get("deprecated") is True
+            assert legacy_info[legacy_name].get("dev_only") is True
+        print("[PASS] Old Provider nodes flagged deprecated and hidden in ordinary search", flush=True)
 
         # Fail closed on raw API keys: the ComfyUI queue must never persist them.
         raw_graph = {
@@ -376,6 +385,26 @@ def run(root: Path):
             raise AssertionError("ComfyUI accepted a raw API key into its queue")
         assert not REQUESTS, "A rejected raw-key graph reached the proxy"
         print("[PASS] Prompt guard rejects raw keys before enqueue", flush=True)
+        # A forged Profile node must not make it possible to push a raw
+        # credential into a shareable ComfyUI prompt/history.
+        injected_profile = {
+            "1": {
+                "class_type": "GPTImageBridgeProviderProfile",
+                "inputs": {"profile": "ci_gateway", "api_key": CLIENT_KEY},
+            },
+            "2": {"class_type": "GPTImageBridgeGenerate", "inputs": generate_inputs("1")},
+            "3": {"class_type": "SaveImage", "inputs": {
+                "images": ["2", 0], "filename_prefix": "InjectedProfileMustNotSave",
+            }},
+        }
+        try:
+            http_json(comfy_url, "/prompt", {"prompt": injected_profile})
+        except urllib.error.HTTPError as error:
+            assert error.code == 400, "Raw key in Profile graph should be rejected"
+        else:
+            raise AssertionError("ComfyUI accepted raw API Key injected into Profile node")
+        assert not REQUESTS, "Rejected Profile prompt was forwarded to the gateway"
+        print("[PASS] Provider Profile rejects injected raw Key before queue insertion", flush=True)
 
         # Text-to-image: n=2 means two real ComfyUI->proxy HTTP requests.
         graph = {
