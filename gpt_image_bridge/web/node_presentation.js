@@ -59,6 +59,7 @@ export function desiredWidgetVisibility(node) {
             // A text host is only relevant when reference generation selects
             // Responses; preserve nonempty overrides and connected sockets.
             responses_model: referenceMode === "responses"
+                || hasSocketLink(node, "reference_mode")
                 || hasNondefaultValue(responseHost, "")
                 || hasSocketLink(node, "responses_model"),
         };
