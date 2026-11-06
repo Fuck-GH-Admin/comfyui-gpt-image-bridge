@@ -155,7 +155,7 @@ def test_responses_protocol_checks_fields_carried_by_image_generation_tool(api_p
     }
     opener = QueueOpener(
         FakeResponse(
-            f"data: {json.dumps(completed)}\\n\\n".encode(),
+            f"data: {json.dumps(completed)}\n\n".encode(),
             headers={"content-type": "text/event-stream"},
         )
     )
