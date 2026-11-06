@@ -145,6 +145,13 @@ Remaining problems:
 
 不要上传 `auth.json`、带凭据的 `config.yaml`、原始 Bearer Header、工作流中尚未删除的 API Key 或包含敏感查询参数的 URL。
 
+
+### 多输出请求失败时的进度证据（n>1）
+
+CLIProxyAPI 图片路径、Responses 和 Chat Completions 在请求多张图片时，可能对每张图各发一次请求。如果后一张失败，前面成功返回的图片**不会作为完整 ComfyUI 节点输出交付**，但其远端执行可能已经消耗额度。错误报告的 `batch_progress` 记录 `requested_outputs`、`confirmed_outputs`、`failed_request_index`，以及 `batch_outputs_delivered=false`。它是本轮实际收到的响应计数，**不是账号扣费记录**。
+
+出现该字段时 `safe_to_resubmit=false`；若失败请求状态不确定，`remote_task_may_continue=true`。先检查代理请求记录和实际远端任务，再决定是否单独补做缺失图片，**不要直接重新运行整个 n>1 批次**。当前不会把部分成功图片作为节点结果返回；此次补强仅改善失败证据，不是部分结果恢复功能。
+
 ## 6. 宣称全部远端功能可用前的验收条件
 
 - 单元 CI 和真实 ComfyUI 后端 CI 通过（**已经有证据**）。

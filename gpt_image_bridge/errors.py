@@ -116,6 +116,7 @@ class BridgeError(RuntimeError):
     phase: str | None = None
     safe_to_resubmit: bool | None = None
     remote_task_may_continue: bool | None = None
+    batch_progress: dict[str, Any] | None = None
 
     def report(self, known_secrets: tuple[str, ...] = ()) -> dict[str, Any]:
         return sanitize(
@@ -136,6 +137,7 @@ class BridgeError(RuntimeError):
                 "phase": self.phase,
                 "safe_to_resubmit": self.safe_to_resubmit,
                 "remote_task_may_continue": self.remote_task_may_continue,
+                "batch_progress": self.batch_progress,
             },
             known_secrets,
         )

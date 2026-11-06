@@ -2638,6 +2638,33 @@ def image_output_conformance(
     }
 
 
+def _annotate_multi_output_failure(
+    error: BridgeError,
+    *,
+    requested_outputs: int,
+    confirmed_outputs: int,
+    failed_request_index: int,
+) -> None:
+    """Report partial/uncertain paid work without exposing or replaying image bytes.
+
+    A failed ComfyUI node returns no batch even when earlier responses succeeded.
+    The failed request may still have completed remotely. Never imply that
+    restarting the entire batch is a safe retry.
+    """
+    if requested_outputs <= 1:
+        return
+    error.batch_progress = {
+        "requested_outputs": requested_outputs,
+        "confirmed_outputs": confirmed_outputs,
+        "failed_request_index": failed_request_index + 1,
+        "batch_outputs_delivered": False,
+        "whole_batch_retry_risk": "may_duplicate_outputs",
+    }
+    error.safe_to_resubmit = False
+    if error.status is None or error.status in {408, 409, 429, 500, 502, 503, 504}:
+        error.remote_task_may_continue = True
+
+
 def _execute_operation(
     *,
     provider: ProviderConfig,
@@ -2731,24 +2758,33 @@ def _execute_operation(
             moderation=moderation,
         )
         for request_index in range(int(n)):
-            response = client.request(
-                url=url,
-                body=json.dumps(payload, separators=(",", ":")).encode("utf-8"),
-                headers=_headers(
-                    auth_headers,
-                    content_type="application/json",
-                    accept="text/event-stream, application/json",
-                ),
-                timeout=timeout,
-                known_secrets=secrets,
-                operation=operation,
-                protocol=protocol,
-                max_attempts=1,
-            )
-            images, revised, metadata = _parse_responses(
-                response,
-                known_secrets=secrets,
-            )
+            try:
+                response = client.request(
+                    url=url,
+                    body=json.dumps(payload, separators=(",", ":")).encode("utf-8"),
+                    headers=_headers(
+                        auth_headers,
+                        content_type="application/json",
+                        accept="text/event-stream, application/json",
+                    ),
+                    timeout=timeout,
+                    known_secrets=secrets,
+                    operation=operation,
+                    protocol=protocol,
+                    max_attempts=1,
+                )
+                images, revised, metadata = _parse_responses(
+                    response,
+                    known_secrets=secrets,
+                )
+            except BridgeError as error:
+                _annotate_multi_output_failure(
+                    error,
+                    requested_outputs=int(n),
+                    confirmed_outputs=len(all_images),
+                    failed_request_index=request_index,
+                )
+                raise
             all_images.extend(images)
             all_metadata.extend(metadata)
             revised_prompt = revised_prompt or revised
@@ -2777,26 +2813,35 @@ def _execute_operation(
             size=size,
         )
         for request_index in range(int(n)):
-            response = client.request(
-                url=url,
-                body=json.dumps(payload, separators=(",", ":")).encode("utf-8"),
-                headers=_headers(
-                    auth_headers,
-                    content_type="application/json",
-                    accept="application/json",
-                ),
-                timeout=timeout,
-                known_secrets=secrets,
-                operation=operation,
-                protocol=protocol,
-                max_attempts=1,
-            )
-            images, revised, metadata = _parse_chat_completions(
-                response,
-                client=client,
-                timeout=timeout,
-                known_secrets=secrets,
-            )
+            try:
+                response = client.request(
+                    url=url,
+                    body=json.dumps(payload, separators=(",", ":")).encode("utf-8"),
+                    headers=_headers(
+                        auth_headers,
+                        content_type="application/json",
+                        accept="application/json",
+                    ),
+                    timeout=timeout,
+                    known_secrets=secrets,
+                    operation=operation,
+                    protocol=protocol,
+                    max_attempts=1,
+                )
+                images, revised, metadata = _parse_chat_completions(
+                    response,
+                    client=client,
+                    timeout=timeout,
+                    known_secrets=secrets,
+                )
+            except BridgeError as error:
+                _annotate_multi_output_failure(
+                    error,
+                    requested_outputs=int(n),
+                    confirmed_outputs=len(all_images),
+                    failed_request_index=request_index,
+                )
+                raise
             all_images.extend(images)
             all_metadata.extend(metadata)
             revised_prompt = revised_prompt or revised
@@ -2860,23 +2905,32 @@ def _execute_operation(
                 moderation=moderation,
                 n=images_per_request,
             )
-            (
-                current_images,
-                current_revised_prompt,
-                current_metadata,
-                current_evidence,
-                async_report,
-            ) = _execute_images_request(
-                provider=provider,
-                client=client,
-                operation="edit" if reference_guided_images else operation,
-                sync_url=url,
-                body=body,
-                headers=image_headers,
-                image_field=image_field,
-                timeout=timeout,
-                secrets=secrets,
-            )
+            try:
+                (
+                    current_images,
+                    current_revised_prompt,
+                    current_metadata,
+                    current_evidence,
+                    async_report,
+                ) = _execute_images_request(
+                    provider=provider,
+                    client=client,
+                    operation="edit" if reference_guided_images else operation,
+                    sync_url=url,
+                    body=body,
+                    headers=image_headers,
+                    image_field=image_field,
+                    timeout=timeout,
+                    secrets=secrets,
+                )
+            except BridgeError as error:
+                _annotate_multi_output_failure(
+                    error,
+                    requested_outputs=int(n),
+                    confirmed_outputs=len(all_images),
+                    failed_request_index=request_index,
+                )
+                raise
             all_images.extend(current_images)
             all_metadata.extend(current_metadata)
             revised_prompt = revised_prompt or current_revised_prompt
