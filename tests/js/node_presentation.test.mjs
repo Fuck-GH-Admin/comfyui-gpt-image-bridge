@@ -201,6 +201,16 @@ test("Provider Profile reveals Responses host only when relevant or configured",
     assert.equal(node.properties.existing_user_property, "keep-me");
 });
 
+test("Provider Profile mode socket may resolve to Responses: keep main model visible", () => {
+    const node = fakeNode("GPTImageBridgeProviderProfile");
+    node.inputs.push({ name: "reference_mode", type: "COMBO", link: 27 });
+    prepareContextualPresentation(node);
+    assert.equal(widgetByName(node, "responses_model").hidden, false);
+    node.inputs.pop();
+    applyContextualPresentation(node);
+    assert.equal(widgetByName(node, "responses_model").hidden, true);
+});
+
 test("unknown nodes are untouched and repeat calls do not leak new widgets", () => {
     const node = fakeNode("UnknownNode");
     const before = structuredClone(node.widgets);
