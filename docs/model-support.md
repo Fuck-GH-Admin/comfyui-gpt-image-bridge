@@ -30,7 +30,7 @@ Provider 的 `image_model` 仍是普通字符串输入。不会通过本插件�
 
 OpenAI 的 Images API 文档也列出 `gpt-image-2`、`gpt-image-2-2026-04-21`、`gpt-image-2.5-flare`、`gpt-image-2.5-sunburst` 及它们的部分快照等旧型号。
 
-你的历史实机报告只验证过 `gpt-image-2`：纯文生图、单图 Edit、带参考图 Edit 通过。更新默认值**不会自动证明** 2.6 Flare/Sunburst 已在你账号上开放。建议两者分别进行一次 `n=1` 的短提示词生图验证；若代理或账户不支持，可在 Provider 将型号改回已经通过的 `gpt-image-2`。
+此前 PR #2 的历史报告只验证过 `gpt-image-2`。后续 [Main 0.7.0 实机报告](main-acceptance-2026-11-06.md)已在本次 CLIProxyAPI 8.0.57 + Codex OAuth 环境中分别验证 Flare、Sunburst 真实生成，并验证默认 Images Edit 参考图生成。**这证明当前测试账户和链路可用，不代表其他账户、代理版本或区域都已开放。** 若其他环境不支持，可改回已验证的 `gpt-image-2`，并重新记录结果。
 
 特别注意：OpenAI 正式 API 的模型目录，与 Codex **订阅型授权**、CLIProxyAPI 的实际 OAuth 路由不是一个保证；官方支持不代表订阅永远包含全部模型。
 
@@ -66,7 +66,7 @@ OpenAI 文档将 `complexity` 描述为图片生成前的规划计算强度，�
 
 在 Images Generate 中为 JSON 字段，在 Images Edit 中为 multipart 字段；选择可选 Responses 模式时进入图片工具参数。当前源码对这三个合法值做了校验。
 
-**不要在老型号上盲目开启**：不同模型/代理版本可能拒绝未知字段。2.6 官方指南称未设置时其默认规划复杂度为 `high`；这里 UI 的 `auto` 表示“不指定”，并不保证低延迟或低额度消耗。
+**不要在老型号上盲目开启**：不同模型/代理版本可能拒绝未知字段。2.6 官方指南称未设置时其默认规划复杂度为 `high`；这里 UI 的 `auto` 表示“不指定”，并不保证低延迟或低额度消耗。Main 0.7.0 实机工作流使用过 low/medium/high，但没有进行隔离变量的 A/B 对照，因此不能据此量化复杂度对效果、延迟或费用的影响。
 
 ## 5. 从官方 ComfyUI 节点补齐的高级控制
 
@@ -111,5 +111,5 @@ OpenAI 官方还介绍了 2.6 的 SVG 输出、GIF 动画和 markup-guided editi
 | CLIProxyAPI v8.0.57 识别两个型号及 Images 端点 | 指定发布标签源码 |
 | ComfyUI 可通过插件传递 2.6 型号及 complexity | 本 fork 请求形态单元测试（Mock HTTP） |
 | 参考图默认 Images Edit，Responses 可手动选择 | 本 fork 源码、单元和真实 ComfyUI + 假代理集成测试 |
-| 2.6 在用户真实 Codex 订阅账户上的生图权限与可靠性 | **尚需实机验收** |
+| 2.6 Flare / Sunburst 在本次真实账户的生图与默认参考图链路 | **已实机通过**；自定义尺寸/格式、透明输出仍未达标，Responses 另受 DNS 阻塞；其他账户需自行验证 |
 | SVG、GIF、markup-guided 编辑在当前 ComfyUI 节点可用 | **未实现/未验证** |
