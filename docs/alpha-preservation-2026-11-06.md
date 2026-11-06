@@ -24,7 +24,7 @@ ComfyUI itself does not require this conversion. Its image conversion helper cho
 
 ## Verification
 
-PR #5 exact HEAD: `b0d47579ba7f98b03db43260633d346d43b5674a`.
+Code verification HEAD: `b0d47579ba7f98b03db43260633d346d43b5674a` (the later PR #5 commits only updated documentation).
 
 - Python: **294 passed, 0 xfailed**.
 - JavaScript: **14 passed, 0 failed**.
