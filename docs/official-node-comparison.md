@@ -17,7 +17,7 @@
 | 生成与编辑 | 一个节点可根据有无图片选择 Images Generate/Edit | 独立 Generate、Edit，另有 Provider | 显式职责更清晰，适合 ComfyUI 复杂工作流 |
 | 自定义大小 | 2K/4K 预设 + 自定义宽高和本地尺寸检查 | 同样加入预设及 `Custom` 宽高；非法尺寸在发请求前拒绝 | 已补齐核心差距 |
 | 质量档位 | 2.6 和 2.5 包含 `low/medium/high/xhigh/max` | `auto/low/medium/high/xhigh/max` | 已补齐，旧型号可能拒绝高档位 |
-| 规划复杂度 | 2.6 的 `low/medium/high` | Provider 中 `auto/low/medium/high` | `auto` 不发送字段，避免破坏旧服务 |
+| 规划复杂度 | 2.6 的 `low/medium/high` | Provider 保留 `auto/low/medium/high` | CLIProxyAPI 8.0.57 的 Codex Images 转换层丢弃 `complexity`；当前默认路径仅保留 UI 兼容，不应视为有效控制 |
 | 参考图 | OpenAI 节点最多 16 张，可输入多图编辑 | Generate 最多 16 张参考图；Edit 最多基础图 1 张 + 15 张参考图 | 已补齐，沿用连续编号/单图插口 |
 | 局部编辑 | 可选 Mask，需要正确的输入图数 | Edit 具有 Mask，参考图生成另设 Images Edit 模式 | 基本具备 |
 | 输出数量 | `n` 1–8 | `n` 1–8；CLIProxyAPI 每张单独请求 | 结果相似，远端使用量/延迟不等同 |
@@ -44,7 +44,7 @@
 
 官方通过 `IO.DynamicCombo` 根据型号动态切换合法 `quality`、背景与尺寸：
 
-- 2.6：五级渲染质量与独立复杂度。
+- 2.6：五级渲染质量；官方 API 有独立复杂度字段，但当前 CLIProxyAPI 8.0.57 Codex Images 路径未透传。
 - 2.5：五级渲染质量，但没有 2.6 的规划复杂度。
 - 2：通常只允许 `low/medium/high`，且背景透明度有差异。
 - 1.5：尺寸限制更严格。
