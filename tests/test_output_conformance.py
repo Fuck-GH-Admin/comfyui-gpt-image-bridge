@@ -139,3 +139,104 @@ def test_images_api_report_marks_real_response_mismatches(api_provider):
         "output_format",
         "background",
     }
+
+def test_responses_protocol_checks_fields_carried_by_image_generation_tool(api_provider):
+    provider = with_protocol(api_provider, "responses")
+    completed = {
+        "type": "response.completed",
+        "response": {
+            "output": [
+                {
+                    "type": "image_generation_call",
+                    "result": png_b64(7, 9),
+                }
+            ]
+        },
+    }
+    opener = QueueOpener(
+        FakeResponse(
+            f"data: {json.dumps(completed)}\\n\\n".encode(),
+            headers={"content-type": "text/event-stream"},
+        )
+    )
+
+    result = execute_operation(
+        provider=provider,
+        operation="generate",
+        prompt="check Responses output fields",
+        size="1024x1024",
+        background="transparent",
+        output_format="webp",
+        client=HttpClient(opener=opener, sleeper=lambda _: None),
+    )
+
+    tool = json.loads(opener.requests[0][0].data)["tools"][0]
+    assert tool["size"] == "1024x1024"
+    assert tool["background"] == "transparent"
+    assert tool["output_format"] == "webp"
+    conformance = result.report["output"]["conformance"]
+    assert conformance["status"] == "warning"
+    assert conformance["checked_fields"] == ["size", "output_format", "background"]
+    assert {item["field"] for item in conformance["warnings"]} == {
+        "size",
+        "output_format",
+        "background",
+    }
+
+
+def test_chat_completions_prompt_instruction_size_is_not_asserted(api_provider):
+    provider = with_protocol(api_provider, "chat_completions")
+    payload = {
+        "choices": [
+            {
+                "message": {
+                    "images": [{"b64_json": png_b64(7, 9)}],
+                }
+            }
+        ]
+    }
+    opener = QueueOpener(FakeResponse(json.dumps(payload).encode()))
+
+    result = execute_operation(
+        provider=provider,
+        operation="generate",
+        prompt="check Chat Completions output fields",
+        size="1024x1024",
+        background="transparent",
+        output_format="webp",
+        client=HttpClient(opener=opener, sleeper=lambda _: None),
+    )
+
+    assert result.report["protocol_notes"]["size_transport"] == "prompt_instruction"
+    conformance = result.report["output"]["conformance"]
+    assert conformance["status"] == "not_checked"
+    assert conformance["checked_fields"] == []
+    assert conformance["warnings"] == []
+
+
+def test_native_oauth_ignored_background_and_format_leave_size_checkable():
+    result = image_output_conformance(
+        size="1024x1024",
+        background="transparent",
+        output_format="webp",
+        images=[metadata(1536, 1024, "PNG")],
+        ignored_options=("background", "output_format"),
+    )
+
+    assert result["status"] == "warning"
+    assert result["checked_fields"] == ["size"]
+    assert [item["field"] for item in result["warnings"]] == ["size"]
+
+
+def test_unrecognized_or_uncomparable_options_are_not_checked():
+    result = image_output_conformance(
+        size="Custom",
+        background="opaque",
+        output_format="svg",
+        images=[metadata(1536, 1024, "PNG")],
+    )
+
+    assert result["status"] == "not_checked"
+    assert result["checked_fields"] == []
+    assert result["warnings"] == []
+
