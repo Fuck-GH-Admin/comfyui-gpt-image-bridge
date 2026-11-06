@@ -39,7 +39,7 @@ def test_all_local_markdown_links_exist_and_fences_are_balanced():
 def test_readme_is_a_short_usage_guide():
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     assert len(readme.splitlines()) <= 130
-    assert "feat/image26-images-first-reference-mode" in readme
+    assert "git clone --branch main" in readme
     assert "docs/README.md" in readme
     assert "CLIProxyAPI-Text-to-Image.json" in readme
 
