@@ -30,6 +30,7 @@ def test_comfyui_registration_and_provider_responsibilities_are_separate():
     module = import_comfy_package()
     expected = {
         "GPTImageBridgeAPIProvider",
+        "GPTImageBridgeProviderProfile",
         "GPTImageBridgeCLIProxyAPIProvider",
         "GPTImageBridgeOAuthProvider",
         "GPTImageBridgeReferenceList",
@@ -38,6 +39,14 @@ def test_comfyui_registration_and_provider_responsibilities_are_separate():
         "GPTImageBridgeSaveImage",
     }
     assert set(module.NODE_CLASS_MAPPINGS) == expected
+    profile_types = module.NODE_CLASS_MAPPINGS["GPTImageBridgeProviderProfile"].INPUT_TYPES()
+    assert list(profile_types["required"]) == ["profile"]
+    assert list(profile_types["optional"]) == ["image_model", "reference_mode", "responses_model"]
+    assert "api_key" not in str(profile_types)
+    assert "base_url" not in str(profile_types)
+    for legacy in ("GPTImageBridgeAPIProvider", "GPTImageBridgeCLIProxyAPIProvider", "GPTImageBridgeOAuthProvider"):
+        assert module.NODE_CLASS_MAPPINGS[legacy].DEPRECATED is True
+        assert module.NODE_CLASS_MAPPINGS[legacy].DEV_ONLY is True
     for name, node in module.NODE_CLASS_MAPPINGS.items():
         input_types = node.INPUT_TYPES()
         assert isinstance(input_types, dict)
