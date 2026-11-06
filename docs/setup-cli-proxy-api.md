@@ -154,7 +154,7 @@ Provider 的字段：
 | `image_model` | `gpt-image-2.6-flare` | 最新正式 Flare；可改 `gpt-image-2.6-sunburst`，账户若尚不支持则退回 `gpt-image-2` |
 | `responses_model` | 空 | 仅手动选择 `responses` 时填写可用文本主模型 |
 | `reference_mode` | `images_edit` | 默认参考图引导的新图通过 Images Edit，或切换为 Responses |
-| `image_complexity` | `auto` | 2.6 支持 `low`、`medium`、`high` 规划复杂度 |
+| `image_complexity` | `auto` | CLIProxyAPI v8.0.57 默认 Images 路径不转发 `low/medium/high`；保持 `auto`，该控件仅为兼容保留 |
 
 Generate 初次建议：`prompt` 用一句简短提示词；`size=auto`、`quality=auto`、`background=auto`、`output_format=png`、`moderation=auto`、`n=1`、`timeout_sec=300`。点击 Queue 执行。若模型不支持某个参数，按错误信息逐一调整，不要认定所有 GPT 图片模型具备完全相同选项。
 
