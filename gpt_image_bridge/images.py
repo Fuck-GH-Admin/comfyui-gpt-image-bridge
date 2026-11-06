@@ -161,6 +161,13 @@ def validate_image_bytes(
         with Image.open(io.BytesIO(payload)) as image:
             width, height = image.size
             image_format = image.format or "unknown"
+            mode = image.mode
+            has_alpha = "A" in image.getbands() or "transparency" in image.info
+            alpha_extrema = (
+                list(image.convert("RGBA").getchannel("A").getextrema())
+                if has_alpha
+                else None
+            )
     except Exception as error:
         raise ValueError("Returned bytes are not a valid image.") from error
     if width <= 0 or height <= 0 or width * height > MAX_IMAGE_PIXELS:
@@ -169,7 +176,11 @@ def validate_image_bytes(
         "width": width,
         "height": height,
         "format": image_format,
-        "mime_type": content_type.split(";", 1)[0].strip() or None,
+        "mode": mode,
+        "has_alpha": has_alpha,
+        "alpha_extrema": alpha_extrema,
+        "mime_type": content_type.split(";",
+        1)[0].strip() or None,
         "bytes": len(payload),
     }
 
