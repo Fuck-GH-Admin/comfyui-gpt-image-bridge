@@ -889,6 +889,7 @@ def _build_edit_multipart(
     quality: str,
     background: str,
     output_format: str,
+    moderation: str,
     n: int,
     reference_guided: bool = False,
 ) -> tuple[bytes, str, str]:
@@ -935,6 +936,7 @@ def _build_edit_multipart(
             [
                 _multipart_field(boundary, "background", background),
                 _multipart_field(boundary, "output_format", output_format),
+                _multipart_field(boundary, "moderation", moderation),
             ]
         )
     parts.extend(
@@ -1184,6 +1186,7 @@ def _images_request(
     quality: str,
     background: str,
     output_format: str,
+    moderation: str,
     n: int,
     reference_guided: bool = False,
 ) -> tuple[str, bytes, dict[str, str], str | None]:
@@ -1203,6 +1206,7 @@ def _images_request(
         }
         if provider.auth_mode != "codex_oauth":
             payload["output_format"] = output_format
+            payload["moderation"] = moderation
         if provider.image_complexity != "auto":
             payload["complexity"] = provider.image_complexity
         return (
@@ -1252,6 +1256,7 @@ def _images_request(
         quality=quality,
         background=background,
         output_format=output_format,
+        moderation=moderation,
         n=int(n),
         reference_guided=reference_guided,
     )
@@ -2737,6 +2742,7 @@ def _execute_operation(
                 quality=quality,
                 background=background,
                 output_format=output_format,
+                moderation=moderation,
                 n=images_per_request,
             )
             (
