@@ -1,0 +1,33 @@
+name: Retire merged PR 13 source branch once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/retire-merged-pr13.yml
+
+permissions:
+  contents: write
+
+jobs:
+  retire:
+    if: github.repository == 'Fuck-GH-Admin/comfyui-gpt-image-bridge'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify PR merged and exact source ref before deleting
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          branch=feat/native-comfy-composition-20261107
+          expected=2ef946a40b2edc678811bf4cb98b4817ea96a9e8
+          merged="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/13" --jq '.merged')"
+          test "$merged" = true
+          actual="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/${branch}" --jq '.object.sha')"
+          if [[ "$actual" != "$expected" ]]; then
+            echo "Source branch moved; refusing deletion" >&2
+            exit 1
+          fi
+          gh api -X DELETE "repos/${GITHUB_REPOSITORY}/git/refs/heads/${branch}"
+          echo "Retired merged PR 13 exact source branch"
