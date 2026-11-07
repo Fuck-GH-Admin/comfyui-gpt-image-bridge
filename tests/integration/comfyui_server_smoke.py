@@ -361,6 +361,10 @@ def run(root: Path):
         version = info.get("system", {}).get("comfyui_version")
         print("[PASS] Real ComfyUI server started. Version:", version, flush=True)
         print("[PASS] All 8 GPT Image Bridge custom nodes registered", flush=True)
+        for builtin in ("PrimitiveStringMultiline", "PrimitiveInt", "ImageBatch", "GetImageSize", "SaveImage"):
+            built_info, _ = http_json(comfy_url, "/object_info/" + builtin)
+            assert builtin in built_info, "Missing native ComfyUI node: " + builtin
+        print("[PASS] Native ComfyUI Text/Int/ImageBatch/GetImageSize/SaveImage nodes registered", flush=True)
         for legacy_name in (
             "GPTImageBridgeAPIProvider",
             "GPTImageBridgeCLIProxyAPIProvider",
@@ -509,6 +513,43 @@ def run(root: Path):
         queue_workflow(comfy_url, proxy_url, graph, "9", 1, log_path, root / "output")
         print("[PASS] Editing -> actual PNG file via IMAGE/reference list/multipart/SaveImage", flush=True)
 
+        # Native ComfyUI text editing and image batching, without our own
+        # prompt editor or reference collector node. Legacy ImageBatch is used
+        # in the pinned ComfyUI smoke; newer UI offers BatchImagesNode.
+        graph = {
+            "1": {"class_type": "GPTImageBridgeProviderProfile", "inputs": {}},
+            "4": {"class_type": "LoadImage", "inputs": {"image": "bridge_reference.png"}},
+            "14": {"class_type": "PrimitiveStringMultiline", "inputs": {"value": "Create a completely NEW reference-inspired image"}},
+            "15": {"class_type": "ImageBatch", "inputs": {"image1": ["4", 0], "image2": ["4", 0]}},
+            "16": {"class_type": "GPTImageBridgeGenerate", "inputs": {
+                **generate_inputs("1"),
+                "prompt": ["14", 0],
+                "reference_batch": ["15", 0],
+            }},
+            "17": {"class_type": "SaveImage", "inputs": {
+                "images": ["16", 0], "filename_prefix": "CI-Native-Reference-Batch",
+            }},
+        }
+        queue_workflow(comfy_url, proxy_url, graph, "17", 1, log_path, root / "output")
+        print("[PASS] Native multiline Text + native ImageBatch -> bridge Generate -> native SaveImage", flush=True)
+
+        # Native batch also feeds Edit without the deprecated Bridge Reference List.
+        graph = {
+            "1": {"class_type": "GPTImageBridgeProviderProfile", "inputs": {}},
+            "4": {"class_type": "LoadImage", "inputs": {"image": "bridge_reference.png"}},
+            "15": {"class_type": "ImageBatch", "inputs": {"image1": ["4", 0], "image2": ["4", 0]}},
+            "18": {"class_type": "GPTImageBridgeEdit", "inputs": {
+                **generate_inputs("1"),
+                "base_image（Image 1）": ["4", 0],
+                "reference_batch": ["15", 0],
+            }},
+            "19": {"class_type": "SaveImage", "inputs": {
+                "images": ["18", 0], "filename_prefix": "CI-Native-Edit-Batch",
+            }},
+        }
+        queue_workflow(comfy_url, proxy_url, graph, "19", 1, log_path, root / "output")
+        print("[PASS] Native ImageBatch -> bridge Edit -> native SaveImage", flush=True)
+
         # Profile provider: server-side Key only, never a workflow widget or queue field.
         graph = {
             "1": {"class_type": "GPTImageBridgeProviderProfile", "inputs": {}},
@@ -528,10 +569,12 @@ def run(root: Path):
             "reference_image_edit",
             "reference",
             "edit",
+            "reference_image_edit",
+            "edit",
             "generate",
         ], "Unexpected proxy requests: " + str(observed)
         assert all(item["valid"] for item in observed)
-        print("[PASS] 8 proxy HTTP requests matched both reference modes, profile and local saver paths", flush=True)
+        print("[PASS] 10 proxy HTTP requests matched native image batches, two reference modes and local savers", flush=True)
         print("COMFYUI_SMOKE_PASS", flush=True)
 
     except Exception:
