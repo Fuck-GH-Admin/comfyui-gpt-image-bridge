@@ -127,7 +127,9 @@ export function migrateLegacyGenerateReferences(node) {
     const alreadyConnected = referenceEntries(node)
         .filter(({ input }) => isConnected(input))
         .length;
-    ensureReferenceInputCount(node, alreadyConnected + plans.length);
+    // Leave one free socket after migrating connected legacy images, just as
+    // the normal connected-input autogrow path does.
+    ensureReferenceInputCount(node, alreadyConnected + plans.length + 1);
 
     let migrated = 0;
     for (const plan of plans) {
