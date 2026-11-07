@@ -44,7 +44,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     ),
     "GPTImageBridgeGenerate": "GPT Image Bridge · Generate",
     "GPTImageBridgeEdit": "GPT Image Bridge · Edit",
-    "GPTImageBridgeSaveImage": "GPT Image Bridge · Save Image",
+    "GPTImageBridgeSaveImage": "GPT Image Bridge · Export JPEG/WebP (optional)",
 }
 
 WEB_DIRECTORY = "./gpt_image_bridge/web"
