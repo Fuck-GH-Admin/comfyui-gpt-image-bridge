@@ -69,13 +69,13 @@ GPT Image Bridge · Generate
 Save Image
 ```
 
-也可以直接[下载无密钥的 ComfyUI 文生图示例工作流](example_workflows/CLIProxyAPI-Text-to-Image.json)，拖入画布后选择已经在本机配置好的服务商。
+**推荐先使用 [ComfyUI 原生 Text + Int 输入示例](example_workflows/Native-ComfyUI-Text-and-Size.json)**：`Text (Multiline)` 负责提示词，两个 `Int` 负责宽高，Bridge 只负责向云端模型请求，输出连原生 Save Image。也保留[旧的单节点文本输入工作流](example_workflows/CLIProxyAPI-Text-to-Image.json)，用于旧版和快速调试。
 
 Provider Profile 不含 Key 和 `base_url`。`profile` 选择服务商，`image_model` 留空时使用配置的默认模型，`reference_mode` 默认跟随服务商配置。第一次用 Generate：填写提示词、`n=1`，其他项保持 `auto`、`output_format=png`，然后点击 Queue。**日常界面默认隐藏审核强度和超时等低频设置；节点上的「显示高级参数」可以随时展开，`size=Custom` 时自动显示宽高。** 后端参数没有删减，旧工作流仍可加载。旧版 Provider 参数已转移到[旧工作流手册](docs/nodes-and-workflows.md)。
 
-- **参考图生成**：`Load Image.IMAGE` → `Generate.reference_1`，依次可连更多参考图。
-- **编辑图片**：`Load Image.IMAGE` → `Edit.base_image（Image 1）`；可选将更多参考图接到 `Edit Reference List`，再接 Edit 的参考图入口。
-- **保存图片**：Generate 或 Edit 的 `image` → 本插件 `GPT Image Bridge · Save Image`，可选择 PNG/JPEG/WebP；也可以继续使用 ComfyUI 原生 `Save Image`。
+- **参考图生成**：普通等尺寸多参考图建议使用官方 `Batch Images` → `Generate.reference_batch`；不同尺寸或需要保留每张原始尺寸时，仍可直接连接 `reference_1–reference_16`。
+- **编辑图片**：`Load Image.IMAGE` → `Edit.base_image（Image 1）`；额外参考图优先用原生 `Batch Images` → `Edit.reference_batch`。旧 `Edit Reference List` 仅保留不同尺寸参考图和历史工作流兼容。
+- **保存图片**：一般使用 ComfyUI 原生 `Save Image`（PNG）。只有需要 JPEG/WebP 等专门输出时，才接本插件的 `Export JPEG/WebP (optional)`。
 
 **推荐本地 Codex 配置默认走 Images API**：纯文本生成用 `/images/generations`，有参考图的 Generate 使用 `/images/edits` 作参考图引导生成（不是严格意义的从零生图），Edit 同样使用 `/images/edits`。需要多轮文本模型协调时，手动将 `reference_mode` 改成 `responses` 并填写可用的 `responses_model`。`n>1` 会发出多次独立请求，可能分别消耗额度。
 
@@ -91,6 +91,7 @@ Provider Profile 不含 Key 和 `base_url`。`profile` 选择服务商，`image_
 
 - [文档目录](docs/README.md)
 - [本机服务商配置与第三方中转站](docs/provider-profiles.md)
+- [ComfyUI 原生功能复用与逐项职责审计](docs/native-comfyui-delegation-audit-2026-11-07.md)
 - [官方 ComfyUI 云端生图节点能力对照](docs/official-node-comparison.md)
 - [OpenAI 官方 GPT Image 模型、2.6 能力与代理兼容](docs/model-support.md)
 - [CLIProxyAPI 安装、登录及本机连接](docs/setup-cli-proxy-api.md)
