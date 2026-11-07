@@ -95,11 +95,22 @@ class FakeCLIProxyAPI(BaseHTTPRequestHandler):
         elif self.path == "/v1/images/edits":
             guided_generation = b"Create a NEW image guided by" in body
             if guided_generation:
+                # Single reference uses the Images 'image' field; multiple
+                # references use the API's 'image[]' field consistently.
+                first_single = b'name="image"; filename="image-1-base.png"' in body
+                first_multi = b'name="image[]"; filename="image-1-base.png"' in body
+                second_multi = b'name="image[]"; filename="image-2-reference.png"' in body
+                has_second = b"image-2-reference.png" in body
                 valid = (
                     b'name="model"' in body
                     and b"gpt-image-2.6-flare" in body
-                    and b'name="image"; filename="image-1-base.png"' in body
+                    and (first_single or first_multi)
                     and b"not a canvas to preserve or minimally edit" in body
+                    and (
+                        (not has_second and first_single)
+                        or (has_second and first_multi and second_multi
+                            and body.index(b"image-1-base.png") < body.index(b"image-2-reference.png"))
+                    )
                 )
                 kind = "reference_image_edit"
             else:
