@@ -143,8 +143,11 @@ class FakeCLIProxyAPI(BaseHTTPRequestHandler):
             self._write(b'{"error":"unexpected_endpoint"}', status=404)
             return
 
+        observed_request = {"kind": kind, "valid": valid}
+        if kind == "generate":
+            observed_request["size"] = request.get("size")
         with REQUESTS_LOCK:
-            REQUESTS.append({"kind": kind, "valid": valid})
+            REQUESTS.append(observed_request)
         if not valid:
             self._write(b'{"error":"invalid_request_shape"}', status=422)
             return
@@ -524,6 +527,34 @@ def run(root: Path):
         queue_workflow(comfy_url, proxy_url, graph, "9", 1, log_path, root / "output")
         print("[PASS] Editing -> actual PNG file via IMAGE/reference list/multipart/SaveImage", flush=True)
 
+        # Official primitive Text + Int widgets provide prompts and output dimensions.
+        # The Bridge only translates Custom/INT into the Images API size field.
+        graph = {
+            "1": {"class_type": "GPTImageBridgeProviderProfile", "inputs": {}},
+            "20": {"class_type": "PrimitiveStringMultiline", "inputs": {
+                "value": "A carefully staged environment with atmospheric perspective",
+            }},
+            "21": {"class_type": "PrimitiveInt", "inputs": {"value": 1536}},
+            "22": {"class_type": "PrimitiveInt", "inputs": {"value": 1024}},
+            "23": {"class_type": "GPTImageBridgeGenerate", "inputs": {
+                **generate_inputs("1"),
+                "prompt": ["20", 0],
+                "size": "Custom",
+                "custom_width": ["21", 0],
+                "custom_height": ["22", 0],
+            }},
+            "24": {"class_type": "SaveImage", "inputs": {
+                "images": ["23", 0], "filename_prefix": "CI-Native-Text-Int-Size",
+            }},
+        }
+        queue_workflow(comfy_url, proxy_url, graph, "24", 1, log_path, root / "output")
+        with REQUESTS_LOCK:
+            native_request = dict(REQUESTS[-1])
+        assert native_request == {
+            "kind": "generate", "valid": True, "size": "1536x1024"
+        }, "Native Int dimensions were not forwarded as the image API target size"
+        print("[PASS] Native Text and Ints -> Bridge Custom size 1536x1024 -> native SaveImage", flush=True)
+
         # Native ComfyUI text editing and image batching, without our own
         # prompt editor or reference collector node. Modern BatchImagesNode is registered in the pinned ComfyUI 0.44.0;
         # V3 Autogrow inputs use namespaced prompt keys images.image0 etc.
@@ -580,12 +611,13 @@ def run(root: Path):
             "reference_image_edit",
             "reference",
             "edit",
+            "generate",
             "reference_image_edit",
             "edit",
             "generate",
         ], "Unexpected proxy requests: " + str(observed)
         assert all(item["valid"] for item in observed)
-        print("[PASS] 10 proxy HTTP requests matched native image batches, two reference modes and local savers", flush=True)
+        print("[PASS] 11 proxy HTTP requests matched native image batches, two reference modes and local savers", flush=True)
         print("COMFYUI_SMOKE_PASS", flush=True)
 
     except Exception:
