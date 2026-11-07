@@ -1,5 +1,7 @@
 export const GENERATE_REFERENCE_PREFIX = "reference_";
-export const MIN_GENERATE_REFERENCE_INPUTS = 3;
+// Prefer native ComfyUI Batch Images for ordinary sets; retain one direct
+// socket for independent-size visual references and expand on demand.
+export const MIN_GENERATE_REFERENCE_INPUTS = 1;
 export const MAX_GENERATE_REFERENCE_INPUTS = 16;
 export const LEGACY_GENERATE_REFERENCE_INPUT_NAMES = new Set([
     "references",
