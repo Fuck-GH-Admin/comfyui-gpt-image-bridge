@@ -12,12 +12,14 @@
 | GPT Image Bridge · Codex OAuth Provider | `GPTImageBridgeOAuthProvider` | 图片 model、protocol | `GPT_IMAGE_PROVIDER`；旧的内置 Codex 登录方案 |
 | GPT Image Bridge · Generate | `GPTImageBridgeGenerate` | Provider、提示词、生成参数、至多 16 张独立参考图 | `IMAGE`、`revised_prompt`、`request_report` |
 | GPT Image Bridge · Edit | `GPTImageBridgeEdit` | Provider、基础图、提示词、生成参数、参考图列表、可选 MASK | 同上 |
-| GPT Image Bridge · Edit Reference List (Image 2–16) | `GPTImageBridgeReferenceList` | `image_2`…`image_16` | `GPT_IMAGE_REFERENCES`，只用于 Edit |
+| GPT Image Bridge · Edit Reference List (Image 2–16)（旧版/特殊尺寸） | `GPTImageBridgeReferenceList` | `image_2`…`image_16` | `GPT_IMAGE_REFERENCES`，只用于 Edit |
 | GPT Image Bridge · Save Image | `GPTImageBridgeSaveImage` | `IMAGE`、文件格式、质量、文件名前缀、JPEG 背景色 | 保存 PNG/JPEG/WebP 到 ComfyUI `output/`，并继续输出原 IMAGE batch |
 
 旧 API / CLIProxyAPI / OAuth 三个 Provider 已标记 DEPRECATED / DEV_ONLY：默认新建菜单隐藏，但旧工作流可继续运行。配置请先参阅[服务商配置](provider-profiles.md)。
 
-所有节点都在 `GPT Image Bridge` 分类下。保存生成结果可以使用本插件的 **Save Image**（PNG/JPEG/WebP），也可以继续使用 ComfyUI 原生 Save Image。
+**优先使用 ComfyUI 自带的 Text、Int、Get Image Size、Batch Images、Resize Image/Mask、Mask、Save Image。** Bridge 只负责模型请求、图片转换、参数验证与诊断。详见[逐项职责审计](native-comfyui-delegation-audit-2026-11-07.md)。
+
+所有节点都在 `GPT Image Bridge` 分类下。日常 PNG 保存请使用 ComfyUI 原生 **Save Image**；只有确实需要 JPEG/WebP 编码或自选 JPEG 底色时，才用本插件 **Export JPEG/WebP (optional)**。旧 PNG 导出模式仍可运行。
 
 ### 主要输出
 
@@ -72,15 +74,20 @@ OpenAI 官方 2026-11-04 发布了 Flare / Sunburst；CLIProxyAPI v8.0.57 代码
 | `custom_width`、`custom_height` | 可选整数，默认 1024×1024 | 仅 `size=Custom` 时有效：480–3840、16 的倍数、比例 ≤3:1、像素 655,360–8,294,400 |
 | `quality` | `auto`、`low`、`medium`、`high`、`xhigh`、`max` | 2.5/2.6 可用更高质量档位，旧型号可能拒绝 |
 | `background` | `auto`、`opaque`、`transparent` | 透明图建议配 PNG/WebP；不保证上游兑现 |
-| `output_format` | `png`、`jpeg`、`webp` | 这是上游 API 响应编码请求，不是本地文件保存格式；ComfyUI 原生 Save Image 仍保存 PNG，本插件新增 Save Image 可重新编码为 PNG/JPEG/WebP |
+| `output_format` | `png`、`jpeg`、`webp` | 这是上游 API 响应编码请求，不是本地文件保存格式；ComfyUI 原生 Save Image 仍保存 PNG，本插件的特殊 JPEG/WebP 导出节点 可重新编码为 PNG/JPEG/WebP |
 | `moderation` | `auto`、`low` | 服务端可能忽略或拒绝 |
 | `n` | 整数 1–8 | 需要多少张输出。**CLIProxyAPI 专用模式每张对应一次独立上游请求** |
 | `timeout_sec` | 整数 30–3600 | 超过后本地等待结束，未必代表上游操作已取消 |
+| `reference_batch` | 可选 `IMAGE` batch | 普通多图使用原生 Batch Images，输出批次按帧发送。与编号参考图互斥；原生 Batch 可能统一尺寸 |
 | `reference_1`…`reference_16` | 可选 `IMAGE` | 按顺序连接，不允许中间空洞；每个入口单张，非 IMAGE batch |
 
 首次接入建议采用全部 `auto`、`png`、`n=1`、`timeout_sec=300`。只有验证了最简单请求后，才调高级选项。
 
-### 文生图连线
+### 文生图连线（原生 ComfyUI Text/Int 优先）
+
+推荐先拖入[原生 Text、Int 与 Bridge 组合工作流](../example_workflows/Native-ComfyUI-Text-and-Size.json)。原生 `Text (Multiline)` 连接 Generate 的 `prompt`，两个原生 `Int` 连接 `custom_width` / `custom_height`，并设 `size=Custom`。最后接原生 Save Image。无需再做专用 Prompt 或比例计算器。
+
+下方为保留的极简兼容示例：
 
 可从[无密钥的 CLIProxyAPI 文生图示例](../example_workflows/CLIProxyAPI-Text-to-Image.json)开始，直接拖入 ComfyUI 画布后选用本机 Provider Profile（Key 在本机配置中）。示例工作流无需 Checkpoint、VAE 或 GPU 推理。
 
@@ -101,7 +108,7 @@ OpenAI 官方 2026-11-04 发布了 Flare / Sunburst；CLIProxyAPI v8.0.57 代码
 ```
 
 - Generate 的参考图不是待修改底图，仅作为新图上下文。
-- 前端默认显示三个入口，连接当前末尾入口会扩展下一个（至多 16 张）。
+- 前端默认显示一个独立参考图入口，连接最后一个后自动扩展（至多 16 张）；普通等尺寸参考图推荐原生 Batch Images 接到 `reference_batch`。
 - `reference_1`、`reference_2`…从 1 开始**连续**连接。中间有空洞会报错。
 - 每个参考图各自编码，不要求尺寸相同；不可把多个图片帧放进单个入口。
 - CLIProxyAPI 下默认走 **Images Edit multipart**：第一张参考图作为输入 Image 1，后续按 Image 2、3……有序追加，提示词明确要求“生成新图”。这与完全从零的 Generations 不完全等价。选择 `reference_mode=responses` 才会调用文本主模型 + 图片工具；两种模式要分别验收。
@@ -115,7 +122,8 @@ Edit 与 Generate 共享 `provider`、`prompt`、`size`、`quality`、`backgroun
 | 输入 | 用途 |
 | --- | --- |
 | `base_image（Image 1）` | **必需**。原始待编辑图片，通常接 Load Image 的 `IMAGE` |
-| `references（Image 2 开始）` | **可选**。来自 `Edit Reference List` 的参考图集合，不能直接接普通 IMAGE |
+| `reference_batch` | **可选，推荐**。标准 `IMAGE` batch，由 ComfyUI 原生 Batch Images 连接，最多 15 张；与旧列表互斥 |
+| `references（Image 2 开始）` | **可选，旧版特殊入口**。来自 `Edit Reference List` 的原始尺寸参考图集合 |
 | `mask` | **可选**。ComfyUI `MASK`，尺寸必须与基础图一致；部分代理/模型不支持 Mask |
 | `custom_width` / `custom_height` | **可选**。`size=Custom` 时指定输出宽高，需为 16 的倍数并满足官方像素/比例限制 |
 
@@ -129,7 +137,7 @@ Edit 与 Generate 共享 `provider`、`prompt`、`size`、`quality`、`backgroun
 
 - **Image 1 永远是待编辑的基础图**。
 - Image 2 是 `image_2`，Image 3 是 `image_3`，顺序严格保留到 HTTP 请求中。
-- `Edit Reference List` 有 `image_2`～`image_16` 十五个接口，缺少中间接口会报错。
+- 普通多参考图优先使用官方 Batch Images；`Edit Reference List` 是保留的旧节点，用于不同宽高图片需要保持原始尺寸的场景，其 `image_2`～`image_16` 十五个接口不能有空洞。
 - 单图编辑不需要 `Edit Reference List`，只连 Image 1。
 - 参考图的宽高可以不同。
 - Images Edit 使用 multipart；如果模型不支持指定选项会返回请求错误，避免反复提交可能产生费用的请求。
@@ -142,7 +150,7 @@ Edit 与 Generate 共享 `provider`、`prompt`、`size`、`quality`、`backgroun
 | 从零生成图片 | Generate，不连接参考图 | 直接走 Images 生图 |
 | 用参考图作为风格/构图参考，生成一张新图 | Generate + `reference_1` 等 | 不指定固定待编辑底图 |
 | 修改已有图中的特定内容 | Edit + `base_image` | 明确 Image 1 作为待修改对象 |
-| 根据参考图修改已有图 | Edit + base + Reference List | 同时有待修改底图和参考素材 |
+| 根据参考图修改已有图 | Edit + base + 原生 Batch Images / 旧 Reference List | 同时有待修改底图和参考素材 |
 | 要做蒙版修改 | Edit + base + MASK | 仅在供应商支持时可用 |
 
 ## 5. 生成数量与额度
