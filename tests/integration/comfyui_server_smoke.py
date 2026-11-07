@@ -525,12 +525,13 @@ def run(root: Path):
         print("[PASS] Editing -> actual PNG file via IMAGE/reference list/multipart/SaveImage", flush=True)
 
         # Native ComfyUI text editing and image batching, without our own
-        # prompt editor or reference collector node. Modern BatchImagesNode is registered in the pinned ComfyUI 0.44.0.
+        # prompt editor or reference collector node. Modern BatchImagesNode is registered in the pinned ComfyUI 0.44.0;
+        # V3 Autogrow inputs use namespaced prompt keys images.image0 etc.
         graph = {
             "1": {"class_type": "GPTImageBridgeProviderProfile", "inputs": {}},
             "4": {"class_type": "LoadImage", "inputs": {"image": "bridge_reference.png"}},
             "14": {"class_type": "PrimitiveStringMultiline", "inputs": {"value": "Create a completely NEW reference-inspired image"}},
-            "15": {"class_type": "BatchImagesNode", "inputs": {"image0": ["4", 0], "image1": ["4", 0]}},
+            "15": {"class_type": "BatchImagesNode", "inputs": {"images.image0": ["4", 0], "images.image1": ["4", 0]}},
             "16": {"class_type": "GPTImageBridgeGenerate", "inputs": {
                 **generate_inputs("1"),
                 "prompt": ["14", 0],
@@ -547,7 +548,7 @@ def run(root: Path):
         graph = {
             "1": {"class_type": "GPTImageBridgeProviderProfile", "inputs": {}},
             "4": {"class_type": "LoadImage", "inputs": {"image": "bridge_reference.png"}},
-            "15": {"class_type": "BatchImagesNode", "inputs": {"image0": ["4", 0], "image1": ["4", 0]}},
+            "15": {"class_type": "BatchImagesNode", "inputs": {"images.image0": ["4", 0], "images.image1": ["4", 0]}},
             "18": {"class_type": "GPTImageBridgeEdit", "inputs": {
                 **generate_inputs("1"),
                 "base_image（Image 1）": ["4", 0],
