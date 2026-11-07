@@ -65,7 +65,7 @@ def test_saver_is_registered_as_a_comfyui_output_node():
     module = import_comfy_package()
     node = module.NODE_CLASS_MAPPINGS["GPTImageBridgeSaveImage"]
     assert module.NODE_DISPLAY_NAME_MAPPINGS["GPTImageBridgeSaveImage"] == (
-        "GPT Image Bridge · Save Image"
+        "GPT Image Bridge · Export JPEG/WebP (optional)"
     )
     assert node.OUTPUT_NODE is True
     assert node.RETURN_TYPES == ("IMAGE",)
