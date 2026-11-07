@@ -219,7 +219,7 @@ def test_generated_example_matches_the_only_checked_in_workflow():
     # Keep the legacy generated edit workflow, and ship a separate no-key
     # CLIProxyAPI starter that is validated in test_docs_and_starter_workflow.
     assert sorted(path.name for path in EXAMPLE_DIR.glob("*.json")) == sorted(
-        [EXAMPLE_FILENAME, "CLIProxyAPI-Text-to-Image.json"]
+        [EXAMPLE_FILENAME, "CLIProxyAPI-Text-to-Image.json", "Native-ComfyUI-Text-and-Size.json"]
     )
     assert not any((EXAMPLE_DIR / name).exists() for name in LEGACY_EXAMPLE_FILENAMES)
 
