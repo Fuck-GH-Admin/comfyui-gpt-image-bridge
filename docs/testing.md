@@ -4,14 +4,14 @@
 
 **真实账户历史证据**：[Main 0.7.0 全功能验收报告](main-acceptance-2026-11-06.md)及[脱敏证据 JSON](evidence/main-acceptance-2026-11-06.json)。此前 PR #2 的 `gpt-image-2` 旧型号报告仍保留作历史记录；2.6 新型号和默认参考图模式的真实账户结论以 Main 0.7.0 与后续单次 Alpha 复测为准。当前主线自动化基线另见下方 CI 记录。
 
-**后续修复：** [Alpha 保留修复报告](alpha-preservation-2026-11-06.md)记录 PR #5 的 RGBA 解码修复和真实 ComfyUI SaveImage 集成验证。当前主线原有 Python **333 passed**、JavaScript **14/14 passed**；PR #12 验证结果为 Python **334 passed**、JavaScript **25/25 passed**；修复后的一次真实 Codex 透明背景复测已保存 RGBA（Alpha 0–254），仅证明该样例成功，不保证所有请求。尺寸、上游原生格式等未达标项仍按失败处理。
+**后续修复：** [Alpha 保留修复报告](alpha-preservation-2026-11-06.md)记录 PR #5 的 RGBA 解码修复和真实 ComfyUI SaveImage 集成验证。当前主线 PR #13 验证结果为 Python **342 passed**、JavaScript **25/25 passed**；修复后的一次真实 Codex 透明背景复测已保存 RGBA（Alpha 0–254），仅证明该样例成功，不保证所有请求。尺寸、上游原生格式等未达标项仍按失败处理。
 
 ## 1. 当前验收矩阵（代码截至 2026-11-07；真实账户证据来自 2026-11-06）
 
 | 层次 | 验证方法 | 当前结论 |
 | --- | --- | --- |
-| Python 单元测试 | PR #12：新增前端文件打包/后端参数合同核验 | **334 passed，无 warning** |
-| JavaScript 单元测试 | PR #12：含 11 项新增 UI 单元测试 | **25/25 PASS** |
+| Python 单元测试 | PR #13：增加官方 IMAGE batch 上传、上下限、互斥与原生工作流示例校验 | **342 passed，无 warning** |
+| JavaScript 单元测试 | PR #13：独立参考图入口精简后，迁移和动态增长仍需全部通过 | **25/25 PASS** |
 | 真实 ComfyUI 后端 | Ubuntu Runner 启动 ComfyUI 0.44.0，HTTP/队列执行 | **PASS**；远端图片 API 是模拟服务，不是真实 CLIProxyAPI |
 | 本机 HTTP 协议矩阵 | 19/19 场景，另有凭据路由 2/2 | **PASS**；使用 HTTP 替身 |
 | 浏览器控件与工作流重载 | 本机真实浏览器，DOM/图对象检查 | **17/17 PASS**；这是人工本机验收，不是 GitHub CI |
@@ -28,7 +28,7 @@
 | Chat Completions 图片路由 | 用户本机真实请求 | **失败**；当前 CLIProxyAPI 图片型号拒绝该路由 |
 | Windows/macOS、Docker 组合及长期并发 | 本轮环境未覆盖 | **NOT_RUN** |
 
-当前 PR #12 单测：[Python 334 passed、JavaScript 25/25](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42308632427)；[八节点 ComfyUI 0.44.0 CPU + fake API 集成](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42303210663)（PR #11，含 Provider Profile）。主线 push 现在也会触发真实 ComfyUI CPU 集成。PR #5 的 [294 项 Python 测试](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42220463919) 为历史基线。
+当前 PR #13 单测：[Python 342 passed、JavaScript 25/25](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42362496932)；[ComfyUI 0.44.0 CPU + fake API（原生 Text、Int、Batch Images 集成）](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42362496956)。主线 push 现在也会触发真实 ComfyUI CPU 集成。PR #5 的 [294 项 Python 测试](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42220463919) 为历史基线。
 
 本轮真实服务工作流为 16 次：14 次队列执行成功、2 次失败。**队列成功不代表每个请求参数都生效**；原始矩阵中的尺寸、格式和透明背景当时未达标。PR #5 的 RGBA 集成测试使用模拟上游；后续真实透明背景复测已单独通过，证据见 Alpha 报告。新版本的 `request_report.output.conformance` 会在真实响应不符合请求时明确给出 warning；无法比较或协议明确忽略的字段返回 `not_checked`，不会自动重试，也不会把已受理的付费请求伪装成失败。
 
@@ -39,6 +39,12 @@
 - `widget.hidden` 与 `widget.options.hidden` 使用 ComfyUI 前端原生隐藏约定；**Node 单测不等同于完整浏览器绘制验收**。
 - 本机浏览器最终需检查：新建 Generate/Edit 初始显示；切换 Custom 来回后宽高值不丢；「显示高级参数」切换后工作流保存、刷新、重载保持一致；主模型字段按参考图模式显隐；连接后的插口可见；旧工作流重新打开正常。
 - 真正的 ComfyUI 0.44.0 CPU + fake API 端到端测试只证明**后端工作流仍可执行**，不宣称它模拟了浏览器上的用户点击或画布渲染。
+
+### PR #13：优先复用原生 ComfyUI 功能
+
+已完成 [逐项职责审计](native-comfyui-delegation-audit-2026-11-07.md)：文本输入、Text Format/Concatenate、Int、GetImageSize、Resize、Mask、BatchImagesNode 和默认 PNG Save 属于 ComfyUI；本插件只保留模型协议、请求参数、响应转换、真实尺寸兑现核验与专用 JPEG/WebP 导出。新增 `reference_batch` 使用标准 `IMAGE`，不依赖私有容器；历史多尺寸 Reference List 保留为弃用兼容路径。
+
+CI 已实际让官方 Text/Int/BatchImagesNode 通过 ComfyUI 队列运行。网页端的实际控件渲染与交互仍为 **NOT_RUN**；第三方付费 API 以及实际输出指定分辨率仍为 **NOT_RUN/历史未达标**，不可把 HTTP 假服务的成功当成真服务能力。
 
 ## 2. 自动化测试如何运行
 
@@ -70,9 +76,10 @@ node --experimental-default-type=module --test tests/js/*.test.mjs
 5. 提交 `Generate n=2` 工作流，通过 Images 请求保存两张 PNG。
 6. 分别以本插件 Save Image 节点将生成的 RGBA 图片保存为无损 WebP、JPEG，验证 Alpha 和 JPEG 指定底色合成。
 7. 再提交 Load Image → 参考图 Generate（默认 Images Edit、可选 Responses）及 Edit Reference List → Edit → 原生 SaveImage 工作流，验证参考图顺序与 multipart 请求。
-8. 检查八次 HTTP 请求的端点、模型角色、Bearer 客户端 Key 和关键字段。
-9. 检查原生 SaveImage 的 PNG 输出，以及插件保存节点的 WebP/JPEG 文件、32×24 尺寸、Alpha/背景合成和输出目录路径。
-10. 通过新 Provider Profile 的本地配置再执行一次文生图（无画布 API Key 输入），检查旧 Provider 已标记隐藏/弃用。
+8. 使用官方 `PrimitiveStringMultiline` + `PrimitiveInt` 与本插件 Generate 连接，核对实际向 HTTP API 发送 `size=1536x1024`（**模拟上游返回小测试图片，不代表真实上游兑现目标尺寸**）；再用官方 `BatchImagesNode` 分别驱动 Generate 和 Edit，核对带多个参考图的 multipart。
+9. 检查 11 次 HTTP 请求的端点、模型角色、Bearer 客户端 Key、次序和关键字段。
+10. 检查原生 SaveImage 的 PNG 输出，以及插件特殊导出节点的 WebP/JPEG 文件、32×24 测试响应图片、Alpha/背景合成和输出目录路径。
+11. 通过新 Provider Profile 的本地配置再执行一次文生图（无画布 API Key 输入），检查旧 Provider 已标记隐藏/弃用。
 11. 关闭测试进程并输出 `COMFYUI_SMOKE_PASS`。
 
 **注意：用户已通过 [PR #2](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/pull/2) 上传旧型号真实 CLIProxyAPI + Codex 实机报告。该报告确认 `gpt-image-2` 的纯文生成、基础 Edit 和带参考图 Edit，但没有验证 2.6 Flare/Sunburst，也未确认新版默认的参考图 Generate（Images Edit 模式）。请勿将报告覆盖范围扩大。**
