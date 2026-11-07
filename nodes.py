@@ -457,6 +457,10 @@ def _ordered_single_image_slots(
 
 
 class GPTImageBridgeReferenceList:
+    # Legacy: native Batch Images now handles common same-sized reference sets.
+    # Keep registered for historical workflows and mixed-size reference inputs.
+    DEPRECATED = True
+    DEV_ONLY = True
     @classmethod
     def INPUT_TYPES(cls):
         return {
@@ -503,6 +507,20 @@ def _validate_references(
     return references
 
 
+def _native_reference_batch(batch, *, start_slot: int, limit: int) -> tuple[EncodedImage, ...]:
+    """Translate ComfyUI's standard IMAGE batch into ordered API references.
+
+    Batch Images may resize unequal-sized inputs before they reach us; that is
+    ComfyUI's composition behavior, not a bridge-side image transformation.
+    """
+    refs = encode_reference_slots(batch, start_slot=start_slot)
+    if not refs:
+        raise ValueError("reference_batch must contain at least one IMAGE frame.")
+    if len(refs) > limit:
+        raise ValueError(f"reference_batch accepts at most {limit} reference images.")
+    return refs
+
+
 def _run_and_convert(**kwargs):
     result = execute_operation(**kwargs)
     return (
@@ -531,6 +549,7 @@ class GPTImageBridgeGenerate:
                 **{name: ("IMAGE",) for name in GENERATE_REFERENCE_INPUT_NAMES},
                 "custom_width": ("INT", {"default": 1024, "min": 480, "max": 3840, "step": 16, "tooltip": "Used only for size=Custom."}),
                 "custom_height": ("INT", {"default": 1024, "min": 480, "max": 3840, "step": 16, "tooltip": "Used only for size=Custom."}),
+                "reference_batch": ("IMAGE", {"tooltip": "Connect ComfyUI Batch Images. Use instead of numbered reference inputs; original individual dimensions may be resized by the batch node."}),
             },
         }
 
@@ -568,6 +587,7 @@ class GPTImageBridgeGenerate:
         reference_16=None,
         custom_width=1024,
         custom_height=1024,
+        reference_batch=None,
     ):
         if not isinstance(provider, ProviderConfig):
             raise ValueError("provider must come from GPT Image Bridge · Provider.")
@@ -593,9 +613,15 @@ class GPTImageBridgeGenerate:
             GENERATE_REFERENCE_INPUT_NAMES,
             queue_name="GPT Image Generate",
         )
-        encoded_references = encode_reference_slots(
-            *direct_values,
-            start_slot=1,
+        if reference_batch is not None and direct_values:
+            raise ValueError(
+                "Use either reference_batch (native ComfyUI Batch Images) or "
+                "numbered reference_1–reference_16 sockets, not both."
+            )
+        encoded_references = (
+            _native_reference_batch(reference_batch, start_slot=1, limit=16)
+            if reference_batch is not None
+            else encode_reference_slots(*direct_values, start_slot=1)
         )
         return _run_and_convert(
             provider=provider,
@@ -633,6 +659,7 @@ class GPTImageBridgeEdit:
                 "mask": ("MASK",),
                 "custom_width": ("INT", {"default": 1024, "min": 480, "max": 3840, "step": 16, "tooltip": "Used only for size=Custom."}),
                 "custom_height": ("INT", {"default": 1024, "min": 480, "max": 3840, "step": 16, "tooltip": "Used only for size=Custom."}),
+                "reference_batch": ("IMAGE", {"tooltip": "Connect ComfyUI Batch Images for Image 2 onward. Use instead of legacy Edit Reference List; native batching may resize inputs."}),
             },
         }
 
@@ -656,6 +683,7 @@ class GPTImageBridgeEdit:
         mask=None,
         custom_width=1024,
         custom_height=1024,
+        reference_batch=None,
         **kwargs,
     ):
         labeled_base_image = kwargs.pop(BASE_IMAGE_INPUT_NAME, None)
@@ -681,6 +709,11 @@ class GPTImageBridgeEdit:
             )
         if labeled_references is not None:
             references = labeled_references
+        if reference_batch is not None and references is not None:
+            raise ValueError(
+                "Use either reference_batch (native ComfyUI Batch Images) or "
+                "legacy Edit Reference List, not both."
+            )
         if not isinstance(provider, ProviderConfig):
             raise ValueError("provider must come from GPT Image Bridge · Provider.")
         encoded_base = tensor_to_png(base_image, source_slot=1, role="base")
@@ -696,9 +729,13 @@ class GPTImageBridgeEdit:
             operation="edit",
             prompt=prompt,
             base_image=encoded_base,
-            references=_validate_references(
-                references,
-                queue_name="Edit Reference List (Image 2–9)",
+            references=(
+                _native_reference_batch(reference_batch, start_slot=2, limit=15)
+                if reference_batch is not None
+                else _validate_references(
+                    references,
+                    queue_name="Edit Reference List (Image 2–16)",
+                )
             ),
             mask_png=encoded_mask,
             size=_effective_image_size(size, custom_width, custom_height),
