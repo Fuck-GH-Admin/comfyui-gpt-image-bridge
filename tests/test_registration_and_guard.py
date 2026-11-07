@@ -205,12 +205,18 @@ def test_comfyui_registration_and_provider_responsibilities_are_separate():
     ].INPUT_TYPES()
     assert list(generate_types["optional"]) == [
         *(f"reference_{index}" for index in range(1, 17)),
-        "custom_width", "custom_height",
+        "custom_width", "custom_height", "reference_batch",
     ]
     assert "Custom" in generate_types["required"]["size"][0]
     assert "max" in generate_types["required"]["quality"][0]
     assert "custom_width" in edit_types["optional"]
     assert "custom_height" in edit_types["optional"]
+    assert "reference_batch" in generate_types["optional"]
+    assert "reference_batch" in edit_types["optional"]
+    assert generate_types["optional"]["reference_batch"][0] == "IMAGE"
+    assert edit_types["optional"]["reference_batch"][0] == "IMAGE"
+    assert module.NODE_CLASS_MAPPINGS["GPTImageBridgeReferenceList"].DEPRECATED is True
+    assert module.NODE_CLASS_MAPPINGS["GPTImageBridgeReferenceList"].DEV_ONLY is True
     assert "references" not in generate_types["optional"]
 
 
@@ -242,8 +248,8 @@ def test_contextual_frontend_is_packaged_and_preserves_backend_schemas():
         "quality", "background", "output_format", "moderation", "n",
         "timeout_sec",
     ]
-    assert list(generated["optional"])[-2:] == ["custom_width", "custom_height"]
-    assert list(edited["optional"])[-2:] == ["custom_width", "custom_height"]
+    assert list(generated["optional"])[-3:] == ["custom_width", "custom_height", "reference_batch"]
+    assert list(edited["optional"])[-3:] == ["custom_width", "custom_height", "reference_batch"]
 
 
 def test_api_provider_frontend_migrates_legacy_widgets_before_configuration():
