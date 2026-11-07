@@ -159,12 +159,7 @@
           "link": null
         },
         {
-          "name": "reference_2",
-          "type": "IMAGE",
-          "link": null
-        },
-        {
-          "name": "reference_3",
+          "name": "reference_batch",
           "type": "IMAGE",
           "link": null
         }
@@ -270,7 +265,7 @@
         20
       ]
     },
-    "gpt_image_bridge_example": "provider-profile-plaintext-no-secrets",
+    "gpt_image_bridge_example": "profile-simple-text-to-image",
     "workflowRendererVersion": "LG"
   },
   "version": 0.4
