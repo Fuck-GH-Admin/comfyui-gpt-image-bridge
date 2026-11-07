@@ -69,8 +69,7 @@ def test_cliproxyapi_starter_workflow_is_connected_and_has_no_secrets():
     )
     assert [item["name"] for item in by_id[2]["inputs"][9:]] == [
         "reference_1",
-        "reference_2",
-        "reference_3",
+        "reference_batch",
     ]
     assert by_id[1]["outputs"][0]["links"] == [1]
     assert by_id[2]["outputs"][0]["links"] == [2]
@@ -80,3 +79,32 @@ def test_cliproxyapi_starter_workflow_is_connected_and_has_no_secrets():
     assert "Bearer " not in STARTER.read_text(encoding="utf-8")
     assert "access_token" not in STARTER.read_text(encoding="utf-8")
     assert "refresh_token" not in STARTER.read_text(encoding="utf-8")
+
+
+def test_native_comfy_text_and_size_workflow_uses_only_standard_primitive_nodes():
+    workflow_file = ROOT / "example_workflows/Native-ComfyUI-Text-and-Size.json"
+    data = json.loads(workflow_file.read_text(encoding="utf-8"))
+    assert data["version"] == 0.4
+    nodes_by_id = {node["id"]: node for node in data["nodes"]}
+    assert {node["type"] for node in data["nodes"]} == {
+        "GPTImageBridgeProviderProfile",
+        "GPTImageBridgeGenerate",
+        "PrimitiveStringMultiline",
+        "PrimitiveInt",
+        "SaveImage",
+    }
+    assert sum(n["type"] == "PrimitiveInt" for n in data["nodes"]) == 2
+    generate = nodes_by_id[2]
+    assert generate["widgets_values"][1] == "Custom"
+    by_name = {input_["name"]: input_ for input_ in generate["inputs"]}
+    assert by_name["prompt"]["link"] == 3
+    assert by_name["custom_width"]["link"] == 4
+    assert by_name["custom_height"]["link"] == 5
+    assert by_name["reference_batch"]["link"] is None
+    assert nodes_by_id[4]["type"] == "PrimitiveStringMultiline"
+    assert nodes_by_id[5]["type"] == "PrimitiveInt"
+    assert nodes_by_id[6]["type"] == "PrimitiveInt"
+    assert [nodes_by_id[x]["widgets_values"][0] for x in [5, 6]] == [1536, 1024]
+    assert len(data["links"]) == 5
+    assert "api_key" not in workflow_file.read_text(encoding="utf-8")
+    assert "base_url" not in workflow_file.read_text(encoding="utf-8")

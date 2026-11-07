@@ -1,5 +1,7 @@
 export const GENERATE_REFERENCE_PREFIX = "reference_";
-export const MIN_GENERATE_REFERENCE_INPUTS = 3;
+// Prefer native ComfyUI Batch Images for ordinary sets; retain one direct
+// socket for independent-size visual references and expand on demand.
+export const MIN_GENERATE_REFERENCE_INPUTS = 1;
 export const MAX_GENERATE_REFERENCE_INPUTS = 16;
 export const LEGACY_GENERATE_REFERENCE_INPUT_NAMES = new Set([
     "references",
@@ -125,7 +127,9 @@ export function migrateLegacyGenerateReferences(node) {
     const alreadyConnected = referenceEntries(node)
         .filter(({ input }) => isConnected(input))
         .length;
-    ensureReferenceInputCount(node, alreadyConnected + plans.length);
+    // Leave one free socket after migrating connected legacy images, just as
+    // the normal connected-input autogrow path does.
+    ensureReferenceInputCount(node, alreadyConnected + plans.length + 1);
 
     let migrated = 0;
     for (const plan of plans) {

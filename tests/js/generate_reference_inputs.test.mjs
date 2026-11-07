@@ -28,7 +28,7 @@ function fakeNode(referenceInputs) {
     };
 }
 
-test("defaults to three reference inputs", () => {
+test("defaults to one direct reference input and uses native batch for multi-image", () => {
     const node = fakeNode(
         Array.from({ length: MAX_GENERATE_REFERENCE_INPUTS }, (_, index) => (
             input(`reference_${index + 1}`)
@@ -37,7 +37,7 @@ test("defaults to three reference inputs", () => {
     normalizeGenerateReferenceInputs(node);
     assert.deepEqual(
         node.inputs.slice(1).map(({ name }) => name),
-        ["reference_1", "reference_2", "reference_3"],
+        ["reference_1"],
     );
 });
 
@@ -106,7 +106,7 @@ test("never grows past sixteen inputs", () => {
         desiredGenerateReferenceInputCount(node.inputs.slice(1)),
         MAX_GENERATE_REFERENCE_INPUTS,
     );
-    assert.equal(MIN_GENERATE_REFERENCE_INPUTS, 3);
+    assert.equal(MIN_GENERATE_REFERENCE_INPUTS, 1);
     assert.equal(node.inputs.at(-1).name, "reference_16");
 });
 
@@ -189,7 +189,7 @@ test("removes an unknown legacy list and reports that it needs attention", () =>
     assert.deepEqual(migration, { removed: 1, migrated: 0, unresolved: 1 });
     assert.deepEqual(
         node.inputs.slice(1).map(({ name }) => name),
-        ["reference_1", "reference_2", "reference_3"],
+        ["reference_1"],
     );
 });
 

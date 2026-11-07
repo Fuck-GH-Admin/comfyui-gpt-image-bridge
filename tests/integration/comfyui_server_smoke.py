@@ -95,11 +95,22 @@ class FakeCLIProxyAPI(BaseHTTPRequestHandler):
         elif self.path == "/v1/images/edits":
             guided_generation = b"Create a NEW image guided by" in body
             if guided_generation:
+                # Single reference uses the Images 'image' field; multiple
+                # references use the API's 'image[]' field consistently.
+                first_single = b'name="image"; filename="image-1-base.png"' in body
+                first_multi = b'name="image[]"; filename="image-1-base.png"' in body
+                second_multi = b'name="image[]"; filename="image-2-reference.png"' in body
+                has_second = b"image-2-reference.png" in body
                 valid = (
                     b'name="model"' in body
                     and b"gpt-image-2.6-flare" in body
-                    and b'name="image"; filename="image-1-base.png"' in body
+                    and (first_single or first_multi)
                     and b"not a canvas to preserve or minimally edit" in body
+                    and (
+                        (not has_second and first_single)
+                        or (has_second and first_multi and second_multi
+                            and body.index(b"image-1-base.png") < body.index(b"image-2-reference.png"))
+                    )
                 )
                 kind = "reference_image_edit"
             else:
@@ -132,8 +143,11 @@ class FakeCLIProxyAPI(BaseHTTPRequestHandler):
             self._write(b'{"error":"unexpected_endpoint"}', status=404)
             return
 
+        observed_request = {"kind": kind, "valid": valid}
+        if kind == "generate":
+            observed_request["size"] = request.get("size")
         with REQUESTS_LOCK:
-            REQUESTS.append({"kind": kind, "valid": valid})
+            REQUESTS.append(observed_request)
         if not valid:
             self._write(b'{"error":"invalid_request_shape"}', status=422)
             return
@@ -361,6 +375,10 @@ def run(root: Path):
         version = info.get("system", {}).get("comfyui_version")
         print("[PASS] Real ComfyUI server started. Version:", version, flush=True)
         print("[PASS] All 8 GPT Image Bridge custom nodes registered", flush=True)
+        for builtin in ("PrimitiveStringMultiline", "PrimitiveInt", "BatchImagesNode", "GetImageSize", "SaveImage"):
+            built_info, _ = http_json(comfy_url, "/object_info/" + builtin)
+            assert builtin in built_info, "Missing native ComfyUI node: " + builtin
+        print("[PASS] Native ComfyUI Text/Int/BatchImagesNode/GetImageSize/SaveImage nodes registered", flush=True)
         for legacy_name in (
             "GPTImageBridgeAPIProvider",
             "GPTImageBridgeCLIProxyAPIProvider",
@@ -509,6 +527,71 @@ def run(root: Path):
         queue_workflow(comfy_url, proxy_url, graph, "9", 1, log_path, root / "output")
         print("[PASS] Editing -> actual PNG file via IMAGE/reference list/multipart/SaveImage", flush=True)
 
+        # Official primitive Text + Int widgets provide prompts and output dimensions.
+        # The Bridge only translates Custom/INT into the Images API size field.
+        graph = {
+            "1": {"class_type": "GPTImageBridgeProviderProfile", "inputs": {}},
+            "20": {"class_type": "PrimitiveStringMultiline", "inputs": {
+                "value": "A carefully staged environment with atmospheric perspective",
+            }},
+            "21": {"class_type": "PrimitiveInt", "inputs": {"value": 1536}},
+            "22": {"class_type": "PrimitiveInt", "inputs": {"value": 1024}},
+            "23": {"class_type": "GPTImageBridgeGenerate", "inputs": {
+                **generate_inputs("1"),
+                "prompt": ["20", 0],
+                "size": "Custom",
+                "custom_width": ["21", 0],
+                "custom_height": ["22", 0],
+            }},
+            "24": {"class_type": "SaveImage", "inputs": {
+                "images": ["23", 0], "filename_prefix": "CI-Native-Text-Int-Size",
+            }},
+        }
+        queue_workflow(comfy_url, proxy_url, graph, "24", 1, log_path, root / "output")
+        with REQUESTS_LOCK:
+            native_request = dict(REQUESTS[-1])
+        assert native_request == {
+            "kind": "generate", "valid": True, "size": "1536x1024"
+        }, "Native Int dimensions were not forwarded as the image API target size"
+        print("[PASS] Native Text and Ints -> Bridge Custom size 1536x1024 -> native SaveImage", flush=True)
+
+        # Native ComfyUI text editing and image batching, without our own
+        # prompt editor or reference collector node. Modern BatchImagesNode is registered in the pinned ComfyUI 0.44.0;
+        # V3 Autogrow inputs use namespaced prompt keys images.image0 etc.
+        graph = {
+            "1": {"class_type": "GPTImageBridgeProviderProfile", "inputs": {}},
+            "4": {"class_type": "LoadImage", "inputs": {"image": "bridge_reference.png"}},
+            "14": {"class_type": "PrimitiveStringMultiline", "inputs": {"value": "Create a completely NEW reference-inspired image"}},
+            "15": {"class_type": "BatchImagesNode", "inputs": {"images.image0": ["4", 0], "images.image1": ["4", 0]}},
+            "16": {"class_type": "GPTImageBridgeGenerate", "inputs": {
+                **generate_inputs("1"),
+                "prompt": ["14", 0],
+                "reference_batch": ["15", 0],
+            }},
+            "17": {"class_type": "SaveImage", "inputs": {
+                "images": ["16", 0], "filename_prefix": "CI-Native-Reference-Batch",
+            }},
+        }
+        queue_workflow(comfy_url, proxy_url, graph, "17", 1, log_path, root / "output")
+        print("[PASS] Native multiline Text + native Batch Images -> bridge Generate -> native SaveImage", flush=True)
+
+        # Native batch also feeds Edit without the deprecated Bridge Reference List.
+        graph = {
+            "1": {"class_type": "GPTImageBridgeProviderProfile", "inputs": {}},
+            "4": {"class_type": "LoadImage", "inputs": {"image": "bridge_reference.png"}},
+            "15": {"class_type": "BatchImagesNode", "inputs": {"images.image0": ["4", 0], "images.image1": ["4", 0]}},
+            "18": {"class_type": "GPTImageBridgeEdit", "inputs": {
+                **generate_inputs("1"),
+                "base_image（Image 1）": ["4", 0],
+                "reference_batch": ["15", 0],
+            }},
+            "19": {"class_type": "SaveImage", "inputs": {
+                "images": ["18", 0], "filename_prefix": "CI-Native-Edit-Batch",
+            }},
+        }
+        queue_workflow(comfy_url, proxy_url, graph, "19", 1, log_path, root / "output")
+        print("[PASS] Native Batch Images -> bridge Edit -> native SaveImage", flush=True)
+
         # Profile provider: server-side Key only, never a workflow widget or queue field.
         graph = {
             "1": {"class_type": "GPTImageBridgeProviderProfile", "inputs": {}},
@@ -529,9 +612,12 @@ def run(root: Path):
             "reference",
             "edit",
             "generate",
+            "reference_image_edit",
+            "edit",
+            "generate",
         ], "Unexpected proxy requests: " + str(observed)
         assert all(item["valid"] for item in observed)
-        print("[PASS] 8 proxy HTTP requests matched both reference modes, profile and local saver paths", flush=True)
+        print("[PASS] 11 proxy HTTP requests matched native image batches, two reference modes and local savers", flush=True)
         print("COMFYUI_SMOKE_PASS", flush=True)
 
     except Exception:

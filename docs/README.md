@@ -46,3 +46,5 @@
 上游代码、模型名称及非公开 Codex 生图接口会变化。需要区分**源码中已有实现**、**本仓库自动测试的观察**和**本机真实账号的验收结果**。测试通过不能推出接口永久稳定或订阅永远可用。
 
 - [服务商配置：Provider Profile、第三方中转站与密钥保护](provider-profiles.md)
+
+- [ComfyUI 原生能力复用与去重审计（按功能逐项核对）](native-comfyui-delegation-audit-2026-11-07.md)

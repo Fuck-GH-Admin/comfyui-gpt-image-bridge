@@ -1,0 +1,426 @@
+{
+  "id": "9e750e95-83af-4a63-b1a4-2779c24f952e",
+  "revision": 0,
+  "last_node_id": 6,
+  "last_link_id": 5,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "GPTImageBridgeProviderProfile",
+      "pos": [
+        0,
+        20
+      ],
+      "size": [
+        400,
+        235
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "profile",
+          "type": "COMBO",
+          "link": null,
+          "widget": {
+            "name": "profile"
+          }
+        },
+        {
+          "name": "image_model",
+          "type": "STRING",
+          "link": null,
+          "widget": {
+            "name": "image_model"
+          }
+        },
+        {
+          "name": "reference_mode",
+          "type": "COMBO",
+          "link": null,
+          "widget": {
+            "name": "reference_mode"
+          }
+        },
+        {
+          "name": "responses_model",
+          "type": "STRING",
+          "link": null,
+          "widget": {
+            "name": "responses_model"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "provider",
+          "type": "GPT_IMAGE_PROVIDER",
+          "links": [
+            1
+          ]
+        }
+      ],
+      "properties": {},
+      "widgets_values": [
+        "local_codex",
+        "",
+        "profile",
+        ""
+      ]
+    },
+    {
+      "id": 2,
+      "type": "GPTImageBridgeGenerate",
+      "pos": [
+        470,
+        45
+      ],
+      "size": [
+        465,
+        530
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "provider",
+          "type": "GPT_IMAGE_PROVIDER",
+          "link": 1
+        },
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "link": 3,
+          "widget": {
+            "name": "prompt"
+          }
+        },
+        {
+          "name": "size",
+          "type": "COMBO",
+          "link": null,
+          "widget": {
+            "name": "size"
+          }
+        },
+        {
+          "name": "quality",
+          "type": "COMBO",
+          "link": null,
+          "widget": {
+            "name": "quality"
+          }
+        },
+        {
+          "name": "background",
+          "type": "COMBO",
+          "link": null,
+          "widget": {
+            "name": "background"
+          }
+        },
+        {
+          "name": "output_format",
+          "type": "COMBO",
+          "link": null,
+          "widget": {
+            "name": "output_format"
+          }
+        },
+        {
+          "name": "moderation",
+          "type": "COMBO",
+          "link": null,
+          "widget": {
+            "name": "moderation"
+          }
+        },
+        {
+          "name": "n",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "n"
+          }
+        },
+        {
+          "name": "timeout_sec",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "timeout_sec"
+          }
+        },
+        {
+          "name": "reference_1",
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "custom_width",
+          "type": "INT",
+          "link": 4,
+          "widget": {
+            "name": "custom_width"
+          }
+        },
+        {
+          "name": "custom_height",
+          "type": "INT",
+          "link": 5,
+          "widget": {
+            "name": "custom_height"
+          }
+        },
+        {
+          "name": "reference_batch",
+          "type": "IMAGE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            2
+          ]
+        },
+        {
+          "name": "revised_prompt",
+          "type": "STRING",
+          "links": []
+        },
+        {
+          "name": "request_report",
+          "type": "STRING",
+          "links": []
+        }
+      ],
+      "properties": {},
+      "widgets_values": [
+        "",
+        "Custom",
+        "auto",
+        "auto",
+        "png",
+        "auto",
+        1,
+        300
+      ]
+    },
+    {
+      "id": 3,
+      "type": "SaveImage",
+      "pos": [
+        1020,
+        70
+      ],
+      "size": [
+        335,
+        210
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 2
+        },
+        {
+          "name": "filename_prefix",
+          "type": "STRING",
+          "link": null,
+          "widget": {
+            "name": "filename_prefix"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": []
+        }
+      ],
+      "properties": {},
+      "widgets_values": [
+        "GPT-Image-Bridge/cliproxyapi"
+      ]
+    },
+    {
+      "id": 4,
+      "type": "PrimitiveStringMultiline",
+      "pos": [
+        0,
+        290
+      ],
+      "size": [
+        380,
+        170
+      ],
+      "order": 1,
+      "inputs": [
+        {
+          "name": "value",
+          "type": "STRING",
+          "link": null,
+          "widget": {
+            "name": "value"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            3
+          ]
+        }
+      ],
+      "widgets_values": [
+        "A surreal architectural scene, elegant light, carefully staged spatial composition"
+      ],
+      "flags": {},
+      "mode": 0,
+      "properties": {}
+    },
+    {
+      "id": 5,
+      "type": "PrimitiveInt",
+      "pos": [
+        25,
+        510
+      ],
+      "size": [
+        240,
+        90
+      ],
+      "order": 2,
+      "inputs": [
+        {
+          "name": "value",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "value"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "INT",
+          "type": "INT",
+          "links": [
+            4
+          ]
+        }
+      ],
+      "widgets_values": [
+        1536
+      ],
+      "flags": {},
+      "mode": 0,
+      "properties": {}
+    },
+    {
+      "id": 6,
+      "type": "PrimitiveInt",
+      "pos": [
+        25,
+        655
+      ],
+      "size": [
+        240,
+        90
+      ],
+      "order": 3,
+      "inputs": [
+        {
+          "name": "value",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "value"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "INT",
+          "type": "INT",
+          "links": [
+            5
+          ]
+        }
+      ],
+      "widgets_values": [
+        1024
+      ],
+      "flags": {},
+      "mode": 0,
+      "properties": {}
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      2,
+      0,
+      "GPT_IMAGE_PROVIDER"
+    ],
+    [
+      2,
+      2,
+      0,
+      3,
+      0,
+      "IMAGE"
+    ],
+    [
+      3,
+      4,
+      0,
+      2,
+      1,
+      "STRING"
+    ],
+    [
+      4,
+      5,
+      0,
+      2,
+      10,
+      "INT"
+    ],
+    [
+      5,
+      6,
+      0,
+      2,
+      11,
+      "INT"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.9,
+      "offset": [
+        30,
+        20
+      ]
+    },
+    "gpt_image_bridge_example": "native-comfy-text-int-api-bridge",
+    "workflowRendererVersion": "LG"
+  },
+  "version": 0.4
+}
