@@ -71,7 +71,7 @@ Save Image
 
 **推荐先使用 [ComfyUI 原生 Text + Int 输入示例](example_workflows/Native-ComfyUI-Text-and-Size.json)**：`Text (Multiline)` 负责提示词，两个 `Int` 负责宽高，Bridge 只负责向云端模型请求，输出连原生 Save Image。也保留[旧的单节点文本输入工作流](example_workflows/CLIProxyAPI-Text-to-Image.json)，用于旧版和快速调试。
 
-Provider Profile 不含 Key 和 `base_url`。`profile` 选择服务商，`image_model` 留空时使用配置的默认模型，`reference_mode` 默认跟随服务商配置。第一次用 Generate：填写提示词、`n=1`，其他项保持 `auto`、`output_format=png`，然后点击 Queue。**日常界面默认隐藏审核强度和超时等低频设置；节点上的「显示高级参数」可以随时展开，`size=Custom` 时自动显示宽高。** 后端参数没有删减，旧工作流仍可加载。旧版 Provider 参数已转移到[旧工作流手册](docs/nodes-and-workflows.md)。
+Provider Profile 不含 Key 和 `base_url`。`profile` 选择服务商，`image_model` 留空时使用配置的默认模型，`reference_mode` 默认跟随服务商配置。第一次用 Generate：填写提示词、`n=1`，其他项保持 `auto`、`output_format=png`，然后点击 Queue。**审核强度与超时使用 ComfyUI 原生高级参数机制：可在节点右键菜单选择 Show Advanced，或用新版节点界面的高级参数控制；`size=Custom` 时自动显示宽高。** 后端参数没有删减，旧工作流仍可加载。旧版 Provider 参数已转移到[旧工作流手册](docs/nodes-and-workflows.md)。
 
 - **参考图生成**：普通等尺寸多参考图建议使用官方 `Batch Images` → `Generate.reference_batch`；不同尺寸或需要保留每张原始尺寸时，仍可直接连接 `reference_1–reference_16`。
 - **编辑图片**：`Load Image.IMAGE` → `Edit.base_image（Image 1）`；额外参考图优先用原生 `Batch Images` → `Edit.reference_batch`。需要保留不同尺寸参考图的原始大小时，使用仍可在节点搜索中找到的 **Edit References · Original Sizes**；它保留历史工作流兼容。
