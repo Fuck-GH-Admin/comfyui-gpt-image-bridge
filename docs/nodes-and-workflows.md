@@ -12,10 +12,10 @@
 | GPT Image Bridge · Codex OAuth Provider | `GPTImageBridgeOAuthProvider` | 图片 model、protocol | `GPT_IMAGE_PROVIDER`；旧的内置 Codex 登录方案 |
 | GPT Image Bridge · Generate | `GPTImageBridgeGenerate` | Provider、提示词、生成参数、至多 16 张独立参考图 | `IMAGE`、`revised_prompt`、`request_report` |
 | GPT Image Bridge · Edit | `GPTImageBridgeEdit` | Provider、基础图、提示词、生成参数、参考图列表、可选 MASK | 同上 |
-| GPT Image Bridge · Edit Reference List (Image 2–16)（旧版/特殊尺寸） | `GPTImageBridgeReferenceList` | `image_2`…`image_16` | `GPT_IMAGE_REFERENCES`，只用于 Edit |
+| GPT Image Bridge · Edit References · Original Sizes (Image 2–16)（专用：保留不同尺寸） | `GPTImageBridgeReferenceList` | `image_2`…`image_16` | `GPT_IMAGE_REFERENCES`，只用于 Edit |
 | GPT Image Bridge · Export JPEG/WebP (optional) | `GPTImageBridgeSaveImage` | `IMAGE`、文件格式、质量、文件名前缀、JPEG 背景色 | 保存 PNG/JPEG/WebP 到 ComfyUI `output/`，并继续输出原 IMAGE batch |
 
-旧 API / CLIProxyAPI / OAuth 三个 Provider，以及旧 Edit Reference List，已标记 DEPRECATED / DEV_ONLY：默认新建菜单隐藏，但旧工作流可继续运行。配置请先参阅[服务商配置](provider-profiles.md)。
+旧 API / CLIProxyAPI / OAuth 三个 Provider 已标记 DEPRECATED / DEV_ONLY：默认新建菜单隐藏，但旧工作流可继续运行。**Edit References · Original Sizes 是仍然必要的专用节点，不隐藏**，供不同尺寸的多参考图独立上传使用。配置请先参阅[服务商配置](provider-profiles.md)。
 
 **优先使用 ComfyUI 自带的 Text、Int、Get Image Size、Batch Images、Resize Image/Mask、Mask、Save Image。** Bridge 只负责模型请求、图片转换、参数验证与诊断。详见[逐项职责审计](native-comfyui-delegation-audit-2026-11-07.md)。
 
@@ -127,7 +127,7 @@ Edit 与 Generate 共享 `provider`、`prompt`、`size`、`quality`、`backgroun
 | --- | --- |
 | `base_image（Image 1）` | **必需**。原始待编辑图片，通常接 Load Image 的 `IMAGE` |
 | `reference_batch` | **可选，推荐**。标准 `IMAGE` batch，由 ComfyUI 原生 Batch Images 连接，最多 15 张；与旧列表互斥 |
-| `references（Image 2 开始）` | **可选，旧版特殊入口**。来自 `Edit Reference List` 的原始尺寸参考图集合 |
+| `references（Image 2 开始）` | **可选，专用入口**。来自 `Edit References · Original Sizes` 的原始尺寸参考图集合；普通等尺寸参考图优先使用原生 Batch Images |
 | `mask` | **可选**。ComfyUI `MASK`，尺寸必须与基础图一致；部分代理/模型不支持 Mask |
 | `custom_width` / `custom_height` | **可选**。`size=Custom` 时指定输出宽高，需为 16 的倍数并满足官方像素/比例限制 |
 
@@ -142,7 +142,7 @@ Edit 与 Generate 共享 `provider`、`prompt`、`size`、`quality`、`backgroun
 
 - **Image 1 永远是待编辑的基础图**。
 - Image 2 是 `image_2`，Image 3 是 `image_3`，顺序严格保留到 HTTP 请求中。
-- 普通多参考图优先使用官方 Batch Images；`Edit Reference List` 是保留的旧节点，用于不同宽高图片需要保持原始尺寸的场景，其 `image_2`～`image_16` 十五个接口不能有空洞。
+- 普通多参考图优先使用官方 Batch Images；`Edit References · Original Sizes` 是仍可搜索添加的专用节点，用于不同宽高图片需要保持原始尺寸的场景，其 `image_2`～`image_16` 十五个接口不能有空洞。
 - 单图编辑不需要任何参考图聚合节点，只连 Image 1。
 - 批量编辑参考图连接 `reference_batch`，**不要同时连接旧的 `references（Image 2 开始）`**；该节点会在发出远端请求前拒绝。
 - 参考图的宽高可以不同。
