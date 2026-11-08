@@ -40,7 +40,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "GPTImageBridgeCLIProxyAPIProvider": "GPT Image Bridge · CLIProxyAPI Provider",
     "GPTImageBridgeOAuthProvider": "GPT Image Bridge · Codex OAuth Provider",
     "GPTImageBridgeReferenceList": (
-        "GPT Image Bridge · Edit Reference List (Image 2–16)"
+        "GPT Image Bridge · Edit References · Original Sizes (Image 2–16)"
     ),
     "GPTImageBridgeGenerate": "GPT Image Bridge · Generate",
     "GPTImageBridgeEdit": "GPT Image Bridge · Edit",
