@@ -14,6 +14,7 @@ import json
 import os
 import shutil
 import socket
+import struct
 import subprocess
 import sys
 import tempfile
@@ -113,6 +114,25 @@ class FakeCLIProxyAPI(BaseHTTPRequestHandler):
                     )
                 )
                 kind = "reference_image_edit"
+            elif b"CI-ORIGINAL-SIZES" in body:
+                # Validate actual PNG IHDR dimensions in multipart image
+                # bytes, not just filenames. A native Batch Images node would
+                # resize the third reference to match the first.
+                names = [
+                    b"image-1-base.png",
+                    b"image-2-reference.png",
+                    b"image-3-reference.png",
+                ]
+                png_header = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR"
+                valid = (
+                    b'name="model"' in body
+                    and b"gpt-image-2.6-flare" in body
+                    and all(name in body for name in names)
+                    and body.index(names[0]) < body.index(names[1]) < body.index(names[2])
+                    and body.count(png_header + struct.pack(">II", 47, 29)) >= 2
+                    and (png_header + struct.pack(">II", 23, 41)) in body
+                )
+                kind = "edit_original_sizes"
             else:
                 valid = (
                     b'name="model"' in body
@@ -315,6 +335,7 @@ def run(root: Path):
     input_dir = root / "input"
     input_dir.mkdir(exist_ok=True)
     (input_dir / "bridge_reference.png").write_bytes(png_data(47, 29))
+    (input_dir / "bridge_reference_tall.png").write_bytes(png_data(23, 41))
 
     fake = ThreadingHTTPServer(("127.0.0.1", 0), FakeCLIProxyAPI)
     fake_thread = threading.Thread(target=fake.serve_forever, daemon=True)
@@ -388,6 +409,14 @@ def run(root: Path):
             assert legacy_info[legacy_name].get("deprecated") is True
             assert legacy_info[legacy_name].get("dev_only") is True
         print("[PASS] Old Provider nodes flagged deprecated and hidden in ordinary search", flush=True)
+        original_size_info, _ = http_json(
+            comfy_url, "/object_info/GPTImageBridgeReferenceList"
+        )
+        original_size_node = original_size_info["GPTImageBridgeReferenceList"]
+        assert not original_size_node.get("deprecated", False)
+        assert not original_size_node.get("dev_only", False)
+        assert "Original Sizes" in original_size_node["display_name"]
+        print("[PASS] Specialized Original Sizes collector is discoverable", flush=True)
 
         # Fail closed on raw API keys: the ComfyUI queue must never persist them.
         raw_graph = {
@@ -527,6 +556,30 @@ def run(root: Path):
         queue_workflow(comfy_url, proxy_url, graph, "9", 1, log_path, root / "output")
         print("[PASS] Editing -> actual PNG file via IMAGE/reference list/multipart/SaveImage", flush=True)
 
+        # Non-resizing Edit exception: native Batch Images normalizes every
+        # frame to a shared size. The specialty collector must preserve the
+        # differing dimensions of the Image 3 reference in multipart bytes.
+        graph = {
+            "1": {"class_type": "GPTImageBridgeProviderProfile", "inputs": {}},
+            "4": {"class_type": "LoadImage", "inputs": {"image": "bridge_reference.png"}},
+            "25": {"class_type": "LoadImage", "inputs": {"image": "bridge_reference_tall.png"}},
+            "26": {"class_type": "GPTImageBridgeReferenceList", "inputs": {
+                "image_2": ["4", 0],
+                "image_3": ["25", 0],
+            }},
+            "27": {"class_type": "GPTImageBridgeEdit", "inputs": {
+                **generate_inputs("1"),
+                "prompt": "CI-ORIGINAL-SIZES: edit image with unscaled references",
+                "base_image（Image 1）": ["4", 0],
+                "references（Image 2 开始）": ["26", 0],
+            }},
+            "28": {"class_type": "SaveImage", "inputs": {
+                "images": ["27", 0], "filename_prefix": "CI-Original-Sizes-Edit",
+            }},
+        }
+        queue_workflow(comfy_url, proxy_url, graph, "28", 1, log_path, root / "output")
+        print("[PASS] Original Sizes Edit sends 47x29 + 47x29 + 23x41 PNGs without resizing", flush=True)
+
         # Official primitive Text + Int widgets provide prompts and output dimensions.
         # The Bridge only translates Custom/INT into the Images API size field.
         graph = {
@@ -611,13 +664,14 @@ def run(root: Path):
             "reference_image_edit",
             "reference",
             "edit",
+            "edit_original_sizes",
             "generate",
             "reference_image_edit",
             "edit",
             "generate",
         ], "Unexpected proxy requests: " + str(observed)
         assert all(item["valid"] for item in observed)
-        print("[PASS] 11 proxy HTTP requests matched native image batches, two reference modes and local savers", flush=True)
+        print("[PASS] 12 proxy HTTP requests matched native image batches, original-size Edit and local savers", flush=True)
         print("COMFYUI_SMOKE_PASS", flush=True)
 
     except Exception:
