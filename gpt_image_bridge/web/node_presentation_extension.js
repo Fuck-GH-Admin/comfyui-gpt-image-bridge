@@ -1,6 +1,5 @@
 import { app } from "../../scripts/app.js";
 import {
-    ADVANCED_WIDGET_NAME,
     PRESENTATION_NODE_TYPES,
     applyContextualPresentation,
     prepareContextualPresentation,
@@ -67,7 +66,7 @@ app.registerExtension({
         const originalOnWidgetChanged = nodeType.prototype.onWidgetChanged;
         nodeType.prototype.onWidgetChanged = function (name, ...args) {
             const result = originalOnWidgetChanged?.call(this, name, ...args);
-            if (name === "size" || name === "reference_mode" || name === ADVANCED_WIDGET_NAME) {
+            if (["size", "reference_mode", "moderation", "timeout_sec"].includes(name)) {
                 applyContextualPresentation(this);
             }
             return result;

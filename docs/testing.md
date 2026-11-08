@@ -11,7 +11,7 @@
 | 层次 | 验证方法 | 当前结论 |
 | --- | --- | --- |
 | Python 单元测试 | PR #13：增加官方 IMAGE batch 上传、上下限、互斥与原生工作流示例校验 | **342 passed，无 warning** |
-| JavaScript 单元测试 | PR #13：独立参考图入口精简后，迁移和动态增长仍需全部通过 | **25/25 PASS** |
+| JavaScript 单元测试 | PR #15：原生高级参数接管、旧工作流展开状态迁移及条件 UI 回归 | **26/26 PASS** |
 | 真实 ComfyUI 后端 | Ubuntu Runner 启动 ComfyUI 0.44.0，HTTP/队列执行 | **PASS**；远端图片 API 是模拟服务，不是真实 CLIProxyAPI |
 | 本机 HTTP 协议矩阵 | 19/19 场景，另有凭据路由 2/2 | **PASS**；使用 HTTP 替身 |
 | 浏览器控件与工作流重载 | 本机真实浏览器，DOM/图对象检查 | **17/17 PASS**；这是人工本机验收，不是 GitHub CI |
@@ -35,10 +35,16 @@
 ### 上下文 UI（PR #12）的验收边界
 
 这轮只修改 ComfyUI 前端节点的参数呈现，不修改后端请求语义：
-- JavaScript 自动测试覆盖默认显示、`Custom` 宽高显隐、动态宽高连线、非默认高级值可见、UI 开关不进入 workflow/prompt、宽度不被重设、Edit 端图片和 MASK 插口不变，以及 Provider Profile 的 Responses 条件显示。
+- JavaScript 自动测试覆盖 ComfyUI 原生 `advanced` 标记、旧高级开关状态向 `node.showAdvanced` 迁移、无 Bridge 额外开关控件、`Custom` 宽高显隐、动态连线、非默认值可见、Edit IMAGE/MASK 插口不变和 Responses 条件显示。
 - `widget.hidden` 与 `widget.options.hidden` 使用 ComfyUI 前端原生隐藏约定；**Node 单测不等同于完整浏览器绘制验收**。
-- 本机浏览器最终需检查：新建 Generate/Edit 初始显示；切换 Custom 来回后宽高值不丢；「显示高级参数」切换后工作流保存、刷新、重载保持一致；主模型字段按参考图模式显隐；连接后的插口可见；旧工作流重新打开正常。
+- 本机浏览器最终需检查：新建 Generate/Edit 初始显示；Custom 宽高切换后原值不丢；**ComfyUI 原生 Show Advanced** 在画布/新版节点界面可展开并保存重载；旧 Bridge 高级状态迁移正确；主模型字段按参考图模式显隐；旧工作流正常打开。
 - 真正的 ComfyUI 0.44.0 CPU + fake API 端到端测试只证明**后端工作流仍可执行**，不宣称它模拟了浏览器上的用户点击或画布渲染。
+
+### PR #15：高级参数由 ComfyUI 原生 UI 接管
+
+经过 ComfyUI_frontend 源码对照，原生 `LGraphNode.showAdvanced/toggleAdvanced`、右键菜单的 Show Advanced/Hide Advanced、以及 widget `advanced`（经典画布）和 `options.advanced`（新版 Vue）已经提供完整的高级参数展示机制。因此 Generate/Edit 的 `moderation`、`timeout_sec` 使用 `INPUT_TYPES(..., advanced=True)`，插件不再追加 Bridge 专用高级开关 widget。对非默认值或已有输入连线保持普通可见。旧 `properties.gpt_image_bridge_show_advanced` 一次性迁移到原生 `node.showAdvanced`；默认参数名和序列化顺序不变。
+
+自动验证：[PR #15 Python 342 passed / JavaScript 26 passed](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/actions/runs/42455646179)。真实前端 UI 的交互与重载仍需浏览器端验收，不能用 JavaScript 模拟测试冒充。
 
 ### PR #13：优先复用原生 ComfyUI 功能
 

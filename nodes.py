@@ -549,9 +549,9 @@ class GPTImageBridgeGenerate:
                 "quality": (QUALITY_VALUES, {"default": "auto"}),
                 "background": (BACKGROUND_VALUES, {"default": "auto"}),
                 "output_format": (OUTPUT_FORMAT_VALUES, {"default": "png"}),
-                "moderation": (MODERATION_VALUES, {"default": "auto"}),
+                "moderation": (MODERATION_VALUES, {"default": "auto", "advanced": True}),
                 "n": ("INT", {"default": 1, "min": 1, "max": 8}),
-                "timeout_sec": ("INT", {"default": 300, "min": 30, "max": 3600}),
+                "timeout_sec": ("INT", {"default": 300, "min": 30, "max": 3600, "advanced": True}),
             },
             "optional": {
                 **{name: ("IMAGE",) for name in GENERATE_REFERENCE_INPUT_NAMES},
@@ -658,9 +658,9 @@ class GPTImageBridgeEdit:
                 "quality": (QUALITY_VALUES, {"default": "auto"}),
                 "background": (BACKGROUND_VALUES, {"default": "auto"}),
                 "output_format": (OUTPUT_FORMAT_VALUES, {"default": "png"}),
-                "moderation": (MODERATION_VALUES, {"default": "auto"}),
+                "moderation": (MODERATION_VALUES, {"default": "auto", "advanced": True}),
                 "n": ("INT", {"default": 1, "min": 1, "max": 8}),
-                "timeout_sec": ("INT", {"default": 300, "min": 30, "max": 3600}),
+                "timeout_sec": ("INT", {"default": 300, "min": 30, "max": 3600, "advanced": True}),
             },
             "optional": {
                 EDIT_REFERENCES_INPUT_NAME: ("GPT_IMAGE_REFERENCES",),

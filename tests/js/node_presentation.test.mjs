@@ -1,124 +1,96 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-
 import {
-    ADVANCED_PROPERTY,
-    ADVANCED_WIDGET_NAME,
     applyContextualPresentation,
     desiredWidgetVisibility,
     prepareContextualPresentation,
     widgetByName,
 } from "../../gpt_image_bridge/web/node_presentation.js";
 
-const defaults = {
-    size: "auto",
-    quality: "auto",
-    background: "auto",
-    output_format: "png",
-    moderation: "auto",
-    timeout_sec: 300,
-    n: 1,
-    custom_width: 1024,
-    custom_height: 1024,
+const base = {
+    size: "auto", prompt: "A cinematic image",
+    quality: "auto", background: "auto", output_format: "png",
+    moderation: "auto", timeout_sec: 300, n: 1,
+    custom_width: 1024, custom_height: 1024,
 };
 
-function makeWidget(name, value) {
-    return { name, value, type: "combo", options: { serialize: true } };
-}
-
 function fakeNode(type = "GPTImageBridgeGenerate", overrides = {}) {
-    const values = type === "GPTImageBridgeProviderProfile"
-        ? {
-            profile: "local_codex",
-            image_model: "",
-            reference_mode: "profile",
-            responses_model: "",
-            ...overrides,
-        }
-        : { ...defaults, prompt: "A cinematic image", ...overrides };
-    const node = {
-        type,
-        properties: { existing_user_property: "keep-me" },
-        widgets: Object.entries(values).map(([name, value]) => makeWidget(name, value)),
-        inputs: [
-            { name: "provider", type: "GPT_IMAGE_PROVIDER", link: null },
-            ...(type === "GPTImageBridgeEdit"
-                ? [{ name: "base_image（Image 1）", type: "IMAGE", link: null }]
-                : []),
-        ],
+    const values = type === "GPTImageBridgeProviderProfile" ? {
+        profile: "local_codex", image_model: "",
+        reference_mode: "profile", responses_model: "", ...overrides,
+    } : { ...base, ...overrides };
+    return {
+        type, showAdvanced: false,
+        properties: { existing: "keep" },
+        widgets: Object.entries(values).map(([name, value]) => ({
+            name, value, type: "combo", options: { serialize: true },
+        })),
+        inputs: [{ name: "provider", type: "GPT_IMAGE_PROVIDER", link: null }],
         size: [480, 760],
         computeSize() {
-            const shown = this.widgets.filter((widget) => !widget.hidden);
-            return [300, 80 + 28 * shown.length + 15 * this.inputs.length];
+            return [320, 100 + 28 * this.widgets.filter(w => !w.hidden).length];
         },
-        setSize(newSize) {
-            this.size = newSize;
-            this.resizeCalls = (this.resizeCalls ?? 0) + 1;
-        },
-        addWidget(widgetType, name, value, callback, options) {
-            const widget = { type: widgetType, name, value, callback, options };
-            this.widgets.push(widget);
-            return widget;
-        },
-        setDirtyCanvas() {
-            this.dirtyCalls = (this.dirtyCalls ?? 0) + 1;
-        },
+        setSize(size) { this.size = size; this.resizeCalls = (this.resizeCalls ?? 0) + 1; },
+        setDirtyCanvas() { this.dirtyCalls = (this.dirtyCalls ?? 0) + 1; },
     };
-    return node;
 }
 
-function changed(node, field, value) {
-    const widget = widgetByName(node, field);
+function change(node, name, value) {
+    const widget = widgetByName(node, name);
     widget.value = value;
     widget.callback?.(value);
 }
 
-test("Generate: common controls stay visible, low-frequency controls collapse", () => {
+test("default Generate uses native advanced metadata, no Bridge toggle widget", () => {
     const node = fakeNode();
-    const valuesBefore = Object.fromEntries(node.widgets.map(w => [w.name, w.value]));
+    const original = Object.fromEntries(node.widgets.map(w => [w.name, w.value]));
     prepareContextualPresentation(node);
-    for (const name of ["prompt", "size", "quality", "background", "output_format", "n"]) {
-        assert.notEqual(widgetByName(node, name).hidden, true, name);
+    for (const key of ["prompt", "size", "quality", "background", "output_format", "n"]) {
+        assert.notEqual(widgetByName(node, key).hidden, true);
     }
-    for (const name of ["moderation", "timeout_sec", "custom_width", "custom_height"]) {
-        assert.equal(widgetByName(node, name).hidden, true, name);
-        assert.equal(widgetByName(node, name).options.serialize, true, name);
+    for (const key of ["moderation", "timeout_sec"]) {
+        const w = widgetByName(node, key);
+        assert.equal(w.advanced, true);
+        assert.equal(w.options.advanced, true);
+        assert.equal(w.options.serialize, true);
+        assert.notEqual(w.hidden, true);
     }
-    assert.deepEqual(
-        Object.fromEntries(node.widgets.filter(w => w.name !== ADVANCED_WIDGET_NAME).map(w => [w.name, w.value])),
-        valuesBefore,
-    );
-    assert.equal(node.properties.existing_user_property, "keep-me");
+    for (const key of ["custom_width", "custom_height"]) {
+        assert.equal(widgetByName(node, key).hidden, true);
+    }
+    assert.deepEqual(Object.fromEntries(node.widgets.map(w => [w.name, w.value])), original);
+    assert.equal(node.widgets.length, Object.keys(original).length);
+    assert.equal(node.properties.existing, "keep");
 });
 
-test("Edit: basic controls and image/mask sockets are untouched", () => {
+test("Edit image sockets stay unchanged; advanced behavior is native", () => {
     const node = fakeNode("GPTImageBridgeEdit");
-    node.inputs.push({ name: "mask", type: "MASK", link: 7 });
-    const before = structuredClone(node.inputs);
+    node.inputs.push({ name: "base_image（Image 1）", link: 4, type: "IMAGE" });
+    node.inputs.push({ name: "mask", link: 7, type: "MASK" });
+    const old = structuredClone(node.inputs);
     prepareContextualPresentation(node);
-    assert.deepEqual(node.inputs, before);
-    assert.equal(widgetByName(node, "moderation").hidden, true);
+    assert.deepEqual(node.inputs, old);
+    assert.equal(widgetByName(node, "moderation").advanced, true);
     assert.equal(widgetByName(node, "custom_width").hidden, true);
 });
 
-test("size=Custom reveals width/height; switching back hides only the controls", () => {
+test("Custom shows dimensions and changing size preserves their values", () => {
     const node = fakeNode();
     prepareContextualPresentation(node);
-    changed(node, "size", "Custom");
+    change(node, "size", "Custom");
     assert.equal(widgetByName(node, "custom_width").hidden, false);
     assert.equal(widgetByName(node, "custom_height").hidden, false);
-    changed(node, "custom_width", 2048);
-    changed(node, "custom_height", 1152);
-    changed(node, "size", "auto");
+    change(node, "custom_width", 2048);
+    change(node, "custom_height", 1152);
+    change(node, "size", "auto");
     assert.equal(widgetByName(node, "custom_width").hidden, true);
     assert.equal(widgetByName(node, "custom_width").value, 2048);
+    change(node, "size", "Custom");
     assert.equal(widgetByName(node, "custom_height").value, 1152);
-    changed(node, "size", "Custom");
-    assert.equal(widgetByName(node, "custom_width").value, 2048);
-    assert.equal(widgetByName(node, "custom_height").hidden, false);
+    assert.equal(widgetByName(node, "custom_width").hidden, false);
 });
 
-test("socket-driven size exposes both dimensions for dynamic Custom mode", () => {
+test("dynamic size socket keeps width and height visible", () => {
     const node = fakeNode();
     node.inputs.push({ name: "size", type: "STRING", link: 17 });
     prepareContextualPresentation(node);
@@ -129,81 +101,79 @@ test("socket-driven size exposes both dimensions for dynamic Custom mode", () =>
     assert.equal(widgetByName(node, "custom_width").hidden, true);
 });
 
-test("connected custom dimension stays visible even if size is non-Custom", () => {
+test("custom dimension socket remains available with preset size", () => {
     const node = fakeNode();
-    node.inputs.push({ name: "custom_width", type: "INT", link: 18 });
+    node.inputs.push({ name: "custom_width", type: "INT", link: 10 });
     prepareContextualPresentation(node);
     assert.equal(widgetByName(node, "custom_width").hidden, false);
     assert.equal(widgetByName(node, "custom_height").hidden, true);
 });
 
-test("advanced toggle is UI-only in prompt/workflow but its state persists via node.properties", () => {
+test("native ComfyUI showAdvanced persists without our own widget", () => {
     const node = fakeNode();
+    const oldCount = node.widgets.length;
     prepareContextualPresentation(node);
-    const toggle = widgetByName(node, ADVANCED_WIDGET_NAME);
-    assert.equal(toggle.serialize, false);
-    assert.equal(toggle.options.serialize, false);
-    assert.equal(toggle.value, false);
-    changed(node, ADVANCED_WIDGET_NAME, true);
-    assert.equal(node.properties[ADVANCED_PROPERTY], true);
-    assert.equal(widgetByName(node, "moderation").hidden, false);
-    assert.equal(widgetByName(node, "timeout_sec").hidden, false);
-    assert.equal(widgetByName(node, "custom_width").hidden, true);
-    const size = [...node.size];
-    assert.equal(size[0], 480, "Never overwrite the width chosen by the user");
+    assert.equal(node.showAdvanced, false);
+    node.showAdvanced = true;
     prepareContextualPresentation(node);
-    assert.equal(node.widgets.filter(w => w.name === ADVANCED_WIDGET_NAME).length, 1);
-    assert.equal(widgetByName(node, ADVANCED_WIDGET_NAME).value, true);
-    changed(node, ADVANCED_WIDGET_NAME, false);
-    assert.equal(widgetByName(node, "moderation").hidden, true);
+    assert.equal(node.showAdvanced, true);
+    assert.equal(node.widgets.length, oldCount);
+    assert.equal(widgetByName(node, "moderation").advanced, true);
+    assert.equal(node.size[0], 480);
+    assert.equal(node.widgets.some(w => w.name.includes("advanced_controls")), false);
 });
 
-test("non-default moderation or timeout is not silently buried when advanced is collapsed", () => {
+test("legacy Bridge show advanced setting migrates once to native state", () => {
+    const node = fakeNode();
+    node.properties.gpt_image_bridge_show_advanced = true;
+    prepareContextualPresentation(node);
+    assert.equal(node.showAdvanced, true);
+    assert.equal(node.properties.gpt_image_bridge_show_advanced, undefined);
+    node.showAdvanced = false;
+    prepareContextualPresentation(node);
+    assert.equal(node.showAdvanced, false);
+    assert.equal(node.properties.existing, "keep");
+});
+
+test("non-default moderation and timeout are not hidden behind advanced", () => {
     const node = fakeNode("GPTImageBridgeGenerate", {
-        moderation: "low",
-        timeout_sec: 900,
+        moderation: "low", timeout_sec: 900,
     });
     prepareContextualPresentation(node);
-    assert.equal(widgetByName(node, "moderation").hidden, false);
-    assert.equal(widgetByName(node, "timeout_sec").hidden, false);
-    assert.equal(node.properties[ADVANCED_PROPERTY], false);
-    changed(node, "moderation", "auto");
-    changed(node, "timeout_sec", 300);
-    applyContextualPresentation(node);
-    assert.equal(widgetByName(node, "moderation").hidden, true);
-    assert.equal(widgetByName(node, "timeout_sec").hidden, true);
+    assert.equal(widgetByName(node, "moderation").advanced, false);
+    assert.equal(widgetByName(node, "timeout_sec").advanced, false);
+    change(node, "moderation", "auto");
+    change(node, "timeout_sec", 300);
+    assert.equal(widgetByName(node, "moderation").advanced, true);
+    assert.equal(widgetByName(node, "timeout_sec").advanced, true);
 });
 
-test("incoming moderation socket prevents hiding its linked field", () => {
+test("wired advanced control remains ordinary for inspection", () => {
     const node = fakeNode();
     node.inputs.push({ name: "moderation", type: "COMBO", link: 10 });
     prepareContextualPresentation(node);
-    assert.equal(widgetByName(node, "moderation").hidden, false);
-    assert.equal(widgetByName(node, "timeout_sec").hidden, true);
+    assert.equal(widgetByName(node, "moderation").advanced, false);
+    assert.equal(widgetByName(node, "timeout_sec").advanced, true);
 });
 
-test("Provider Profile reveals Responses host only when relevant or configured", () => {
+test("Profile shows Responses host only when useful or connected", () => {
     const node = fakeNode("GPTImageBridgeProviderProfile");
     prepareContextualPresentation(node);
     assert.equal(widgetByName(node, "profile").hidden, undefined);
-    assert.equal(widgetByName(node, "image_model").hidden, undefined);
-    assert.equal(widgetByName(node, "reference_mode").hidden, undefined);
     assert.equal(widgetByName(node, "responses_model").hidden, true);
-    assert.equal(widgetByName(node, ADVANCED_WIDGET_NAME), undefined);
-    changed(node, "reference_mode", "responses");
+    change(node, "reference_mode", "responses");
     assert.equal(widgetByName(node, "responses_model").hidden, false);
-    changed(node, "responses_model", "some-text-model");
-    changed(node, "reference_mode", "images_edit");
+    change(node, "responses_model", "text-host");
+    change(node, "reference_mode", "images_edit");
     assert.equal(widgetByName(node, "responses_model").hidden, false);
-    changed(node, "responses_model", "");
+    change(node, "responses_model", "");
     applyContextualPresentation(node);
     assert.equal(widgetByName(node, "responses_model").hidden, true);
-    assert.equal(node.properties.existing_user_property, "keep-me");
 });
 
-test("Provider Profile mode socket may resolve to Responses: keep main model visible", () => {
+test("Profile mode socket can resolve to Responses at execution time", () => {
     const node = fakeNode("GPTImageBridgeProviderProfile");
-    node.inputs.push({ name: "reference_mode", type: "COMBO", link: 27 });
+    node.inputs.push({ name: "reference_mode", link: 27, type: "COMBO" });
     prepareContextualPresentation(node);
     assert.equal(widgetByName(node, "responses_model").hidden, false);
     node.inputs.pop();
@@ -211,17 +181,17 @@ test("Provider Profile mode socket may resolve to Responses: keep main model vis
     assert.equal(widgetByName(node, "responses_model").hidden, true);
 });
 
-test("unknown nodes are untouched and repeat calls do not leak new widgets", () => {
+test("unknown node is untouched and repeated presentation is idempotent", () => {
     const node = fakeNode("UnknownNode");
-    const before = structuredClone(node.widgets);
+    const widgets = structuredClone(node.widgets);
     prepareContextualPresentation(node);
-    assert.deepEqual(node.widgets, before);
+    assert.deepEqual(node.widgets, widgets);
     assert.deepEqual(desiredWidgetVisibility(node), {});
-    const n2 = fakeNode();
-    prepareContextualPresentation(n2);
-    const count = n2.widgets.length;
-    const resizeCalls = n2.resizeCalls;
-    prepareContextualPresentation(n2);
-    assert.equal(n2.widgets.length, count);
-    assert.equal(n2.resizeCalls, resizeCalls);
+    const target = fakeNode();
+    prepareContextualPresentation(target);
+    const count = target.widgets.length;
+    const resizeCalls = target.resizeCalls;
+    prepareContextualPresentation(target);
+    assert.equal(target.widgets.length, count);
+    assert.equal(target.resizeCalls, resizeCalls);
 });
