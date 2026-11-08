@@ -190,7 +190,7 @@ def test_comfyui_registration_and_provider_responsibilities_are_separate():
     ].INPUT_TYPES()["optional"]
     assert list(reference_inputs) == [f"image_{i}" for i in range(2, 17)]
     assert module.NODE_DISPLAY_NAME_MAPPINGS["GPTImageBridgeReferenceList"] == (
-        "GPT Image Bridge · Edit Reference List (Image 2–16)"
+        "GPT Image Bridge · Edit References · Original Sizes (Image 2–16)"
     )
 
     edit_types = module.NODE_CLASS_MAPPINGS[
@@ -215,8 +215,11 @@ def test_comfyui_registration_and_provider_responsibilities_are_separate():
     assert "reference_batch" in edit_types["optional"]
     assert generate_types["optional"]["reference_batch"][0] == "IMAGE"
     assert edit_types["optional"]["reference_batch"][0] == "IMAGE"
-    assert module.NODE_CLASS_MAPPINGS["GPTImageBridgeReferenceList"].DEPRECATED is True
-    assert module.NODE_CLASS_MAPPINGS["GPTImageBridgeReferenceList"].DEV_ONLY is True
+    specialized = module.NODE_CLASS_MAPPINGS["GPTImageBridgeReferenceList"]
+    assert getattr(specialized, "DEPRECATED", False) is False
+    assert getattr(specialized, "DEV_ONLY", False) is False
+    assert "original sizes" in specialized.DESCRIPTION.lower()
+    assert specialized.SEARCH_ALIASES
     assert "references" not in generate_types["optional"]
 
 
