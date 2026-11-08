@@ -215,8 +215,11 @@ def test_comfyui_registration_and_provider_responsibilities_are_separate():
     assert "reference_batch" in edit_types["optional"]
     assert generate_types["optional"]["reference_batch"][0] == "IMAGE"
     assert edit_types["optional"]["reference_batch"][0] == "IMAGE"
-    assert module.NODE_CLASS_MAPPINGS["GPTImageBridgeReferenceList"].DEPRECATED is True
-    assert module.NODE_CLASS_MAPPINGS["GPTImageBridgeReferenceList"].DEV_ONLY is True
+    specialized = module.NODE_CLASS_MAPPINGS["GPTImageBridgeReferenceList"]
+    assert getattr(specialized, "DEPRECATED", False) is False
+    assert getattr(specialized, "DEV_ONLY", False) is False
+    assert "original sizes" in specialized.DESCRIPTION.lower()
+    assert specialized.SEARCH_ALIASES
     assert "references" not in generate_types["optional"]
 
 
