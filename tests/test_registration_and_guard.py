@@ -234,8 +234,14 @@ def test_contextual_frontend_is_packaged_and_preserves_backend_schemas():
     assert "GPTImageBridge.ContextualNodeControls" in frontend
     assert "onWidgetChanged" in frontend
     assert "afterConfigureGraph()" in frontend
-    assert "widget.serialize = false" in implementation
-    assert "widget.options.serialize = false" in implementation
+    # ComfyUI owns the advanced toggle and its persistence. The Bridge
+    # adds no widget; it only maps old settings and conditional controls.
+    assert "migrateLegacyAdvancedPreference" in implementation
+    assert "tagNativeAdvancedFields" in implementation
+    assert "node.showAdvanced = true" in implementation
+    assert "ensureAdvancedToggle" not in implementation
+    assert "widget.serialize = false" not in implementation
+    assert "ADVANCED_WIDGET_NAME" not in implementation
     assert "widget.hidden = hidden" in implementation
     assert "widget.options.hidden = hidden" in implementation
 
@@ -251,6 +257,9 @@ def test_contextual_frontend_is_packaged_and_preserves_backend_schemas():
         "quality", "background", "output_format", "moderation", "n",
         "timeout_sec",
     ]
+    for schema in (generated, edited):
+        assert schema["required"]["moderation"][1]["advanced"] is True
+        assert schema["required"]["timeout_sec"][1]["advanced"] is True
     assert list(generated["optional"])[-3:] == ["custom_width", "custom_height", "reference_batch"]
     assert list(edited["optional"])[-3:] == ["custom_width", "custom_height", "reference_batch"]
 
