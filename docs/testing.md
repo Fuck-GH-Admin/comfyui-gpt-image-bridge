@@ -70,7 +70,7 @@ node --experimental-default-type=module --test tests/js/*.test.mjs
 [集成脚本](../tests/integration/comfyui_server_smoke.py)会：
 
 1. 检出真实 ComfyUI 指定 SHA，安装其真实运行依赖，启动 ComfyUI 后端。
-2. 将本 fork 作为自定义节点安装，核对八个节点在 `/object_info` 中注册（其中三个旧 Provider 隐藏于正常新建菜单）。
+2. 将本 fork 作为自定义节点安装，核对八个节点在 `/object_info` 中注册（其中三个旧 Provider 隐藏于正常新建菜单，专用 Original Sizes 参考图节点保持可见）。
 3. 启动**内存中的 CLIProxyAPI 兼容 HTTP 测试服务器**，它返回可解码的固定 PNG 和模拟 Responses SSE。
 4. 使用 `POST /gpt-image-bridge/session-credential` 将测试 Key 转成一次性句柄；检查原始 Key 不能越过 `/prompt` 守卫。
 5. 提交 `Generate n=2` 工作流，通过 Images 请求保存两张 PNG。
@@ -80,7 +80,7 @@ node --experimental-default-type=module --test tests/js/*.test.mjs
 9. 检查 11 次 HTTP 请求的端点、模型角色、Bearer 客户端 Key、次序和关键字段。
 10. 检查原生 SaveImage 的 PNG 输出，以及插件特殊导出节点的 WebP/JPEG 文件、32×24 测试响应图片、Alpha/背景合成和输出目录路径。
 11. 通过新 Provider Profile 的本地配置再执行一次文生图（无画布 API Key 输入），检查旧 Provider 已标记隐藏/弃用。
-11. 关闭测试进程并输出 `COMFYUI_SMOKE_PASS`。
+12. 关闭测试进程并输出 `COMFYUI_SMOKE_PASS`。
 
 **注意：用户已通过 [PR #2](https://github.com/Fuck-GH-Admin/comfyui-gpt-image-bridge/pull/2) 上传旧型号真实 CLIProxyAPI + Codex 实机报告。该报告确认 `gpt-image-2` 的纯文生成、基础 Edit 和带参考图 Edit，但没有验证 2.6 Flare/Sunburst，也未确认新版默认的参考图 Generate（Images Edit 模式）。请勿将报告覆盖范围扩大。**
 
