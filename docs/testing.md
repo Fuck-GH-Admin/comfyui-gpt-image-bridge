@@ -75,9 +75,9 @@ node --experimental-default-type=module --test tests/js/*.test.mjs
 4. 使用 `POST /gpt-image-bridge/session-credential` 将测试 Key 转成一次性句柄；检查原始 Key 不能越过 `/prompt` 守卫。
 5. 提交 `Generate n=2` 工作流，通过 Images 请求保存两张 PNG。
 6. 分别以本插件 Save Image 节点将生成的 RGBA 图片保存为无损 WebP、JPEG，验证 Alpha 和 JPEG 指定底色合成。
-7. 再提交 Load Image → 参考图 Generate（默认 Images Edit、可选 Responses）及 Edit Reference List → Edit → 原生 SaveImage 工作流，验证参考图顺序与 multipart 请求。
+7. 再提交 Load Image → 参考图 Generate（默认 Images Edit、可选 Responses）及 Edit Reference List → Edit → 原生 SaveImage 工作流，验证参考图顺序与 multipart 请求；追加 **47×29、23×41** 不同尺寸参考图的真实 ComfyUI Edit multipart，确认不会被统一缩放。
 8. 使用官方 `PrimitiveStringMultiline` + `PrimitiveInt` 与本插件 Generate 连接，核对实际向 HTTP API 发送 `size=1536x1024`（**模拟上游返回小测试图片，不代表真实上游兑现目标尺寸**）；再用官方 `BatchImagesNode` 分别驱动 Generate 和 Edit，核对带多个参考图的 multipart。
-9. 检查 11 次 HTTP 请求的端点、模型角色、Bearer 客户端 Key、次序和关键字段。
+9. 检查 12 次 HTTP 请求的端点、模型角色、Bearer 客户端 Key、次序和关键字段。
 10. 检查原生 SaveImage 的 PNG 输出，以及插件特殊导出节点的 WebP/JPEG 文件、32×24 测试响应图片、Alpha/背景合成和输出目录路径。
 11. 通过新 Provider Profile 的本地配置再执行一次文生图（无画布 API Key 输入），检查旧 Provider 已标记隐藏/弃用。
 12. 关闭测试进程并输出 `COMFYUI_SMOKE_PASS`。
@@ -126,7 +126,7 @@ python tests/integration/comfyui_server_smoke.py /abs/path/to/ComfyUI
 
 - [ ] Edit：只连接一张基础图，先不接 Mask/参考图，成功后再追加。
 - [ ] Generate 参考图：从 `reference_1` 接一张图片，先验证默认 `images_edit`，必要时才单独切换 `responses` 并验证模型工具权限。
-- [ ] Edit + Reference List：再接至少一张独立参考图并检查顺序。
+- [ ] Edit + **Edit References · Original Sizes**：当两张参考图尺寸不同时，直接连接该专用节点，核对每张原始宽高和发送顺序；一般等尺寸多图优先使用原生 Batch Images。
 - [ ] 需要时才测试 Mask、多种格式、多参考图、`n>1`、更高并发和失败恢复。
 
 ### D. 安全与失败边界
