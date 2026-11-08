@@ -35,7 +35,7 @@
 | 自定义模型名称/路由、服务商 Base URL、Key | ComfyUI 不提供针对本插件的多服务商 OpenAI-compatible Profiles | **保留 Provider Profile** | 保护本机密钥、不把连接配置写入 workflow |
 | Images Generate / Images Edit / Responses / Chat 协议 | 官方 Partner Nodes 实现与 CLIProxyAPI 等代理不同 | **桥接层核心功能，必须保留** | 不复制官方付费代理认证，但负责用户自有第三方兼容 API |
 | 参考图引导新图 vs 修改基础图 | 官方节点也有区分，但模型端语义不同 | **保留 Generate/Edit 的操作角色** | 避免把“参考引导生成”混成“修改已有底图” |
-| 画质、透明背景、审核强度、数量、超时 | 部分原生 UI 有通用数值输入，但无统一供应商 API 语义 | **保留远端参数；允许官方基础节点提供数值/字符串** | 不将不支持的字段伪装为通用 ComfyUI 变换 |
+| 画质、透明背景、审核强度、数量、超时 | ComfyUI 有通用数值和 **原生 advanced 展开控制**，但无统一供应商 HTTP API 语义 | **保留远端参数；审核强度与超时标记为原生 advanced，不再自造展开控件** | 不把上游参数伪装成图像变换，也不与 ComfyUI 重复维护高级设置开关 |
 | 请求失败、批次已计费的部分进度、实际尺寸/格式兑现 | **原生图像节点不承担第三方 HTTP 责任** | **保留诊断报告、验证与不可盲目重试的安全策略** | 属于连接器必须自己实现的逻辑 |
 | Codex OAuth 老节点、旧 Provider | 新 Profile 已可取代常用入口 | **已隐藏/弃用；本轮仍保留注册** | 历史图加载时不能直接出现 Missing Node |
 
