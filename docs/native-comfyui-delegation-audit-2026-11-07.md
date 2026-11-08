@@ -23,7 +23,7 @@
 | 云端图片请求的 `size`、尺寸值有效性 | **没有等价通用节点** | **保留协议转换和前置校验** | 图像预处理不是图像生成目标尺寸；必须符合上游支持范围，不能请求后才处理 |
 | 单图读取、加载上传文件 | **有**：`LoadImage` | **交给原生加载器**，桥接只将 `IMAGE` 转远端可上传的 PNG bytes | 不复制本机文件浏览和图像加载 UI |
 | 普通等尺寸多参考图组合 | **有**：`BatchImagesNode`（新）、旧 `ImageBatch`（已弃用） | **新增标准 `reference_batch: IMAGE` 输入**；优先连原生 Batch Images | 图片按帧展开并送远端；无需在默认工作流使用专用 Reference List |
-| **不同尺寸**参考图独立上传 | 原生 Batch Images 会把其他图片**缩放成第一张大小** | **保留有序独立参考图入口**，旧 Edit Reference List 仅作兼容特例 | 不可宣称原生 Batch 等价无损独立参考图。官方 `batch_images` 明确执行缩放 |
+| **不同尺寸**参考图独立上传 | 原生 Batch Images 会把其他图片**缩放成第一张大小** | **保留有序独立参考图入口**，专用 Edit Reference List 负责保留多张不同尺寸原图，同时兼容旧工作流 | 不可宣称原生 Batch 等价无损独立参考图。官方 `batch_images` 明确执行缩放 |
 | 参考图枚举、编号、上传顺序 | 部分通过 ComfyUI 连线获得 | **Bridge 保留 HTTP multipart、角色和次序映射** | 服务端使用 Image 1 基础图 / Image 2–16 参考图，序列号是 API 语义 |
 | 蒙版绘制、反转、扩展、合成 | **有**：原生 Mask/图像处理节点 | **交给 ComfyUI**，Bridge 仅接受 `MASK` 并按上游格式发送 | Mask 图形编辑不是 API 桥接职责；仍保留蒙版与基础图尺寸校验 |
 | 透明通道导入与编辑 | `LoadImage` / 其他图像节点已有 | **原生图像流**，Bridge 负责正确编码、解码和保留 Alpha | 不能丢掉云端 RGBA 像素 |
@@ -43,7 +43,7 @@
 
 1. **新增 `Generate.reference_batch` 与 `Edit.reference_batch`**：接标准 ComfyUI `IMAGE` batch，自动按帧、按原始顺序转换成云端参考图；Generate 最多 16，Edit 最多 15（加上 Image 1 基础图共 16）。不会对参考图自行做 Resize。
 2. **输入互斥**：Generate 的 `reference_batch` 与 `reference_1–16` 不能同时使用；Edit 的 `reference_batch` 与历史 `Edit Reference List` 不能同时使用。请求发出前拒绝混用，避免重复上传或重复计费。
-3. **保留有序单图输入**：复杂参考图大小和纵横比不同的场景，Generate 直接接独立 `reference_1–16`；Edit 可用保留的旧 Reference List。默认新建节点里旧 Reference List 标记弃用/隐藏，但不会删除注册和历史图。
+3. **保留有序单图输入**：复杂参考图大小和纵横比不同的场景，Generate 直接接独立 `reference_1–16`；Edit 可用保留的旧 Reference List。Edit References · Original Sizes 维持可搜索，不标记弃用（因为原生 Batch Images 会改变非等尺寸输入）；注册类 ID 不变，旧工作流继续兼容。
 4. **简化前端默认占用**：Generate 只显示 1 个独立参考图 socket，连接后自动增长；不需要把 16 张的自定义聚合节点塞进每个工作流。
 5. **不造新的文本/尺寸节点**：原生 Text、Int、GetImageSize、Resize/Batch/Mask/SaveImage 继续完全由 ComfyUI 提供。增加一份 [原生 Text + Int → GPT Image → 原生 Save Image](../example_workflows/Native-ComfyUI-Text-and-Size.json) 可导入工作流。
 6. **保存责任显式区分**：`GPTImageBridgeSaveImage` 仍保留 PNG/JPEG/WebP 编码以兼容旧图，但展示名改为 `Export JPEG/WebP (optional)`，入门工作流默认使用 ComfyUI 原生 `SaveImage`。
@@ -55,7 +55,7 @@
 - 仍然需要原始 `prompt` 和 `size` 参数，因为它们是 HTTP 请求合同；**不是另做一个提示词编辑器/尺寸引擎**。旧工作流可继续把字符串写在 Bridge 节点里，但推荐用原生 Text/String Format。
 - 官方某些非旧版节点基于较新的 `ComfyExtension`/Autogrow API，不能仅凭主线有源码就宣称所有 ComfyUI 版本都注册；CI 必须记录固定版本的测试结果。
 - 完整浏览器 UI 点击/重载不由纯 Python HTTP 集成代替，标记为 `NOT_RUN` 直到实际测试；真实第三方付费请求本轮不执行。
-- `ReferenceList` 原有功能是支持不同尺寸及保留旧图，不是该功能消失；JPEG/WebP 原生保存也未覆盖，不应该贸然删除。
+- `ReferenceList` 原有功能是支持不同尺寸及保留旧图，因此应在正常节点搜索中可见，不仅保留运行兼容；JPEG/WebP 原生保存也未覆盖，不应该贸然删除。
 
 ## 4. 验收清单
 
