@@ -4,15 +4,14 @@
  * request widget. Hidden widgets remain available to the backend and return
  * with their values intact when the corresponding mode is selected.
  *
- * The only new widget is UI-only (serialize=false and options.serialize=false).
+ * Advanced parameter folding is ComfyUI native (showAdvanced / toggleAdvanced).
  */
 export const PRESENTATION_NODE_TYPES = new Set([
     "GPTImageBridgeGenerate",
     "GPTImageBridgeEdit",
     "GPTImageBridgeProviderProfile",
 ]);
-export const ADVANCED_PROPERTY = "gpt_image_bridge_show_advanced";
-export const ADVANCED_WIDGET_NAME = "gpt_image_bridge_advanced_controls";
+const LEGACY_ADVANCED_PROPERTY = "gpt_image_bridge_show_advanced";
 const PREPARED_FLAG = "__gptImageBridgePresentationPrepared";
 const CONDITIONED_FLAG = "__gptImageBridgeConditionedCallback";
 const DEFAULTS = Object.freeze({
@@ -65,14 +64,7 @@ export function desiredWidgetVisibility(node) {
         };
     }
 
-    const expanded = node.properties?.[ADVANCED_PROPERTY] === true;
     const visibility = {};
-    for (const field of ADVANCED_FIELDS) {
-        visibility[field] = expanded
-            || hasNondefaultValue(widgetByName(node, field), DEFAULTS[field])
-            || hasSocketLink(node, field);
-    }
-
     const size = widgetByName(node, "size")?.value;
     const sizeDynamic = hasSocketLink(node, "size");
     const useCustom = size === "Custom" || sizeDynamic;
@@ -99,6 +91,45 @@ function setHidden(widget, hidden) {
     widget.hidden = hidden;
     widget.options.hidden = hidden;
     return true;
+}
+
+function tagNativeAdvancedFields(node) {
+    const type = node?.comfyClass || node?.type;
+    if (type !== "GPTImageBridgeGenerate" && type !== "GPTImageBridgeEdit") {
+        return false;
+    }
+    let changed = false;
+    for (const field of ADVANCED_FIELDS) {
+        const widget = widgetByName(node, field);
+        if (!widget) continue;
+        // ComfyUI owns advanced visibility, its context menu, and persistence.
+        // Unusual values or connected inputs must remain readily visible.
+        const advanced = (
+            !hasNondefaultValue(widget, DEFAULTS[field])
+            && !hasSocketLink(node, field)
+        );
+        if (widget.advanced === advanced && widget.options?.advanced === advanced) {
+            continue;
+        }
+        widget.options ??= {};
+        widget.advanced = advanced;
+        widget.options.advanced = advanced;
+        changed = true;
+    }
+    return changed;
+}
+
+function migrateLegacyAdvancedPreference(node) {
+    const properties = node?.properties;
+    if (!properties || !Object.prototype.hasOwnProperty.call(
+        properties, LEGACY_ADVANCED_PROPERTY,
+    )) return;
+    if (properties[LEGACY_ADVANCED_PROPERTY] === true) {
+        node.showAdvanced = true;
+    }
+    // Never resurrect the old per-node switch after a user hides advanced
+    // options through ComfyUI's own control.
+    delete properties[LEGACY_ADVANCED_PROPERTY];
 }
 
 function resizeKeepingWidth(node) {
@@ -135,6 +166,7 @@ export function applyContextualPresentation(node) {
         }
         changed = setHidden(widget, !shouldShow) || changed;
     }
+    changed = tagNativeAdvancedFields(node) || changed;
     if (changed) {
         resizeKeepingWidth(node);
         markDirty(node);
@@ -156,60 +188,19 @@ function wrapModeCallback(node, name) {
     widget[CONDITIONED_FLAG] = true;
 }
 
-function ensureAdvancedToggle(node) {
-    if (
-        !["GPTImageBridgeGenerate", "GPTImageBridgeEdit"].includes(
-            node?.comfyClass || node?.type,
-        )
-        || typeof node.addWidget !== "function"
-    ) {
-        return;
-    }
-    const persisted = node.properties?.[ADVANCED_PROPERTY] === true;
-    let widget = widgetByName(node, ADVANCED_WIDGET_NAME);
-    if (!widget) {
-        widget = node.addWidget(
-            "toggle",
-            ADVANCED_WIDGET_NAME,
-            persisted,
-            (next) => {
-                node.properties ??= {};
-                node.properties[ADVANCED_PROPERTY] = next === true;
-                applyContextualPresentation(node);
-            },
-            { serialize: false },
-        );
-    }
-    if (!widget) {
-        return;
-    }
-    widget.label = "显示高级参数";
-    // Distinct paths in ComfyUI: widget.serialize is workflow JSON,
-    // options.serialize is queued prompt. Never affect existing fields.
-    widget.serialize = false;
-    widget.options ??= {};
-    widget.options.serialize = false;
-    widget.value = persisted;
-}
-
 export function prepareContextualPresentation(node) {
     const type = node?.comfyClass || node?.type;
     if (!PRESENTATION_NODE_TYPES.has(type)) {
         return;
     }
-    node.properties ??= {};
-    // An existing graph may already have its own properties; never replace it.
-    if (node.properties[ADVANCED_PROPERTY] === undefined) {
-        node.properties[ADVANCED_PROPERTY] = false;
-    }
-    ensureAdvancedToggle(node);
+    migrateLegacyAdvancedPreference(node);
     for (const [name, label] of Object.entries(FIELD_LABELS)) {
         const widget = widgetByName(node, name);
         if (widget) {
             widget.label = label;
         }
     }
-    for (const name of ["size", "reference_mode"]) {
+    for (const name of ["size", "reference_mode", "moderation", "timeout_sec"]) {
         wrapModeCallback(node, name);
     }
     node[PREPARED_FLAG] = true;
