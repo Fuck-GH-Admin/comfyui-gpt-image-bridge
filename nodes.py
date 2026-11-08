@@ -457,10 +457,18 @@ def _ordered_single_image_slots(
 
 
 class GPTImageBridgeReferenceList:
-    # Legacy: native Batch Images now handles common same-sized reference sets.
-    # Keep registered for historical workflows and mixed-size reference inputs.
-    DEPRECATED = True
-    DEV_ONLY = True
+    """Specialized Edit input: preserve independent reference image dimensions.
+
+    Native ComfyUI Batch Images is preferable for equal-sized sources, but it
+    rescales different-sized sources before the Bridge receives them. Keep this
+    specialized node discoverable; it does work the native batch cannot do.
+    """
+    DESCRIPTION = (
+        "Use only for Edit reference images that must retain their individual "
+        "original sizes. For ordinary same-size sources use native ComfyUI "
+        "Batch Images → Edit.reference_batch instead."
+    )
+    SEARCH_ALIASES = ["original size references", "edit multiple reference images", "keep image dimensions"]
     @classmethod
     def INPUT_TYPES(cls):
         return {
