@@ -59,8 +59,8 @@ OpenAI 官方 2026-11-04 发布了 Flare / Sunburst；CLIProxyAPI v8.0.57 代码
 
 - `size=Custom` 时，显示宽度和高度；选择其他尺寸时收起。**宽和高已经决定宽高比，不需要独立比例参数**。宽、高历史值会保留，切回 Custom 可继续使用。
 - `size` 来自动态输入连线时，宽高不会因为显示值不是 Custom 而被隐藏。
-- `moderation`、`timeout_sec` 默认收起，在节点上打开 **「显示高级参数」** 即可编辑；高级参数处于非默认值或已连接时，不会被无声隐藏。
-- 这个展开开关是**纯前端控件**：展开状态存放在工作流节点的 `properties` 中，但开关不会成为新的 API 请求参数，也不会改变旧工作流按位置保存的原有 widget 列表。
+- `moderation`、`timeout_sec` 使用 **ComfyUI 原生 `advanced` 字段**，不再添加 Bridge 专用的“显示高级参数”开关。按 ComfyUI 界面操作原生 **Show Advanced**（传统画布可在节点右键菜单找到）；非默认值或已连接输入会保持普通可见。
+- 高级参数的展开状态由 **ComfyUI 原生 `node.showAdvanced`** 管理并随工作流保存，而不再由本插件的 widget / 自有属性管理。旧工作流的 `gpt_image_bridge_show_advanced` 会迁移到原生状态一次；API 请求参数和旧工作流的 widget 位置均不变。
 - Provider Profile 只有在显式选择 `responses`、填写过主模型覆盖值，或主模型字段有输入连线时，才显示 `responses_model`。留空仍使用本机 Profile 的默认值。
 - Generate 的参考图插口仍是原来的自动伸缩，Edit 的基础图/参考图/Mask 接口完全保留。某些旧版/定制 ComfyUI 前端可能采用不同的布局机制，请按[浏览器端验收](testing.md)核实。
 
